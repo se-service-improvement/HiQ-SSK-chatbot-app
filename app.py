@@ -30,7 +30,8 @@ def conversation():
 ***REMOVED***try:
 ***REMOVED***messages = request.json["messages"]
 ***REMOVED***body = {
-***REMOVED******REMOVED***"messages": messages
+***REMOVED******REMOVED***"messages": messages,
+***REMOVED******REMOVED***"enable_Indomain": False
 ***REMOVED***
 ***REMOVED***
 ***REMOVED***azure_openai_url = f"https://{AZURE_OPENAI_RESOURCE}.openai.azure.com/openai/deployments/{AZURE_OPENAI_MODEL}/completions?api-version=2022-12-01"
