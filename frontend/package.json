@@ -1,0 +1,26 @@
+{
+  "name": "frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+***REMOVED***"dev": "vite",
+***REMOVED***"build": "tsc && vite build",
+***REMOVED***"watch": "tsc && vite build --watch"
+  },
+  "dependencies": {
+***REMOVED***"@fluentui/react": "^8.105.3",
+***REMOVED***"@fluentui/react-icons": "^2.0.195",
+***REMOVED***"react": "^18.2.0",
+***REMOVED***"react-dom": "^18.2.0",
+***REMOVED***"react-router-dom": "^6.8.1"
+  },
+  "devDependencies": {
+***REMOVED***"@types/react": "^18.0.27",
+***REMOVED***"@types/react-dom": "^18.0.10",
+***REMOVED***"@vitejs/plugin-react": "^3.1.0",
+***REMOVED***"prettier": "^2.8.3",
+***REMOVED***"typescript": "^4.9.3",
+***REMOVED***"vite": "^4.1.0"
+  }
+}

@@ -1,0 +1,136 @@
+.container {
+***REMOVED***flex: 1;
+***REMOVED***display: flex;
+***REMOVED***flex-direction: column;
+***REMOVED***margin-top: 20px;
+}
+
+.chatRoot {
+***REMOVED***flex: 1;
+***REMOVED***display: flex;
+***REMOVED***height: 100vh;
+***REMOVED***width: 100%;
+***REMOVED***margin-top: 24px;
+}
+
+.chatContainer {
+***REMOVED***flex: 1;
+***REMOVED***display: flex;
+***REMOVED***flex-direction: column;
+***REMOVED***align-items: center;
+***REMOVED***width: 100%;
+}
+
+.chatEmptyState {
+***REMOVED***flex-grow: 1;
+***REMOVED***display: flex;
+***REMOVED***flex-direction: column;
+***REMOVED***justify-content: center;
+***REMOVED***align-items: center;
+***REMOVED***max-height: 1024px;
+}
+
+.chatEmptyStateTitle {
+***REMOVED***font-size: 4rem;
+***REMOVED***font-weight: 600;
+***REMOVED***margin-top: 150px;
+}
+
+.chatEmptyStateSubtitle {
+***REMOVED***font-weight: 600;
+}
+
+.chatMessageStream {
+***REMOVED***flex-grow: 1;
+***REMOVED***max-height: 1024px;
+***REMOVED***max-width: 1028px;
+***REMOVED***width: 100%;
+***REMOVED***overflow-y: auto;
+***REMOVED***padding-left: 24px;
+***REMOVED***padding-right: 24px;
+***REMOVED***display: flex;
+***REMOVED***flex-direction: column;
+}
+
+.chatMessageUser {
+***REMOVED***display: flex;
+***REMOVED***justify-content: flex-end;
+***REMOVED***margin-bottom: 12px;
+}
+
+.chatMessageUserMessage {
+***REMOVED***padding: 20px;
+***REMOVED***background: #e8ebfa;
+***REMOVED***border-radius: 0.375rem;
+***REMOVED***box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12);
+***REMOVED***outline: transparent solid 1px;
+}
+
+.chatMessageGpt {
+***REMOVED***margin-bottom: 12px;
+***REMOVED***max-width: 80%;
+***REMOVED***display: flex;
+}
+
+.chatMessageGptStart {
+***REMOVED***margin-bottom: 12px;
+***REMOVED***max-width: 80%;
+***REMOVED***display: flex;
+***REMOVED***align-items: center;
+}
+
+.chatMessageGptLoading {
+***REMOVED***padding: 20px;
+***REMOVED***margin-bottom: 12px;
+***REMOVED***background: rgb(249, 249, 249);
+***REMOVED***border-radius: 0.375rem;
+***REMOVED***box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12);
+***REMOVED***outline: transparent solid 1px;
+***REMOVED***max-width: 300px;
+}
+
+.chatInput {
+***REMOVED***position: sticky;
+***REMOVED***bottom: 0;
+***REMOVED***flex: 0 0 100px;
+***REMOVED***padding-top: 12px;
+***REMOVED***padding-bottom: 24px;
+***REMOVED***padding-left: 24px;
+***REMOVED***padding-right: 24px;
+***REMOVED***width: 100%;
+***REMOVED***max-width: 1028px;
+***REMOVED***background: #f2f2f2;
+}
+
+.chatAnalysisPanel {
+***REMOVED***flex: 1;
+***REMOVED***overflow-y: auto;
+***REMOVED***max-height: 89vh;
+***REMOVED***margin-left: 20px;
+***REMOVED***margin-right: 20px;
+}
+
+.chatThoughtProcessContainer {
+***REMOVED***font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+***REMOVED***word-wrap: break-word;
+***REMOVED***padding-top: 12px;
+***REMOVED***padding-bottom: 12px;
+}
+
+.chatSettingsSeparator {
+***REMOVED***margin-top: 15px;
+}
+
+.loadingLogo {
+***REMOVED***font-size: 28px;
+}
+
+.commandsContainer {
+***REMOVED***display: flex;
+***REMOVED***align-self: flex-end;
+}
+
+.commandButton {
+***REMOVED***margin-right: 20px;
+***REMOVED***margin-bottom: 20px;
+}

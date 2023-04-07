@@ -1,0 +1,23 @@
+* {
+***REMOVED***box-sizing: border-box;
+}
+
+html,
+body {
+***REMOVED***height: 100%;
+***REMOVED***margin: 0;
+***REMOVED***padding: 0;
+}
+
+html {
+***REMOVED***background: #f2f2f2;
+
+***REMOVED***font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+***REMOVED***sans-serif;
+***REMOVED***-webkit-font-smoothing: antialiased;
+***REMOVED***-moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+***REMOVED***height: 100%;
+}

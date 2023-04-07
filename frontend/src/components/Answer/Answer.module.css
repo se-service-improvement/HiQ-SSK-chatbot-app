@@ -1,0 +1,73 @@
+.answerContainer {
+***REMOVED***padding: 20px;
+***REMOVED***background: rgb(249, 249, 249);
+***REMOVED***border-radius: 0.375rem;
+***REMOVED***box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12);
+***REMOVED***outline: transparent solid 1px;
+}
+
+.answerLogo {
+***REMOVED***font-size: 28px;
+}
+
+.answerText {
+***REMOVED***font-size: 16px;
+***REMOVED***font-weight: 400;
+***REMOVED***line-height: 22px;
+***REMOVED***white-space: pre-wrap;
+}
+
+.citationsList {
+***REMOVED***margin-top: 6px;
+}
+
+.citationLearnMore {
+***REMOVED***margin-right: 5px;
+***REMOVED***font-weight: 600;
+***REMOVED***line-height: 24px;
+}
+
+.citation {
+***REMOVED***font-weight: 500;
+***REMOVED***line-height: 24px;
+***REMOVED***text-align: center;
+***REMOVED***border-radius: 4px;
+***REMOVED***padding: 0px 8px;
+***REMOVED***background: #d1dbfa;
+***REMOVED***color: #123bb6;
+***REMOVED***text-decoration: none;
+***REMOVED***cursor: pointer;
+}
+
+.citation:hover {
+***REMOVED***text-decoration: underline;
+}
+
+.supContainer {
+***REMOVED***text-decoration: none;
+***REMOVED***cursor: pointer;
+}
+
+.supContainer:hover {
+***REMOVED***text-decoration: underline;
+}
+
+sup {
+***REMOVED***position: relative;
+***REMOVED***display: inline-flex;
+***REMOVED***align-items: center;
+***REMOVED***justify-content: center;
+***REMOVED***font-size: 10px;
+***REMOVED***font-weight: 600;
+***REMOVED***vertical-align: top;
+***REMOVED***top: -1;
+***REMOVED***margin: 0px 2px;
+***REMOVED***min-width: 14px;
+***REMOVED***height: 14px;
+***REMOVED***border-radius: 3px;
+***REMOVED***background: #d1dbfa;
+***REMOVED***color: #123bb6;
+***REMOVED***text-decoration-color: transparent;
+***REMOVED***outline: transparent solid 1px;
+***REMOVED***cursor: pointer;
+}
