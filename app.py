@@ -38,7 +38,7 @@ def conversation():
 ***REMOVED***messages = request.json["messages"]
 ***REMOVED***body = {
 ***REMOVED******REMOVED***"messages": messages,
-***REMOVED******REMOVED***"enable_Indomain": AZURE_SEARCH_ENABLE_IN_DOMAIN,
+***REMOVED******REMOVED***"enable_Indomain": True if AZURE_SEARCH_ENABLE_IN_DOMAIN == "true" else False,
 ***REMOVED******REMOVED***"azure_document_search_top_k": AZURE_SEARCH_TOP_K,
 ***REMOVED******REMOVED***"temperature": AZURE_OPENAI_TEMPERATURE,
 ***REMOVED******REMOVED***"top_p": AZURE_OPENAI_TOP_P,
