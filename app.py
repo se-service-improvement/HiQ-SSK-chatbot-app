@@ -16,11 +16,18 @@ AZURE_SEARCH_INDEX = os.environ.get("AZURE_SEARCH_INDEX")
 AZURE_SEARCH_KEY = os.environ.get("AZURE_SEARCH_KEY")
 AZURE_SEARCH_USE_SEMANTIC_SEARCH = os.environ.get("AZURE_SEARCH_USE_SEMANTIC_SEARCH")
 AZURE_SEARCH_INDEX_IS_PRECHUNKED = os.environ.get("AZURE_SEARCH_INDEX_IS_PRECHUNKED")
+AZURE_SEARCH_TOP_K = os.environ.get("AZURE_SEARCH_TOP_K", 5)
+AZURE_SEARCH_ENABLE_IN_DOMAIN = os.environ.get("AZURE_SEARCH_ENABLE_IN_DOMAIN", False)
 
 # AOAI Integration Settings
 AZURE_OPENAI_RESOURCE = os.environ.get("AZURE_OPENAI_RESOURCE")
 AZURE_OPENAI_MODEL = os.environ.get("AZURE_OPENAI_MODEL")
 AZURE_OPENAI_KEY = os.environ.get("AZURE_OPENAI_KEY")
+AZURE_OPENAI_DEPLOYMENT = os.environ.get("AZURE_OPENAI_DEPLOYMENT")
+AZURE_OPENAI_TEMPERATURE = os.environ.get("AZURE_OPENAI_TEMPERATURE", 0)
+AZURE_OPENAI_TOP_P = os.environ.get("AZURE_OPENAI_TOP_P", 1.0)
+AZURE_OPENAI_MAX_TOKENS = os.environ.get("AZURE_OPENAI_MAX_TOKENS", 1000)
+AZURE_OPENAI_STOP_SEQUENCE = os.environ.get("AZURE_OPENAI_STOP_SEQUENCE")
 
 # Private API Management Key (temporary)
 AZURE_APIM_KEY = os.environ.get("AZURE_APIM_KEY")
@@ -31,9 +38,20 @@ def conversation():
 ***REMOVED***messages = request.json["messages"]
 ***REMOVED***body = {
 ***REMOVED******REMOVED***"messages": messages,
-***REMOVED******REMOVED***"enable_Indomain": False
+***REMOVED******REMOVED***"enable_Indomain": AZURE_SEARCH_ENABLE_IN_DOMAIN,
+***REMOVED******REMOVED***"azure_document_search_top_k": AZURE_SEARCH_TOP_K,
+***REMOVED******REMOVED***"temperature": AZURE_OPENAI_TEMPERATURE,
+***REMOVED******REMOVED***"top_p": AZURE_OPENAI_TOP_P,
+***REMOVED******REMOVED***"max_tokens": AZURE_OPENAI_MAX_TOKENS
 ***REMOVED***
+
+***REMOVED***if AZURE_OPENAI_STOP_SEQUENCE:
+***REMOVED******REMOVED***sequences = AZURE_OPENAI_STOP_SEQUENCE.split("|")
+***REMOVED******REMOVED***body["stop"] = sequences
 ***REMOVED***
+***REMOVED***if AZURE_OPENAI_DEPLOYMENT:
+***REMOVED******REMOVED***body["deployment"] = AZURE_OPENAI_DEPLOYMENT
+
 ***REMOVED***azure_openai_url = f"https://{AZURE_OPENAI_RESOURCE}.openai.azure.com/openai/deployments/{AZURE_OPENAI_MODEL}/completions?api-version=2022-12-01"
 ***REMOVED***search_url = f"https://{AZURE_SEARCH_SERVICE}.search.windows.net"
 
@@ -50,7 +68,7 @@ def conversation():
 ***REMOVED******REMOVED***"azure_document_search_query_type": "semantic" if AZURE_SEARCH_USE_SEMANTIC_SEARCH else "simple"
 ***REMOVED***
 
-***REMOVED***endpoint = "https://tadevusw2.azure-api.net/svc/inferenceservice/conversation"
+***REMOVED***endpoint = "https://echatpgtameuse.azure-api.net/svc/inferenceservice/conversation"
 ***REMOVED***r = requests.post(endpoint, headers=headers, json=body)
 ***REMOVED***r = r.json()
 
@@ -66,7 +84,7 @@ def feedback():
 ***REMOVED******REMOVED***"Content-Type": "application/json",
 ***REMOVED******REMOVED***"Ocp-Apim-Subscription-Key": AZURE_APIM_KEY
 ***REMOVED***
-***REMOVED***endpoint = "https://tadevusw2.azure-api.net/svc/inferenceservice/feedback"
+***REMOVED***endpoint = "https://echatpgtameuse.azure-api.net/svc/inferenceservice/feedback"
 ***REMOVED***r = requests.post(endpoint, headers=headers, json=request.json)
 ***REMOVED***return jsonify({"status": r.status_code, "ok": r.ok})
 ***REMOVED***except Exception as e:
