@@ -1,0 +1,74 @@
+.oneshotContainer {
+***REMOVED***display: flex;
+***REMOVED***flex: 1;
+***REMOVED***flex-direction: column;
+***REMOVED***align-items: center;
+}
+
+.oneshotTopSection {
+***REMOVED***display: flex;
+***REMOVED***flex-direction: column;
+***REMOVED***align-items: center;
+***REMOVED***width: 100%;
+}
+
+.oneshotBottomSection {
+***REMOVED***display: flex;
+***REMOVED***flex: 1;
+***REMOVED***flex-wrap: wrap;
+***REMOVED***justify-content: center;
+***REMOVED***align-content: flex-start;
+***REMOVED***width: 100%;
+***REMOVED***margin-top: 20px;
+}
+
+.oneshotTitle {
+***REMOVED***font-size: 4rem;
+***REMOVED***font-weight: 600;
+***REMOVED***margin-top: 150px;
+}
+
+@media only screen and (max-width: 800px) {
+***REMOVED***.oneshotTitle {
+***REMOVED***font-size: 3rem;
+***REMOVED***font-weight: 600;
+***REMOVED***margin-top: 0;
+***REMOVED***
+}
+
+.oneshotQuestionInput {
+***REMOVED***max-width: 800px;
+***REMOVED***width: 100%;
+***REMOVED***padding-left: 10px;
+***REMOVED***padding-right: 10px;
+}
+
+.oneshotAnswerContainer {
+***REMOVED***max-width: 800px;
+***REMOVED***width: 100%;
+***REMOVED***padding-left: 10px;
+***REMOVED***padding-right: 10px;
+}
+
+.oneshotAnalysisPanel {
+***REMOVED***width: 600px;
+***REMOVED***margin-left: 20px;
+}
+
+.oneshotSettingsSeparator {
+***REMOVED***margin-top: 15px;
+}
+
+.settingsButton {
+***REMOVED***align-self: flex-end;
+***REMOVED***margin-right: 20px;
+***REMOVED***margin-top: 20px;
+}
+
+
+.oneshotThoughtProcessContainer {
+***REMOVED***font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+***REMOVED***word-wrap: break-word;
+***REMOVED***padding-top: 12px;
+***REMOVED***padding-bottom: 12px;
+}

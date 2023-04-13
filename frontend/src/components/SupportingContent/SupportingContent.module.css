@@ -1,0 +1,29 @@
+.supportingContentNavList {
+***REMOVED***list-style: none;
+***REMOVED***padding-left: 5px;
+***REMOVED***display: flex;
+***REMOVED***flex-direction: column;
+***REMOVED***gap: 10px;
+}
+
+.supportingContentItem {
+***REMOVED***word-break: break-word;
+***REMOVED***background: rgb(249, 249, 249);
+***REMOVED***border-radius: 0.375rem;
+***REMOVED***box-shadow: rgb(0 0 0 / 5%) 0px 0px 0px 1px, rgb(0 0 0 / 10%) 0px 2px 3px 0px;
+***REMOVED***outline: transparent solid 1px;
+***REMOVED***max-width: 80%;
+***REMOVED***display: flex;
+***REMOVED***flex-direction: column;
+***REMOVED***padding: 20px;
+}
+
+.supportingContentItemHeader {
+***REMOVED***margin: 0;
+}
+
+.supportingContentItemText {
+***REMOVED***margin-bottom: 0;
+***REMOVED***font-weight: 300;
+***REMOVED***white-space: pre-wrap;
+}

@@ -1,0 +1,10 @@
+.container {
+***REMOVED***display: flex;
+***REMOVED***align-items: center;
+***REMOVED***gap: 6px;
+***REMOVED***cursor: pointer;
+}
+
+.disabled {
+***REMOVED***opacity: 0.4;
+}

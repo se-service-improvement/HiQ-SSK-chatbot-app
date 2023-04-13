@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+***REMOVED***"target": "ESNext",
+***REMOVED***"useDefineForClassFields": true,
+***REMOVED***"lib": ["DOM", "DOM.Iterable", "ESNext"],
+***REMOVED***"allowJs": false,
+***REMOVED***"skipLibCheck": true,
+***REMOVED***"esModuleInterop": false,
+***REMOVED***"allowSyntheticDefaultImports": true,
+***REMOVED***"strict": true,
+***REMOVED***"forceConsistentCasingInFileNames": true,
+***REMOVED***"module": "ESNext",
+***REMOVED***"moduleResolution": "Node",
+***REMOVED***"resolveJsonModule": true,
+***REMOVED***"isolatedModules": true,
+***REMOVED***"noEmit": true,
+***REMOVED***"jsx": "react-jsx",
+***REMOVED***"types": ["vite/client"]
+  },
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

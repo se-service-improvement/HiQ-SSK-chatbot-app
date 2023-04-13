@@ -1,0 +1,79 @@
+.layout {
+***REMOVED***display: flex;
+***REMOVED***flex-direction: column;
+***REMOVED***height: 100%;
+}
+
+.header {
+***REMOVED***background-color: #0078D4;
+***REMOVED***color: #f2f2f2;
+}
+
+.headerContainer {
+***REMOVED***display: flex;
+***REMOVED***justify-content: left;
+***REMOVED***margin-right: 12px;
+***REMOVED***margin-left: 12px;
+***REMOVED***align-items: center;
+}
+
+.headerTitleContainer {
+***REMOVED***display: flex;
+***REMOVED***align-items: center;
+***REMOVED***margin-right: 100px;
+***REMOVED***color: #f2f2f2;
+***REMOVED***text-decoration: none;
+}
+
+.headerLogo {
+***REMOVED***height: 40px;
+}
+
+.headerTitle {
+***REMOVED***margin-left: 12px;
+***REMOVED***font-weight: 600;
+}
+
+.headerNavList {
+***REMOVED***display: flex;
+***REMOVED***list-style: none;
+***REMOVED***padding-left: 0;
+***REMOVED***align-items: center;
+}
+
+.headerNavPageLink {
+***REMOVED***color: #f2f2f2;
+***REMOVED***text-decoration: none;
+***REMOVED***opacity: 0.75;
+
+***REMOVED***transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+***REMOVED***transition-duration: 500ms;
+***REMOVED***transition-property: opacity;
+}
+
+.headerNavPageLink:hover {
+***REMOVED***opacity: 1;
+}
+
+.headerNavPageLinkActive {
+***REMOVED***color: #f2f2f2;
+***REMOVED***text-decoration: none;
+}
+
+.headerNavLeftMargin {
+***REMOVED***margin-left: 20px;
+}
+
+.headerRightText {
+***REMOVED***font-weight: normal;
+***REMOVED***margin-left: 40px;
+}
+
+.microsoftLogo {
+***REMOVED***height: 23px;
+***REMOVED***font-weight: 600;
+}
+
+.githubLogo {
+***REMOVED***height: 20px;
+}
