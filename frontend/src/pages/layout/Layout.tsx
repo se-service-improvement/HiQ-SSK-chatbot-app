@@ -19,11 +19,6 @@ const Layout = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***Chat
 ***REMOVED******REMOVED******REMOVED******REMOVED***</NavLink>
 ***REMOVED******REMOVED******REMOVED******REMOVED***</li>
-***REMOVED******REMOVED******REMOVED******REMOVED***<li className={styles.headerNavLeftMargin}>
-***REMOVED******REMOVED******REMOVED******REMOVED***<NavLink to="/qa" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***Ask a question
-***REMOVED******REMOVED******REMOVED******REMOVED***</NavLink>
-***REMOVED******REMOVED******REMOVED******REMOVED***</li>
 ***REMOVED******REMOVED******REMOVED***</ul>
 ***REMOVED******REMOVED******REMOVED***</nav>
 ***REMOVED******REMOVED***</div>

@@ -7,7 +7,6 @@ import "./index.css";
 
 import Layout from "./pages/layout/Layout";
 import NoPage from "./pages/NoPage";
-import OneShot from "./pages/oneshot/OneShot";
 import Chat from "./pages/chat/Chat";
 
 initializeIcons();
@@ -18,7 +17,6 @@ export default function App() {
 ***REMOVED******REMOVED***<Routes>
 ***REMOVED******REMOVED***<Route path="/" element={<Layout />}>
 ***REMOVED******REMOVED******REMOVED***<Route index element={<Chat />} />
-***REMOVED******REMOVED******REMOVED***<Route path="qa" element={<OneShot />} />
 ***REMOVED******REMOVED******REMOVED***<Route path="*" element={<NoPage />} />
 ***REMOVED******REMOVED***</Route>
 ***REMOVED******REMOVED***</Routes>
