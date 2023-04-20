@@ -118,9 +118,11 @@ class MarkdownParser(BaseParser):
 
 class HTMLParser(BaseParser):
 ***REMOVED***"""Parses HTML content."""
+***REMOVED***TITLE_MAX_TOKENS = 128
 
 ***REMOVED***def __init__(self) -> None:
 ***REMOVED***super().__init__()
+***REMOVED***self.token_estimator = TokenEstimator()
 
 ***REMOVED***def parse(self, content: str, file_name: Optional[str] = None) -> Document:
 ***REMOVED***"""Parses the given content.
@@ -133,6 +135,8 @@ class HTMLParser(BaseParser):
 ***REMOVED***soup = BeautifulSoup(content, "html.parser")
 ***REMOVED***try:
 ***REMOVED******REMOVED***title = next(soup.stripped_strings)
+***REMOVED******REMOVED***title = self.token_estimator.construct_tokens_with_size(title, self.TITLE_MAX_TOKENS)
+
 ***REMOVED***except StopIteration:
 ***REMOVED******REMOVED***title = file_name
 
