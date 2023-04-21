@@ -3,48 +3,28 @@ import { Stack } from "@fluentui/react";
 
 import styles from "./Answer.module.css";
 
-import { Sparkle28Filled, ThumbLike20Filled, ThumbDislike20Filled } from "@fluentui/react-icons";
+import { Sparkle28Filled} from "@fluentui/react-icons";
 
-import { AskResponse, FeedbackString, DocumentResult } from "../../api";
+import { AskResponse, DocumentResult } from "../../api";
 import { parseAnswerToJsx } from "./AnswerParser";
 
 interface Props {
 ***REMOVED***answer: AskResponse;
 ***REMOVED***onCitationClicked: (citedDocument: DocumentResult) => void;
-***REMOVED***onThoughtProcessClicked: () => void;
-***REMOVED***onSupportingContentClicked: () => void;
-***REMOVED***onLikeResponseClicked: () => void;
-***REMOVED***onDislikeResponseClicked: () => void;
 }
 
 export const Answer = ({
 ***REMOVED***answer,
-***REMOVED***onCitationClicked,
-***REMOVED***onLikeResponseClicked,
-***REMOVED***onDislikeResponseClicked
+***REMOVED***onCitationClicked
 }: Props) => {
 ***REMOVED***const parsedAnswer = useMemo(() => parseAnswerToJsx(answer, onCitationClicked), [answer]);
 
 ***REMOVED***return (
 ***REMOVED***<>
-***REMOVED******REMOVED***<Stack className={styles.answerContainer} verticalAlign="space-between">
+***REMOVED******REMOVED***<Stack className={styles.answerContainer}>
 ***REMOVED******REMOVED***<Stack.Item>
 ***REMOVED******REMOVED******REMOVED***<Stack horizontal horizontalAlign="space-between">
 ***REMOVED******REMOVED******REMOVED***<Sparkle28Filled aria-hidden="true" aria-label="Answer logo" />
-***REMOVED******REMOVED******REMOVED***<div>
-***REMOVED******REMOVED******REMOVED******REMOVED***<ThumbLike20Filled
-***REMOVED******REMOVED******REMOVED******REMOVED***aria-hidden="false"
-***REMOVED******REMOVED******REMOVED******REMOVED***aria-label="Like this response"
-***REMOVED******REMOVED******REMOVED******REMOVED***onClick={() => onLikeResponseClicked()}
-***REMOVED******REMOVED******REMOVED******REMOVED***style={answer.feedback == FeedbackString.ThumbsUp ? { color: "darkgreen" } : { color: "slategray" }}
-***REMOVED******REMOVED******REMOVED******REMOVED***/>
-***REMOVED******REMOVED******REMOVED******REMOVED***<ThumbDislike20Filled
-***REMOVED******REMOVED******REMOVED******REMOVED***aria-hidden="false"
-***REMOVED******REMOVED******REMOVED******REMOVED***aria-label="Dislike this response"
-***REMOVED******REMOVED******REMOVED******REMOVED***onClick={() => onDislikeResponseClicked()}
-***REMOVED******REMOVED******REMOVED******REMOVED***style={answer.feedback == FeedbackString.ThumbsDown ? { color: "darkred" } : { color: "slategray" }}
-***REMOVED******REMOVED******REMOVED******REMOVED***/>
-***REMOVED******REMOVED******REMOVED***</div>
 ***REMOVED******REMOVED******REMOVED***</Stack>
 ***REMOVED******REMOVED***</Stack.Item>
 

@@ -12,15 +12,6 @@ const Layout = () => {
 ***REMOVED******REMOVED******REMOVED***<Link to="/" className={styles.headerTitleContainer}>
 ***REMOVED******REMOVED******REMOVED***<h3 className={styles.headerTitle}>Azure OpenAI</h3>
 ***REMOVED******REMOVED******REMOVED***</Link>
-***REMOVED******REMOVED******REMOVED***<nav>
-***REMOVED******REMOVED******REMOVED***<ul className={styles.headerNavList}>
-***REMOVED******REMOVED******REMOVED******REMOVED***<li>
-***REMOVED******REMOVED******REMOVED******REMOVED***<NavLink to="/" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***Chat
-***REMOVED******REMOVED******REMOVED******REMOVED***</NavLink>
-***REMOVED******REMOVED******REMOVED******REMOVED***</li>
-***REMOVED******REMOVED******REMOVED***</ul>
-***REMOVED******REMOVED******REMOVED***</nav>
 ***REMOVED******REMOVED***</div>
 ***REMOVED******REMOVED***</header>
 
