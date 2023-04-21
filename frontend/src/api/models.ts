@@ -2,7 +2,6 @@ export type AskResponse = {
 ***REMOVED***answer: string;
 ***REMOVED***thoughts: string | null;
 ***REMOVED***data_points: string[];
-***REMOVED***feedback: string | null;
 ***REMOVED***top_docs: DocumentResult[];
 ***REMOVED***error?: string;
 };
@@ -32,15 +31,4 @@ export type ChatMessage = {
 
 export type ConversationRequest = {
 ***REMOVED***messages: ChatMessage[];
-};
-
-export const enum FeedbackString {
-***REMOVED***ThumbsUp = "ThumbsUp",
-***REMOVED***ThumbsDown = "ThumbsDown",
-***REMOVED***Neutral = "Neutral"
-}
-
-export type FeedbackRequest = {
-***REMOVED***message_id: string;
-***REMOVED***feedback: FeedbackString;
 };

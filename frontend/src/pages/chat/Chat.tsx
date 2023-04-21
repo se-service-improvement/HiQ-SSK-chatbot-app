@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { Pivot, PivotItem } from "@fluentui/react";
-import { Sparkle28Filled } from "@fluentui/react-icons";
+import { Sparkle28Filled, Sparkle48Filled } from "@fluentui/react-icons";
 
 import styles from "./Chat.module.css";
 
@@ -9,9 +9,6 @@ import {
 ***REMOVED***ConversationRequest,
 ***REMOVED***conversationApi,
 ***REMOVED***MessageContent,
-***REMOVED***FeedbackString,
-***REMOVED***FeedbackRequest,
-***REMOVED***feedbackApi,
 ***REMOVED***DocumentResult
 } from "../../api";
 import { Answer } from "../../components/Answer";
@@ -20,7 +17,6 @@ import { SupportingContent } from "../../components/SupportingContent";
 import { ClearChatButton } from "../../components/ClearChatButton";
 
 enum Tabs {
-***REMOVED***ThoughtProcessTab = "thoughtProcess",
 ***REMOVED***SupportingContentTab = "supportingContent",
 ***REMOVED***CitationTab = "citation"
 }
@@ -35,7 +31,7 @@ const Chat = () => {
 ***REMOVED***const [activeTab, setActiveTab] = useState<Tabs | undefined>(undefined);
 
 ***REMOVED***const [currentAnswer, setCurrentAnswer] = useState<number>(0);
-***REMOVED***const [answers, setAnswers] = useState<[message_id: string, parent_message_id: string, role: string, content: MessageContent, feedback: FeedbackString][]>(
+***REMOVED***const [answers, setAnswers] = useState<[message_id: string, parent_message_id: string, role: string, content: MessageContent][]>(
 ***REMOVED***[]
 ***REMOVED***);
 
@@ -73,23 +69,12 @@ const Chat = () => {
 
 ***REMOVED******REMOVED***setAnswers([
 ***REMOVED******REMOVED***...answers,
-***REMOVED******REMOVED***[userMessage.message_id, userMessage.parent_message_id ?? "", userMessage.role, userMessage.content, FeedbackString.Neutral],
-***REMOVED******REMOVED***[result.message_id, result.parent_message_id ?? "", result.role, result.content, FeedbackString.Neutral]
+***REMOVED******REMOVED***[userMessage.message_id, userMessage.parent_message_id ?? "", userMessage.role, userMessage.content],
+***REMOVED******REMOVED***[result.message_id, result.parent_message_id ?? "", result.role, result.content]
 ***REMOVED******REMOVED***]);
 ***REMOVED*** finally {
 ***REMOVED******REMOVED***setIsLoading(false);
 ***REMOVED***
-***REMOVED***;
-
-***REMOVED***const makeFeedbackRequest = async (message_id: string, feedback: FeedbackString) => {
-***REMOVED***const request: FeedbackRequest = {
-***REMOVED******REMOVED***message_id: message_id,
-***REMOVED******REMOVED***feedback: feedback
-***REMOVED***;
-
-***REMOVED***await feedbackApi(request);
-
-***REMOVED***return;
 ***REMOVED***;
 
 ***REMOVED***const clearChat = () => {
@@ -110,36 +95,6 @@ const Chat = () => {
 ***REMOVED***
 ***REMOVED***;
 
-***REMOVED***const onToggleTab = (tab: Tabs, index: number) => {
-***REMOVED***setCurrentAnswer(index);
-***REMOVED***if (activeTab === tab) {
-***REMOVED******REMOVED***setActiveTab(undefined);
-***REMOVED***
-***REMOVED******REMOVED***setActiveTab(tab);
-***REMOVED***
-***REMOVED***;
-
-***REMOVED***const onLikeResponse = (index: number) => {
-***REMOVED***let answer = answers[index];
-***REMOVED***answer[4] = answer[4] === FeedbackString.ThumbsUp ? FeedbackString.Neutral : FeedbackString.ThumbsUp;
-***REMOVED***setAnswers([...answers.slice(0, index), answer, ...answers.slice(index + 1)]);
-***REMOVED***if (answer[4] === FeedbackString.ThumbsUp) {
-***REMOVED******REMOVED***makeFeedbackRequest(answer[0], answer[4]);
-***REMOVED***
-***REMOVED***console.log("Liked response", answer[0]);
-***REMOVED***;
-
-***REMOVED***const onDislikeResponse = (index: number) => {
-***REMOVED***let answer = answers[index];
-***REMOVED***answer[4] = answer[4] === FeedbackString.ThumbsDown ? FeedbackString.Neutral : FeedbackString.ThumbsDown;
-***REMOVED***setAnswers([...answers.slice(0, index), answer, ...answers.slice(index + 1)]);
-***REMOVED***if (answer[4] === FeedbackString.ThumbsDown) {
-***REMOVED******REMOVED***makeFeedbackRequest(answer[0], answer[4]);
-***REMOVED***
-***REMOVED***console.log("Dislike response", answer[0]);
-***REMOVED***;
-
-
 ***REMOVED***const isDisabledCitationTab: boolean = !activeCitation;
 
 ***REMOVED***return (
@@ -151,9 +106,9 @@ const Chat = () => {
 ***REMOVED******REMOVED***<div className={styles.chatContainer}>
 ***REMOVED******REMOVED******REMOVED***{!lastQuestionRef.current ? (
 ***REMOVED******REMOVED******REMOVED***<div className={styles.chatEmptyState}>
-***REMOVED******REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED******REMOVED***<h1 className={styles.chatEmptyStateTitle}>Chat with your data</h1>
-***REMOVED******REMOVED******REMOVED******REMOVED***<h2 className={styles.chatEmptyStateSubtitle}>Hi! Ask anything about your data.</h2>
+***REMOVED******REMOVED******REMOVED******REMOVED***<Sparkle48Filled aria-hidden="true" className={styles.chatSparkleIcon}/>
+***REMOVED******REMOVED******REMOVED******REMOVED***<h1 className={styles.chatEmptyStateTitle}>Start chatting</h1>
+***REMOVED******REMOVED******REMOVED******REMOVED***<h2 className={styles.chatEmptyStateSubtitle}>This chatbot is configured to answer your questions.</h2>
 ***REMOVED******REMOVED******REMOVED***</div>
 ***REMOVED******REMOVED******REMOVED***) : (
 ***REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageStream}>
@@ -170,14 +125,9 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***answer: answer[3].parts[0],
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***thoughts: null,
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***data_points: [],
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***feedback: answer[4],
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***top_docs: answer[3].top_docs
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onCitationClicked={c => onShowCitation(c, index)}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onThoughtProcessClicked={() => onToggleTab(Tabs.ThoughtProcessTab, index)}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onSupportingContentClicked={() => onToggleTab(Tabs.SupportingContentTab, index)}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onLikeResponseClicked={() => onLikeResponse(index)}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onDislikeResponseClicked={() => onDislikeResponse(index)}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***/>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***</div>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***)}
