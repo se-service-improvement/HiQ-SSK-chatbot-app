@@ -91,9 +91,9 @@ def prepare_body_headers_without_data(request):
 
 ***REMOVED***body = {
 ***REMOVED***"messages": body_messages,
-***REMOVED***"temperature": AZURE_OPENAI_TEMPERATURE,
-***REMOVED***"top_p": AZURE_OPENAI_TOP_P,
-***REMOVED***"max_tokens": AZURE_OPENAI_MAX_TOKENS,
+***REMOVED***"temperature": float(AZURE_OPENAI_TEMPERATURE),
+***REMOVED***"top_p": float(AZURE_OPENAI_TOP_P),
+***REMOVED***"max_tokens": int(AZURE_OPENAI_MAX_TOKENS),
 ***REMOVED***"stream": False
 ***REMOVED***
 
