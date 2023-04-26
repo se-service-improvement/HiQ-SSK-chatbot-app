@@ -4,6 +4,7 @@ import ast
 import markdown
 import re
 import tiktoken
+import html
 
 from tqdm import tqdm
 from abc import ABC, abstractmethod
@@ -19,7 +20,8 @@ FILE_FORMAT_DICT = {
 ***REMOVED***"html": "html",
 ***REMOVED***"shtml": "html",
 ***REMOVED***"htm": "html",
-***REMOVED***"py": "python"
+***REMOVED***"py": "python",
+***REMOVED***"pdf": "pdf"
 ***REMOVED***
 
 SENTENCE_ENDINGS = [".", "!", "?"]
@@ -303,6 +305,60 @@ def _get_file_format(file_name: str, extensions_to_process: List[str]) -> Option
 ***REMOVED***return None
 ***REMOVED***return FILE_FORMAT_DICT.get(file_extension, None)
 
+def table_to_html(table):
+***REMOVED***table_html = "<table>"
+***REMOVED***rows = [sorted([cell for cell in table.cells if cell.row_index == i], key=lambda cell: cell.column_index) for i in range(table.row_count)]
+***REMOVED***for row_cells in rows:
+***REMOVED***table_html += "<tr>"
+***REMOVED***for cell in row_cells:
+***REMOVED******REMOVED***tag = "th" if (cell.kind == "columnHeader" or cell.kind == "rowHeader") else "td"
+***REMOVED******REMOVED***cell_spans = ""
+***REMOVED******REMOVED***if cell.column_span > 1: cell_spans += f" colSpan={cell.column_span}"
+***REMOVED******REMOVED***if cell.row_span > 1: cell_spans += f" rowSpan={cell.row_span}"
+***REMOVED******REMOVED***table_html += f"<{tag}{cell_spans}>{html.escape(cell.content)}</{tag}>"
+***REMOVED***table_html +="</tr>"
+***REMOVED***table_html += "</table>"
+***REMOVED***return table_html
+
+def extract_pdf_content(file_path, form_recognizer_client): 
+***REMOVED***offset = 0
+***REMOVED***page_map = []
+***REMOVED***with open(file_path, "rb") as f:
+***REMOVED***poller = form_recognizer_client.begin_analyze_document("prebuilt-layout", document = f)
+***REMOVED***form_recognizer_results = poller.result()
+
+***REMOVED***for page_num, page in enumerate(form_recognizer_results.pages):
+***REMOVED***tables_on_page = [table for table in form_recognizer_results.tables if table.bounding_regions[0].page_number == page_num + 1]
+
+***REMOVED***# mark all positions of the table spans in the page
+***REMOVED***page_offset = page.spans[0].offset
+***REMOVED***page_length = page.spans[0].length
+***REMOVED***table_chars = [-1]*page_length
+***REMOVED***for table_id, table in enumerate(tables_on_page):
+***REMOVED******REMOVED***for span in table.spans:
+***REMOVED******REMOVED***# replace all table spans with "table_id" in table_chars array
+***REMOVED******REMOVED***for i in range(span.length):
+***REMOVED******REMOVED******REMOVED***idx = span.offset - page_offset + i
+***REMOVED******REMOVED******REMOVED***if idx >=0 and idx < page_length:
+***REMOVED******REMOVED******REMOVED***table_chars[idx] = table_id
+
+***REMOVED***# build page text by replacing charcters in table spans with table html
+***REMOVED***page_text = ""
+***REMOVED***added_tables = set()
+***REMOVED***for idx, table_id in enumerate(table_chars):
+***REMOVED******REMOVED***if table_id == -1:
+***REMOVED******REMOVED***page_text += form_recognizer_results.content[page_offset + idx]
+***REMOVED******REMOVED***elif not table_id in added_tables:
+***REMOVED******REMOVED***page_text += table_to_html(tables_on_page[table_id])
+***REMOVED******REMOVED***added_tables.add(table_id)
+
+***REMOVED***page_text += " "
+***REMOVED***page_map.append((page_num, offset, page_text))
+***REMOVED***offset += len(page_text)
+
+***REMOVED***full_text = "".join([page_text for _, _, page_text in page_map])
+***REMOVED***return full_text
+
 def chunk_content_helper(
 ***REMOVED***content: str, file_format: str, file_name: Optional[str],
 ***REMOVED***token_overlap: int,
@@ -334,7 +390,8 @@ def chunk_content(
 ***REMOVED***num_tokens: int = 256,
 ***REMOVED***min_chunk_size: int = 10,
 ***REMOVED***token_overlap: int = 0,
-***REMOVED***extensions_to_process = FILE_FORMAT_DICT.keys()
+***REMOVED***extensions_to_process = FILE_FORMAT_DICT.keys(),
+***REMOVED***cracked_pdf = False
 ) -> ChunkingResult:
 ***REMOVED***"""Chunks the given content. If ignore_errors is true, returns None
 ***REMOVED***in case of an error
@@ -351,7 +408,7 @@ def chunk_content(
 ***REMOVED***"""
 
 ***REMOVED***try:
-***REMOVED***if file_name is None:
+***REMOVED***if file_name is None or cracked_pdf:
 ***REMOVED******REMOVED***file_format = "text"
 ***REMOVED***else:
 ***REMOVED******REMOVED***file_format = _get_file_format(file_name, extensions_to_process)
@@ -405,7 +462,8 @@ def chunk_file(
 ***REMOVED***min_chunk_size=10,
 ***REMOVED***url = None,
 ***REMOVED***token_overlap: int = 0,
-***REMOVED***extensions_to_process = FILE_FORMAT_DICT.keys()
+***REMOVED***extensions_to_process = FILE_FORMAT_DICT.keys(),
+***REMOVED***form_recognizer_client = None
 ) -> ChunkingResult:
 ***REMOVED***"""Chunks the given file.
 ***REMOVED***Args:
@@ -423,8 +481,15 @@ def chunk_file(
 ***REMOVED***else:
 ***REMOVED******REMOVED***raise UnsupportedFormatError(f"{file_name} is not supported")
 
+***REMOVED***cracked_pdf = False
+***REMOVED***if file_format == "pdf":
+***REMOVED***if form_recognizer_client is None:
+***REMOVED******REMOVED***raise UnsupportedFormatError("form_recognizer_client is required for pdf files")
+***REMOVED***content = extract_pdf_content(file_path, form_recognizer_client)
+***REMOVED***cracked_pdf = True
+***REMOVED***else:
 ***REMOVED***with open(file_path, "r", encoding="utf8") as f:
-***REMOVED***content = f.read()
+***REMOVED******REMOVED***content = f.read()
 ***REMOVED***return chunk_content(
 ***REMOVED***content=content,
 ***REMOVED***file_name=file_name,
@@ -433,7 +498,8 @@ def chunk_file(
 ***REMOVED***min_chunk_size=min_chunk_size,
 ***REMOVED***url=url,
 ***REMOVED***token_overlap=max(0, token_overlap),
-***REMOVED***extensions_to_process=extensions_to_process
+***REMOVED***extensions_to_process=extensions_to_process,
+***REMOVED***cracked_pdf=cracked_pdf
 ***REMOVED***)
 
 def chunk_directory(
@@ -443,7 +509,8 @@ def chunk_directory(
 ***REMOVED***min_chunk_size: int = 10,
 ***REMOVED***url_prefix = None,
 ***REMOVED***token_overlap: int = 0,
-***REMOVED***extensions_to_process: List[str] = FILE_FORMAT_DICT.keys()
+***REMOVED***extensions_to_process: List[str] = FILE_FORMAT_DICT.keys(),
+***REMOVED***form_recognizer_client = None
 ):
 ***REMOVED***"""
 ***REMOVED***Chunks the given directory recursively
@@ -480,7 +547,8 @@ def chunk_directory(
 ***REMOVED******REMOVED******REMOVED***min_chunk_size=min_chunk_size,
 ***REMOVED******REMOVED******REMOVED***url=url_path,
 ***REMOVED******REMOVED******REMOVED***token_overlap=token_overlap,
-***REMOVED******REMOVED******REMOVED***extensions_to_process=extensions_to_process
+***REMOVED******REMOVED******REMOVED***extensions_to_process=extensions_to_process,
+***REMOVED******REMOVED******REMOVED***form_recognizer_client=form_recognizer_client
 ***REMOVED******REMOVED***)
 ***REMOVED******REMOVED***for chunk_doc in result.chunks:
 ***REMOVED******REMOVED******REMOVED***chunk_doc.filepath = rel_file_path
