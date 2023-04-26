@@ -7,6 +7,7 @@
 ***REMOVED***"search_service_name": "<search service name to use or create>",
 ***REMOVED***"index_name": "<index name to use or create>",
 ***REMOVED***"chunk_size": 1024,
+***REMOVED***"token_overlap": 128,
 ***REMOVED***"semantic_config_name": "default"
 ***REMOVED***
 ]

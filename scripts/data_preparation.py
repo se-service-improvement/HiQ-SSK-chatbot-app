@@ -282,7 +282,7 @@ def create_index(config, credential, form_recognizer_client=None):
 ***REMOVED***
 ***REMOVED***# chunk directory
 ***REMOVED***print("Chunking directory...")
-***REMOVED***result = chunk_directory(config["data_path"], num_tokens=config["chunk_size"], form_recognizer_client=form_recognizer_client)
+***REMOVED***result = chunk_directory(config["data_path"], num_tokens=config["chunk_size"], token_overlap=config["token_overlap"], form_recognizer_client=form_recognizer_client)
 
 ***REMOVED***if len(result.chunks) == 0:
 ***REMOVED***raise Exception("No chunks found. Please check the data path and chunk size.")

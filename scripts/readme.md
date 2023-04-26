@@ -16,6 +16,7 @@
 ***REMOVED***"search_service_name": "<search service name to use or create>",
 ***REMOVED***"index_name": "<index name to use or create>",
 ***REMOVED***"chunk_size": 1024, // set to null to disable chunking before ingestion
+***REMOVED***"token_overlap": 128 // number of tokens to overlap between chunks
 ***REMOVED***"semantic_config_name": "default"
 ***REMOVED***
 ]
