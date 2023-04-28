@@ -8,10 +8,10 @@ import html
 
 from tqdm import tqdm
 from abc import ABC, abstractmethod
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag, NavigableString
 from dataclasses import dataclass
 
-from typing import List, Dict, Optional, Generator, Tuple
+from typing import List, Dict, Optional, Generator, Tuple, Union
 from langchain.text_splitter import MarkdownTextSplitter, RecursiveCharacterTextSplitter, PythonCodeTextSplitter
 
 FILE_FORMAT_DICT = {
@@ -113,7 +113,7 @@ class MarkdownParser(BaseParser):
 ***REMOVED***Returns:
 ***REMOVED******REMOVED***Document: The parsed document.
 ***REMOVED***"""
-***REMOVED***html_content = markdown.markdown(content)
+***REMOVED***html_content = markdown.markdown(content, extensions=['fenced_code', 'toc', 'tables', 'sane_lists'])
 
 ***REMOVED***return self._html_parser.parse(html_content, file_name)
 
@@ -121,6 +121,7 @@ class MarkdownParser(BaseParser):
 class HTMLParser(BaseParser):
 ***REMOVED***"""Parses HTML content."""
 ***REMOVED***TITLE_MAX_TOKENS = 128
+***REMOVED***NEWLINE_TEMPL = "<NEWLINE_TEXT>"
 
 ***REMOVED***def __init__(self) -> None:
 ***REMOVED***super().__init__()
@@ -134,18 +135,71 @@ class HTMLParser(BaseParser):
 ***REMOVED***Returns:
 ***REMOVED******REMOVED***Document: The parsed document.
 ***REMOVED***"""
-***REMOVED***soup = BeautifulSoup(content, "html.parser")
-***REMOVED***try:
+***REMOVED***soup = BeautifulSoup(content, 'html.parser')
+
+***REMOVED***# Extract the title
+***REMOVED***title = ''
+***REMOVED***if soup.title:
+***REMOVED******REMOVED***title = soup.title.string
+***REMOVED***else:
+***REMOVED******REMOVED***# Try to find the first <h1> tag
+***REMOVED******REMOVED***h1_tag = soup.find('h1')
+***REMOVED******REMOVED***if h1_tag:
+***REMOVED******REMOVED***title = h1_tag.get_text(strip=True)
+***REMOVED******REMOVED***else:
+***REMOVED******REMOVED***h2_tag = soup.find('h2')
+***REMOVED******REMOVED***if h2_tag:
+***REMOVED******REMOVED******REMOVED***title = h2_tag.get_text(strip=True)
+***REMOVED***if title == '':
+***REMOVED******REMOVED***# if title is still not found, guess using the next string
+***REMOVED******REMOVED***try:
 ***REMOVED******REMOVED***title = next(soup.stripped_strings)
 ***REMOVED******REMOVED***title = self.token_estimator.construct_tokens_with_size(title, self.TITLE_MAX_TOKENS)
 
-***REMOVED***except StopIteration:
+***REMOVED******REMOVED***except StopIteration:
 ***REMOVED******REMOVED***title = file_name
 
-***REMOVED***text = soup.get_text()
+***REMOVED******REMOVED***# Helper function to process text nodes
+***REMOVED***def process_text(text):
+***REMOVED******REMOVED***return text.strip()
 
-***REMOVED***return Document(content=cleanup_content(text), title=title)
+***REMOVED***# Helper function to process anchor tags
+***REMOVED***def process_anchor_tag(tag):
+***REMOVED******REMOVED***href = tag.get('href', '')
+***REMOVED******REMOVED***text = tag.get_text(strip=True)
+***REMOVED******REMOVED***return f'{text} ({href})'
 
+***REMOVED***# Collect all text nodes and anchor tags in a list
+***REMOVED***elements = []
+
+***REMOVED***for elem in soup.descendants:
+***REMOVED******REMOVED***if isinstance(elem, (Tag, NavigableString)):
+***REMOVED******REMOVED***page_element: Union[Tag, NavigableString] = elem
+***REMOVED******REMOVED***if page_element.name in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'code']:
+***REMOVED******REMOVED******REMOVED***if elements and not elements[-1].endswith('\n'):
+***REMOVED******REMOVED******REMOVED***elements.append(self.NEWLINE_TEMPL)
+***REMOVED******REMOVED***if isinstance(page_element, str):
+***REMOVED******REMOVED******REMOVED***elements.append(process_text(page_element))
+***REMOVED******REMOVED***elif page_element.name == 'a':
+***REMOVED******REMOVED******REMOVED***elements.append(process_anchor_tag(page_element))
+
+
+***REMOVED***# Join the list into a single string and return but ensure that either of newlines or space are used.
+***REMOVED***result = ''
+***REMOVED***is_prev_newline = False
+***REMOVED***for elem in elements:
+***REMOVED******REMOVED***if elem:
+***REMOVED******REMOVED***if elem == self.NEWLINE_TEMPL:
+***REMOVED******REMOVED******REMOVED***result += "\n"
+***REMOVED******REMOVED******REMOVED***is_prev_newline = True
+***REMOVED******REMOVED***else:
+***REMOVED******REMOVED******REMOVED***if not is_prev_newline:
+***REMOVED******REMOVED******REMOVED***result += " "
+***REMOVED******REMOVED******REMOVED***else:
+***REMOVED******REMOVED******REMOVED***is_prev_newline = False
+***REMOVED******REMOVED******REMOVED***result += f"{elem}"
+
+***REMOVED***return Document(content=cleanup_content(result), title=title)
 
 class TextParser(BaseParser):
 ***REMOVED***"""Parses text content."""
