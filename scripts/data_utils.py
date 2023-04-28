@@ -374,17 +374,18 @@ def table_to_html(table):
 ***REMOVED***table_html += "</table>"
 ***REMOVED***return table_html
 
-def extract_pdf_content(file_path, form_recognizer_client): 
+def extract_pdf_content(file_path, form_recognizer_client, use_layout=False): 
 ***REMOVED***offset = 0
 ***REMOVED***page_map = []
+***REMOVED***model = "prebuilt-layout" if use_layout else "prebuilt-read"
 ***REMOVED***with open(file_path, "rb") as f:
-***REMOVED***poller = form_recognizer_client.begin_analyze_document("prebuilt-layout", document = f)
+***REMOVED***poller = form_recognizer_client.begin_analyze_document(model, document = f)
 ***REMOVED***form_recognizer_results = poller.result()
 
 ***REMOVED***for page_num, page in enumerate(form_recognizer_results.pages):
 ***REMOVED***tables_on_page = [table for table in form_recognizer_results.tables if table.bounding_regions[0].page_number == page_num + 1]
 
-***REMOVED***# mark all positions of the table spans in the page
+***REMOVED***# (if using layout) mark all positions of the table spans in the page
 ***REMOVED***page_offset = page.spans[0].offset
 ***REMOVED***page_length = page.spans[0].length
 ***REMOVED***table_chars = [-1]*page_length
@@ -396,7 +397,7 @@ def extract_pdf_content(file_path, form_recognizer_client):
 ***REMOVED******REMOVED******REMOVED***if idx >=0 and idx < page_length:
 ***REMOVED******REMOVED******REMOVED***table_chars[idx] = table_id
 
-***REMOVED***# build page text by replacing charcters in table spans with table html
+***REMOVED***# build page text by replacing charcters in table spans with table html if using layout
 ***REMOVED***page_text = ""
 ***REMOVED***added_tables = set()
 ***REMOVED***for idx, table_id in enumerate(table_chars):
@@ -517,7 +518,8 @@ def chunk_file(
 ***REMOVED***url = None,
 ***REMOVED***token_overlap: int = 0,
 ***REMOVED***extensions_to_process = FILE_FORMAT_DICT.keys(),
-***REMOVED***form_recognizer_client = None
+***REMOVED***form_recognizer_client = None,
+***REMOVED***use_layout = False
 ) -> ChunkingResult:
 ***REMOVED***"""Chunks the given file.
 ***REMOVED***Args:
@@ -539,7 +541,7 @@ def chunk_file(
 ***REMOVED***if file_format == "pdf":
 ***REMOVED***if form_recognizer_client is None:
 ***REMOVED******REMOVED***raise UnsupportedFormatError("form_recognizer_client is required for pdf files")
-***REMOVED***content = extract_pdf_content(file_path, form_recognizer_client)
+***REMOVED***content = extract_pdf_content(file_path, form_recognizer_client, use_layout=use_layout)
 ***REMOVED***cracked_pdf = True
 ***REMOVED***else:
 ***REMOVED***with open(file_path, "r", encoding="utf8") as f:
@@ -564,7 +566,8 @@ def chunk_directory(
 ***REMOVED***url_prefix = None,
 ***REMOVED***token_overlap: int = 0,
 ***REMOVED***extensions_to_process: List[str] = FILE_FORMAT_DICT.keys(),
-***REMOVED***form_recognizer_client = None
+***REMOVED***form_recognizer_client = None,
+***REMOVED***use_layout = False
 ):
 ***REMOVED***"""
 ***REMOVED***Chunks the given directory recursively
@@ -577,6 +580,10 @@ def chunk_directory(
 ***REMOVED******REMOVED******REMOVED******REMOVED***For example, if the directory path is /home/user/data and the url_prefix is https://example.com/data, 
 ***REMOVED******REMOVED******REMOVED******REMOVED***then the url for the file /home/user/data/file1.txt will be https://example.com/data/file1.txt
 ***REMOVED***token_overlap (int): The number of tokens to overlap between chunks.
+***REMOVED***extensions_to_process (List[str]): The list of extensions to process. 
+***REMOVED***form_recognizer_client: Optional form recognizer client to use for pdf files.
+***REMOVED***use_layout (bool): If true, uses Layout model for pdf files. Otherwise, uses Read.
+
 ***REMOVED***Returns:
 ***REMOVED***List[Document]: List of chunked documents.
 ***REMOVED***"""
@@ -602,7 +609,8 @@ def chunk_directory(
 ***REMOVED******REMOVED******REMOVED***url=url_path,
 ***REMOVED******REMOVED******REMOVED***token_overlap=token_overlap,
 ***REMOVED******REMOVED******REMOVED***extensions_to_process=extensions_to_process,
-***REMOVED******REMOVED******REMOVED***form_recognizer_client=form_recognizer_client
+***REMOVED******REMOVED******REMOVED***form_recognizer_client=form_recognizer_client,
+***REMOVED******REMOVED******REMOVED***use_layout=use_layout
 ***REMOVED******REMOVED***)
 ***REMOVED******REMOVED***for chunk_doc in result.chunks:
 ***REMOVED******REMOVED******REMOVED***chunk_doc.filepath = rel_file_path

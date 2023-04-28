@@ -262,7 +262,7 @@ def validate_index(service_name, subscription_id, resource_group, index_name):
 ***REMOVED******REMOVED***print(f"Request failed. Please investigate. Status code: {response.status_code}")
 ***REMOVED******REMOVED***break
 
-def create_index(config, credential, form_recognizer_client=None):
+def create_index(config, credential, form_recognizer_client=None, use_layout=False):
 ***REMOVED***service_name = config["search_service_name"]
 ***REMOVED***subscription_id = config["subscription_id"]
 ***REMOVED***resource_group = config["resource_group"]
@@ -282,7 +282,7 @@ def create_index(config, credential, form_recognizer_client=None):
 ***REMOVED***
 ***REMOVED***# chunk directory
 ***REMOVED***print("Chunking directory...")
-***REMOVED***result = chunk_directory(config["data_path"], num_tokens=config["chunk_size"], token_overlap=config.get("token_overlap",0), form_recognizer_client=form_recognizer_client)
+***REMOVED***result = chunk_directory(config["data_path"], num_tokens=config["chunk_size"], token_overlap=config.get("token_overlap",0), form_recognizer_client=form_recognizer_client, use_layout=use_layout)
 
 ***REMOVED***if len(result.chunks) == 0:
 ***REMOVED***raise Exception("No chunks found. Please check the data path and chunk size.")
@@ -306,6 +306,7 @@ if __name__ == "__main__":
 ***REMOVED***parser.add_argument("--config", type=str, help="Path to config file containing settings for data preparation")
 ***REMOVED***parser.add_argument("--form-rec-resource", type=str, help="Name of your Form Recognizer resource to use for PDF cracking.")
 ***REMOVED***parser.add_argument("--form-rec-key", type=str, help="Key for your Form Recognizer resource to use for PDF cracking.")
+***REMOVED***parser.add_argument("--form-rec-use-layout", type=bool, default=False, help="Whether to use Layout model for PDF cracking, if False will use Read model.")
 ***REMOVED***args = parser.parse_args()
 
 ***REMOVED***with open(args.config) as f:
@@ -320,7 +321,7 @@ if __name__ == "__main__":
 
 ***REMOVED***for index_config in config:
 ***REMOVED***print("Preparing data for index:", index_config["index_name"])
-***REMOVED***create_index(index_config, credential, form_recognizer_client)
+***REMOVED***create_index(index_config, credential, form_recognizer_client, use_layout=args.form_rec_use_layout)
 ***REMOVED***print("Data preparation for index", index_config["index_name"], "completed")
 
 ***REMOVED***print(f"Data preparation script completed. {len(config)} indexes updated.")
