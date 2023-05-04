@@ -5,6 +5,7 @@ import markdown
 import re
 import tiktoken
 import html
+import json
 
 from tqdm import tqdm
 from abc import ABC, abstractmethod
@@ -139,7 +140,7 @@ class HTMLParser(BaseParser):
 
 ***REMOVED***# Extract the title
 ***REMOVED***title = ''
-***REMOVED***if soup.title:
+***REMOVED***if soup.title and soup.title.string:
 ***REMOVED******REMOVED***title = soup.title.string
 ***REMOVED***else:
 ***REMOVED******REMOVED***# Try to find the first <h1> tag
@@ -150,7 +151,7 @@ class HTMLParser(BaseParser):
 ***REMOVED******REMOVED***h2_tag = soup.find('h2')
 ***REMOVED******REMOVED***if h2_tag:
 ***REMOVED******REMOVED******REMOVED***title = h2_tag.get_text(strip=True)
-***REMOVED***if title == '':
+***REMOVED***if title is None or title == '':
 ***REMOVED******REMOVED***# if title is still not found, guess using the next string
 ***REMOVED******REMOVED***try:
 ***REMOVED******REMOVED***title = next(soup.stripped_strings)
@@ -199,7 +200,9 @@ class HTMLParser(BaseParser):
 ***REMOVED******REMOVED******REMOVED***is_prev_newline = False
 ***REMOVED******REMOVED******REMOVED***result += f"{elem}"
 
-***REMOVED***return Document(content=cleanup_content(result), title=title)
+***REMOVED***if title is None:
+***REMOVED******REMOVED***title = '' # ensure no 'None' type title
+***REMOVED***return Document(content=cleanup_content(result), title=str(title))
 
 class TextParser(BaseParser):
 ***REMOVED***"""Parses text content."""
@@ -612,8 +615,9 @@ def chunk_directory(
 ***REMOVED******REMOVED******REMOVED***form_recognizer_client=form_recognizer_client,
 ***REMOVED******REMOVED******REMOVED***use_layout=use_layout
 ***REMOVED******REMOVED***)
-***REMOVED******REMOVED***for chunk_doc in result.chunks:
+***REMOVED******REMOVED***for chunk_idx, chunk_doc in enumerate(result.chunks):
 ***REMOVED******REMOVED******REMOVED***chunk_doc.filepath = rel_file_path
+***REMOVED******REMOVED******REMOVED***chunk_doc.metadata = json.dumps({"chunk_id": str(chunk_idx)})
 ***REMOVED******REMOVED***chunks.extend(result.chunks)
 ***REMOVED******REMOVED***num_unsupported_format_files += result.num_unsupported_format_files
 ***REMOVED******REMOVED***num_files_with_errors += result.num_files_with_errors
