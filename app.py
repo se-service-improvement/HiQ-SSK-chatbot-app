@@ -15,9 +15,14 @@ AZURE_SEARCH_SERVICE = os.environ.get("AZURE_SEARCH_SERVICE")
 AZURE_SEARCH_INDEX = os.environ.get("AZURE_SEARCH_INDEX")
 AZURE_SEARCH_KEY = os.environ.get("AZURE_SEARCH_KEY")
 AZURE_SEARCH_USE_SEMANTIC_SEARCH = os.environ.get("AZURE_SEARCH_USE_SEMANTIC_SEARCH", False)
+AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG = os.environ.get("AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG", "default")
 AZURE_SEARCH_INDEX_IS_PRECHUNKED = os.environ.get("AZURE_SEARCH_INDEX_IS_PRECHUNKED", True)
 AZURE_SEARCH_TOP_K = os.environ.get("AZURE_SEARCH_TOP_K", 5)
 AZURE_SEARCH_ENABLE_IN_DOMAIN = os.environ.get("AZURE_SEARCH_ENABLE_IN_DOMAIN", False)
+AZURE_SEARCH_CONTENT_COLUMNS = os.environ.get("AZURE_SEARCH_CONTENT_COLUMNS")
+AZURE_SEARCH_FILENAME_COLUMN = os.environ.get("AZURE_SEARCH_FILENAME_COLUMN")
+AZURE_SEARCH_TITLE_COLUMN = os.environ.get("AZURE_SEARCH_TITLE_COLUMN")
+AZURE_SEARCH_URL_COLUMN = os.environ.get("AZURE_SEARCH_URL_COLUMN")
 
 # AOAI Integration Settings
 AZURE_OPENAI_RESOURCE = os.environ.get("AZURE_OPENAI_RESOURCE")
@@ -31,8 +36,6 @@ AZURE_OPENAI_STOP_SEQUENCE = os.environ.get("AZURE_OPENAI_STOP_SEQUENCE")
 AZURE_OPENAI_SYSTEM_MESSAGE = os.environ.get("AZURE_OPENAI_SYSTEM_MESSAGE", "You are an AI assistant that helps people find information.")
 AZURE_OPENAI_PREVIEW_API_VERSION = os.environ.get("AZURE_OPENAI_PREVIEW_API_VERSION", "2023-03-31-preview")
 
-# Private API Management Key (temporary)
-AZURE_APIM_KEY = os.environ.get("AZURE_APIM_KEY")
 
 def prepare_body_headers_with_data(request):
 ***REMOVED***messages = request.json["messages"]
@@ -55,6 +58,19 @@ def prepare_body_headers_with_data(request):
 ***REMOVED***if AZURE_OPENAI_SYSTEM_MESSAGE:
 ***REMOVED***body["system_message"] = AZURE_OPENAI_SYSTEM_MESSAGE
 
+***REMOVED***index_column_mapping = {}
+***REMOVED***if AZURE_SEARCH_CONTENT_COLUMNS:
+***REMOVED***index_column_mapping["content_column"] = AZURE_SEARCH_CONTENT_COLUMNS.split("|")
+***REMOVED***if AZURE_SEARCH_FILENAME_COLUMN:
+***REMOVED***index_column_mapping["filepath_column"] = AZURE_SEARCH_FILENAME_COLUMN
+***REMOVED***if AZURE_SEARCH_TITLE_COLUMN:
+***REMOVED***index_column_mapping["title_column"] = AZURE_SEARCH_TITLE_COLUMN
+***REMOVED***if AZURE_SEARCH_URL_COLUMN:
+***REMOVED***index_column_mapping["url_column"] = AZURE_SEARCH_URL_COLUMN
+***REMOVED***# TODO: uncomment this when the API is ready
+***REMOVED***# if index_column_mapping:
+***REMOVED***#***REMOVED*** body["index_column_mapping"] = index_column_mapping
+
 ***REMOVED***azure_openai_url = f"https://{AZURE_OPENAI_RESOURCE}.openai.azure.com/openai/deployments/{AZURE_OPENAI_MODEL}/completions?api-version=2022-12-01"
 ***REMOVED***search_url = f"https://{AZURE_SEARCH_SERVICE}.search.windows.net"
 
@@ -68,8 +84,8 @@ def prepare_body_headers_with_data(request):
 ***REMOVED***"chatgpt_key": AZURE_OPENAI_KEY,
 ***REMOVED***"Ocp-Apim-Subscription-Key": AZURE_OPENAI_KEY,
 ***REMOVED***'api-key': AZURE_OPENAI_KEY,
-***REMOVED***"azure_document_search_configuration": "default" if AZURE_SEARCH_USE_SEMANTIC_SEARCH else "",
-***REMOVED***"azure_document_search_query_type": "semantic" if AZURE_SEARCH_USE_SEMANTIC_SEARCH else "simple"
+***REMOVED***"azure_document_search_configuration": AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG if AZURE_SEARCH_USE_SEMANTIC_SEARCH.lower() == "true" and AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG else "",
+***REMOVED***"azure_document_search_query_type": "semantic" if AZURE_SEARCH_USE_SEMANTIC_SEARCH.lower() == "true" else "simple"
 ***REMOVED***
 
 ***REMOVED***return body, headers
