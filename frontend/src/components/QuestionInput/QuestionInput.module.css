@@ -1,38 +1,52 @@
 .questionInputContainer {
-***REMOVED***border-radius: 0.375rem;
+***REMOVED***height: 120px;
+***REMOVED***position: absolute;
+***REMOVED***left: 6.5%;
+***REMOVED***right: 0%;
+***REMOVED***top: 0%;
+***REMOVED***bottom: 0%;
+***REMOVED***background: #FFFFFF;
 ***REMOVED***box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12);
-***REMOVED***height: 115px;
-***REMOVED***width: 100%;
-***REMOVED***padding: 15px;
-***REMOVED***background: white;
+***REMOVED***border-radius: 8px;
 }
 
 .questionInputTextArea {
 ***REMOVED***width: 100%;
 ***REMOVED***line-height: 40px;
+***REMOVED***margin-top: 10px;
+***REMOVED***margin-bottom: 10px;
+***REMOVED***margin-left: 12px;
+***REMOVED***margin-right: 12px;
 }
 
-.questionInputButtonsContainer {
-***REMOVED***display: flex;
-***REMOVED***flex-direction: column;
-***REMOVED***gap: 10px;
-***REMOVED***align-items: center;
+.questionInputSendButtonContainer {
+***REMOVED***position: absolute;
+***REMOVED***right: 24px;
+***REMOVED***bottom: 20px;
 }
 
 .questionInputSendButton {
-***REMOVED***cursor: pointer;
-***REMOVED***padding: 12px 9px 12px 12px;
-***REMOVED***gap: 7.5px;
-***REMOVED***background: linear-gradient(90.08deg, #f1b8c0 0%, #b3d4ff 100%);
-***REMOVED***border-radius: 37.5px;
-***REMOVED***width: 51px;
-***REMOVED***height: 51px;
-***REMOVED***display: flex;
-***REMOVED***align-items: flex-start;
+***REMOVED***width: 24px;
+***REMOVED***height: 23px;
 }
 
 .questionInputSendButtonDisabled {
-***REMOVED***opacity: 0.4;
+***REMOVED***/* opacity: 0.4; */
+***REMOVED***width: 24px;
+***REMOVED***height: 23px;
+***REMOVED***background: none;
+***REMOVED***color: #424242;
+}
+
+.questionInputBottomBorder {
+***REMOVED***position: absolute;
+***REMOVED***width: 100%;
+***REMOVED***height: 4px;
+***REMOVED***left: 0%;
+***REMOVED***bottom: 0%;
+***REMOVED***background: radial-gradient(106.04% 106.06% at 100.1% 90.19%,#0F6CBD 33.63%,#8DDDD8 100%);
+***REMOVED***border-bottom-left-radius: 8px;
+***REMOVED***border-bottom-right-radius: 8px;
 }
 
 .questionInputOptionsButton {

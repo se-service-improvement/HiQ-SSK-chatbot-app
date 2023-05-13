@@ -5,7 +5,7 @@ type JsxParsedAnswer = {
 ***REMOVED***citations: DocumentResult[];
 };
 
-export function parseAnswerToJsx(answer: AskResponse, onCitationClicked: (citedDocument: DocumentResult) => void): JsxParsedAnswer {
+export function parseAnswerToJsx(answer: AskResponse, onInlineCitationClicked: (citedDocument: DocumentResult) => void): JsxParsedAnswer {
 ***REMOVED***let citationIndex = 0;
 ***REMOVED***const citations: DocumentResult[] = [];
 
@@ -32,7 +32,7 @@ export function parseAnswerToJsx(answer: AskResponse, onCitationClicked: (citedD
 ***REMOVED***
 
 ***REMOVED******REMOVED***return (
-***REMOVED******REMOVED***<a className="supContainer" title={citedDocument.filepath ?? ""} onClick={() => onCitationClicked(citedDocument)}>
+***REMOVED******REMOVED***<a className="citation" title={citedDocument.filepath ?? ""} onClick={() => onInlineCitationClicked(citedDocument)}>
 ***REMOVED******REMOVED******REMOVED***<sup>{citationIndex}</sup>
 ***REMOVED******REMOVED***</a>
 ***REMOVED******REMOVED***);

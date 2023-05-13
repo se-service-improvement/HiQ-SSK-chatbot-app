@@ -5,31 +5,113 @@
 }
 
 .header {
-***REMOVED***background-color: #0078D4;
-***REMOVED***color: #f2f2f2;
+***REMOVED***background-color: #f2f2f2;
 }
 
 .headerContainer {
 ***REMOVED***display: flex;
 ***REMOVED***justify-content: left;
-***REMOVED***margin-right: 12px;
-***REMOVED***margin-left: 12px;
 ***REMOVED***align-items: center;
 }
 
 .headerTitleContainer {
 ***REMOVED***display: flex;
 ***REMOVED***align-items: center;
-***REMOVED***margin-right: 100px;
-***REMOVED***color: #f2f2f2;
+***REMOVED***margin-left: 14px;
 ***REMOVED***text-decoration: none;
 }
 
-.headerLogo {
-***REMOVED***height: 40px;
+.headerTitle {
+***REMOVED***font-family: 'Segoe UI';
+***REMOVED***font-style: normal;
+***REMOVED***font-weight: 600;
+***REMOVED***font-size: 20px;
+***REMOVED***line-height: 28px;
+***REMOVED***display: flex;
+***REMOVED***align-items: flex-end;
+***REMOVED***color: #242424;
 }
 
-.headerTitle {
-***REMOVED***margin-left: 12px;
+.headerIcon {
+***REMOVED***height: 28px;
+***REMOVED***width: 28px;
+***REMOVED***margin-left: 36px;
+}
+
+.shareButtonContainer {
+***REMOVED***display: flex;
+***REMOVED***flex-direction: row;
+***REMOVED***justify-content: center;
+***REMOVED***align-items: center;
+***REMOVED***padding: 5px 12px;
+***REMOVED***gap: 4px;
+***REMOVED***width: 86px;
+***REMOVED***height: 32px;
+***REMOVED***background: radial-gradient(109.81% 107.82% at 100.1% 90.19%, #0F6CBD 33.63%, #2D87C3 70.31%, #8DDDD8 100%) /* warning: gradient uses a rotation that is not supported by CSS and may not behave as expected */;
+***REMOVED***border-radius: 4px;
+***REMOVED***flex: none;
+***REMOVED***order: 1;
+***REMOVED***flex-grow: 0;
+***REMOVED***position: absolute;
+***REMOVED***right: 20px;
+***REMOVED***cursor: pointer;
+}
+
+.shareButton {
+***REMOVED***color: #FFFFFF;
+}
+
+.shareButtonText {
+***REMOVED***font-family: 'Segoe UI';
+***REMOVED***font-style: normal;
 ***REMOVED***font-weight: 600;
+***REMOVED***font-size: 14px;
+***REMOVED***line-height: 20px;
+***REMOVED***display: flex;
+***REMOVED***align-items: center;
+***REMOVED***color: #FFFFFF;
+}
+
+.urlTextBox {
+***REMOVED***font-family: 'Segoe UI';
+***REMOVED***font-style: normal;
+***REMOVED***font-weight: 400;
+***REMOVED***font-size: 14px;
+***REMOVED***line-height: 20px;
+***REMOVED***color: #707070;
+***REMOVED***border: 1px solid #D1D1D1;
+***REMOVED***border-radius: 4px;
+}
+
+.copyButtonContainer {
+***REMOVED***box-sizing: border-box;
+***REMOVED***display: flex;
+***REMOVED***flex-direction: row;
+***REMOVED***justify-content: center;
+***REMOVED***align-items: center;
+***REMOVED***padding: 5px 12px;
+***REMOVED***gap: 4px;
+***REMOVED***background: #FFFFFF;
+***REMOVED***border: 1px solid #D1D1D1;
+***REMOVED***border-radius: 4px;
+}
+
+.copyButtonContainer:hover {
+***REMOVED***cursor: pointer;
+***REMOVED***background: #D1D1D1;
+}
+
+.copyButton {
+***REMOVED***color: #424242;
+}
+
+.copyButtonText {
+***REMOVED***font-family: 'Segoe UI';
+***REMOVED***font-style: normal;
+***REMOVED***font-weight: 600;
+***REMOVED***font-size: 14px;
+***REMOVED***line-height: 20px;
+***REMOVED***display: flex;
+***REMOVED***align-items: center;
+***REMOVED***color: #242424;
 }

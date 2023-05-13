@@ -2,15 +2,17 @@
 ***REMOVED***flex: 1;
 ***REMOVED***display: flex;
 ***REMOVED***flex-direction: column;
-***REMOVED***margin-top: 20px;
+***REMOVED***gap: 20px
 }
 
 .chatRoot {
 ***REMOVED***flex: 1;
 ***REMOVED***display: flex;
-***REMOVED***height: 100vh;
-***REMOVED***width: 100%;
-***REMOVED***margin-top: 24px;
+***REMOVED***margin-top: 0px;
+***REMOVED***margin-bottom: 20px;
+***REMOVED***margin-left: 20px;
+***REMOVED***margin-right: 20px;
+***REMOVED***gap: 20px;
 }
 
 .chatContainer {
@@ -18,7 +20,9 @@
 ***REMOVED***display: flex;
 ***REMOVED***flex-direction: column;
 ***REMOVED***align-items: center;
-***REMOVED***width: 100%;
+***REMOVED***background: radial-gradient(108.78% 108.78% at 50.02% 19.78%, #FFFFFF 57.29%, #EEF6FE 100%);
+***REMOVED***box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12);
+***REMOVED***border-radius: 12px;
 }
 
 .chatEmptyState {
@@ -31,17 +35,35 @@
 }
 
 .chatEmptyStateTitle {
-***REMOVED***font-size: 2rem;
-***REMOVED***font-weight: 600;
+***REMOVED***font-family: 'Segoe UI';
+***REMOVED***font-style: normal;
+***REMOVED***font-weight: 700;
+***REMOVED***font-size: 36px;
+***REMOVED***display: flex;
+***REMOVED***align-items: flex-end;
+***REMOVED***text-align: center;
+***REMOVED***line-height: 24px;
+***REMOVED***margin-top: 36px;
+***REMOVED***margin-bottom: 0px;
 }
 
 .chatEmptyStateSubtitle {
-***REMOVED***font-size: 1rem;
-***REMOVED***font-weight: 600;
+***REMOVED***margin-top: 20px;
+***REMOVED***font-family: 'Segoe UI';
+***REMOVED***font-style: normal;
+***REMOVED***font-weight: 400;
+***REMOVED***font-size: 16px;
+***REMOVED***line-height: 150%;
+***REMOVED***display: flex;
+***REMOVED***align-items: flex-end;
+***REMOVED***text-align: center;
+***REMOVED***letter-spacing: -0.01em;
+***REMOVED***color: #616161;
 }
 
 .chatSparkleIcon {
-***REMOVED***color: #0078d4;
+***REMOVED***height: 62px;
+***REMOVED***width: 62px;
 }
 
 .chatMessageStream {
@@ -54,6 +76,7 @@
 ***REMOVED***padding-right: 24px;
 ***REMOVED***display: flex;
 ***REMOVED***flex-direction: column;
+***REMOVED***margin-top: 24px;
 }
 
 .chatMessageUser {
@@ -64,10 +87,18 @@
 
 .chatMessageUserMessage {
 ***REMOVED***padding: 20px;
-***REMOVED***background: #e8ebfa;
-***REMOVED***border-radius: 0.375rem;
-***REMOVED***box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12);
-***REMOVED***outline: transparent solid 1px;
+***REMOVED***background: #EDF5FD;
+***REMOVED***border-radius: 8px;
+***REMOVED***box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12);
+***REMOVED***font-family: 'Segoe UI';
+***REMOVED***font-style: normal;
+***REMOVED***font-weight: 400;
+***REMOVED***font-size: 16px;
+***REMOVED***line-height: 22px;
+***REMOVED***color: #242424;
+***REMOVED***flex: none;
+***REMOVED***order: 0;
+***REMOVED***flex-grow: 0;
 }
 
 .chatMessageGpt {
@@ -76,26 +107,8 @@
 ***REMOVED***display: flex;
 }
 
-.chatMessageGptStart {
-***REMOVED***margin-bottom: 12px;
-***REMOVED***max-width: 80%;
-***REMOVED***display: flex;
-***REMOVED***align-items: center;
-}
-
-.chatMessageGptLoading {
-***REMOVED***padding: 20px;
-***REMOVED***margin-bottom: 12px;
-***REMOVED***background: rgb(249, 249, 249);
-***REMOVED***border-radius: 0.375rem;
-***REMOVED***box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12);
-***REMOVED***outline: transparent solid 1px;
-***REMOVED***max-width: 300px;
-}
-
 .chatInput {
 ***REMOVED***position: sticky;
-***REMOVED***bottom: 0;
 ***REMOVED***flex: 0 0 100px;
 ***REMOVED***padding-top: 12px;
 ***REMOVED***padding-bottom: 24px;
@@ -103,8 +116,132 @@
 ***REMOVED***padding-right: 24px;
 ***REMOVED***width: 100%;
 ***REMOVED***max-width: 1028px;
-***REMOVED***background: #f2f2f2;
+***REMOVED***margin-bottom: 50px;
 }
+
+.clearChatBroom {
+***REMOVED***box-sizing: border-box;
+***REMOVED***display: flex;
+***REMOVED***flex-direction: row;
+***REMOVED***justify-content: center;
+***REMOVED***align-items: center;
+***REMOVED***padding: 8px;
+***REMOVED***position: absolute;
+***REMOVED***width: 40px;
+***REMOVED***height: 40px;
+***REMOVED***left: 12px;
+***REMOVED***top: 66px;
+***REMOVED***color: #FFFFFF;
+***REMOVED***border: 1px solid #D1D1D1;
+***REMOVED***border-radius: 20px;
+}
+
+.stopGeneratingContainer {
+***REMOVED***box-sizing: border-box;
+***REMOVED***display: flex;
+***REMOVED***flex-direction: row;
+***REMOVED***justify-content: center;
+***REMOVED***align-items: center;
+***REMOVED***padding: 5px 16px;
+***REMOVED***gap: 4px;
+***REMOVED***position: absolute;
+***REMOVED***width: 161px;
+***REMOVED***height: 32px;
+***REMOVED***left: calc(50% - 161px/2 + 25.8px);
+***REMOVED***bottom: 116px;
+***REMOVED***border: 1px solid #D1D1D1;
+***REMOVED***border-radius: 16px;
+}
+
+.stopGeneratingIcon {
+***REMOVED***width: 14px;
+***REMOVED***height: 14px;
+***REMOVED***color: #424242;
+}
+
+.stopGeneratingText {
+***REMOVED***width: 103px;
+***REMOVED***height: 20px;
+***REMOVED***font-family: 'Segoe UI';
+***REMOVED***font-style: normal;
+***REMOVED***font-weight: 600;
+***REMOVED***font-size: 14px;
+***REMOVED***line-height: 20px;
+***REMOVED***display: flex;
+***REMOVED***align-items: center;
+***REMOVED***color: #242424;
+***REMOVED***flex: none;
+***REMOVED***order: 0;
+***REMOVED***flex-grow: 0;
+}
+
+.citationPanel {
+***REMOVED***display: flex;
+***REMOVED***flex-direction: column;
+***REMOVED***align-items: flex-start;
+***REMOVED***padding: 16px 16px;
+***REMOVED***gap: 8px;
+***REMOVED***background: #FFFFFF;
+***REMOVED***box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12);
+***REMOVED***border-radius: 4px;
+***REMOVED***flex: auto;
+***REMOVED***order: 0;
+***REMOVED***align-self: stretch;
+***REMOVED***flex-grow: 0.3;
+***REMOVED***max-width: 30%;
+}
+
+.citationPanelHeaderContainer {
+***REMOVED***width: 100%;
+}
+
+.citationPanelHeader {
+***REMOVED***font-family: 'Segoe UI';
+***REMOVED***font-style: normal;
+***REMOVED***font-weight: 600;
+***REMOVED***font-size: 18px;
+***REMOVED***line-height: 24px;
+***REMOVED***color: #000000;
+***REMOVED***flex: none;
+***REMOVED***order: 0;
+***REMOVED***flex-grow: 0;
+}
+
+.citationPanelDismiss {
+***REMOVED***width: 18px;
+***REMOVED***height: 18px;
+***REMOVED***color: #424242;
+}
+
+.citationPanelDismiss:hover {
+***REMOVED***background-color: #D1D1D1;
+***REMOVED***cursor: pointer;
+}
+
+.citationPanelTitle {
+***REMOVED***font-family: 'Segoe UI';
+***REMOVED***font-style: normal;
+***REMOVED***font-weight: 600;
+***REMOVED***font-size: 16px;
+***REMOVED***line-height: 22px;
+***REMOVED***color: #323130;
+***REMOVED***margin-top: 12px;
+***REMOVED***margin-bottom: 12px;
+} 
+
+.citationPanelContent {
+***REMOVED***font-family: 'Segoe UI';
+***REMOVED***font-style: normal;
+***REMOVED***font-weight: 400;
+***REMOVED***font-size: 14px;
+***REMOVED***line-height: 20px;
+***REMOVED***color: #000000;
+***REMOVED***flex: none;
+***REMOVED***order: 1;
+***REMOVED***align-self: stretch;
+***REMOVED***flex-grow: 0;
+***REMOVED***white-space: pre-wrap;
+} 
 
 .chatAnalysisPanel {
 ***REMOVED***flex: 1;
@@ -112,29 +249,4 @@
 ***REMOVED***max-height: 89vh;
 ***REMOVED***margin-left: 20px;
 ***REMOVED***margin-right: 20px;
-}
-
-.chatThoughtProcessContainer {
-***REMOVED***font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
-***REMOVED***word-wrap: break-word;
-***REMOVED***padding-top: 12px;
-***REMOVED***padding-bottom: 12px;
-}
-
-.chatSettingsSeparator {
-***REMOVED***margin-top: 15px;
-}
-
-.loadingLogo {
-***REMOVED***font-size: 28px;
-}
-
-.commandsContainer {
-***REMOVED***display: flex;
-***REMOVED***align-self: flex-end;
-}
-
-.commandButton {
-***REMOVED***margin-right: 20px;
-***REMOVED***margin-bottom: 20px;
 }
