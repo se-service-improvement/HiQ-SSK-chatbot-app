@@ -1,4 +1,5 @@
 import { AskResponse, DocumentResult } from "../../api";
+import styles from "./Answer.module.css";
 
 type JsxParsedAnswer = {
 ***REMOVED***answerJsx: (string | JSX.Element)[];
@@ -32,7 +33,7 @@ export function parseAnswerToJsx(answer: AskResponse, onInlineCitationClicked: (
 ***REMOVED***
 
 ***REMOVED******REMOVED***return (
-***REMOVED******REMOVED***<a className="citation" title={citedDocument.filepath ?? ""} onClick={() => onInlineCitationClicked(citedDocument)}>
+***REMOVED******REMOVED***<a className={styles.citation} title={citedDocument.filepath ?? ""} onClick={() => onInlineCitationClicked(citedDocument)}>
 ***REMOVED******REMOVED******REMOVED***<sup>{citationIndex}</sup>
 ***REMOVED******REMOVED***</a>
 ***REMOVED******REMOVED***);

@@ -35,6 +35,22 @@ export const Answer = ({
 ***REMOVED***setChevronIsExpanded(isRefAccordionOpen);
 ***REMOVED***, [isRefAccordionOpen]);
 
+***REMOVED***const createCitationFilepath = (citation: DocumentResult) => {
+***REMOVED***let citationDisplay = "";
+
+***REMOVED***if (citation.filepath) {
+***REMOVED******REMOVED***citationDisplay = citation.filepath;
+***REMOVED***
+***REMOVED***else if (citation.title) {
+***REMOVED******REMOVED***citationDisplay = citation.title;
+***REMOVED***
+
+***REMOVED***if (citation.chunk_id !== null) {
+***REMOVED******REMOVED***citationDisplay += `- Part ${parseInt(citation.chunk_id) + 1}`;
+***REMOVED***
+***REMOVED***return citationDisplay;
+***REMOVED***
+
 ***REMOVED***return (
 ***REMOVED***<>
 ***REMOVED******REMOVED***<Stack className={styles.answerContainer}>
@@ -70,7 +86,7 @@ export const Answer = ({
 ***REMOVED******REMOVED******REMOVED******REMOVED***return (
 ***REMOVED******REMOVED******REMOVED******REMOVED***<span key={idx} onClick={() => onCitationClicked(citation)} className={styles.citationContainer}>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.citation}>{++idx}</div>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***{citation.filepath ?? ""}
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***{createCitationFilepath(citation)}
 ***REMOVED******REMOVED******REMOVED******REMOVED***</span>);
 ***REMOVED******REMOVED******REMOVED***)}
 ***REMOVED******REMOVED******REMOVED***</div>

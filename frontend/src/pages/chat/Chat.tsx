@@ -2,6 +2,9 @@ import { useRef, useState, useEffect } from "react";
 import { Stack } from "@fluentui/react";
 import { BroomRegular, DismissRegular, SquareRegular } from "@fluentui/react-icons";
 
+import ReactMarkdown from "react-markdown";
+import remarkGfm from 'remark-gfm'
+
 import styles from "./Chat.module.css";
 import Sparkle from "../../assets/sparkle.svg";
 import {
@@ -27,8 +30,6 @@ const Chat = () => {
 ***REMOVED***lastQuestionRef.current = question;
 
 ***REMOVED***setIsLoading(true);
-***REMOVED***setActiveCitation(undefined);
-***REMOVED***setIsCitationPanelOpen(false);
 ***REMOVED***const abortController = new AbortController();
 ***REMOVED***abortFuncs.current.unshift(abortController);
 
@@ -188,14 +189,14 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED***/>
 ***REMOVED******REMOVED******REMOVED***</Stack>
 ***REMOVED******REMOVED***</div>
-***REMOVED******REMOVED***{!isLoading && answers.length > 0 && isCitationPanelOpen && activeCitation && (
+***REMOVED******REMOVED***{answers.length > 0 && isCitationPanelOpen && activeCitation && (
 ***REMOVED******REMOVED***<Stack.Item className={styles.citationPanel}>
 ***REMOVED******REMOVED******REMOVED***<Stack horizontal className={styles.citationPanelHeaderContainer} horizontalAlign="space-between" verticalAlign="center">
 ***REMOVED******REMOVED******REMOVED***<span className={styles.citationPanelHeader}>Citations</span>
 ***REMOVED******REMOVED******REMOVED***<DismissRegular className={styles.citationPanelDismiss} onClick={() => setIsCitationPanelOpen(false)}/>
 ***REMOVED******REMOVED******REMOVED***</Stack>
 ***REMOVED******REMOVED******REMOVED***<h5 className={styles.citationPanelTitle}>{activeCitation[2]}</h5>
-***REMOVED******REMOVED******REMOVED***<p className={styles.citationPanelContent} dangerouslySetInnerHTML={{__html: activeCitation[0]}}></p>
+***REMOVED******REMOVED******REMOVED***<ReactMarkdown className={styles.citationPanelContent} children={activeCitation[0]} remarkPlugins={[remarkGfm]}/>
 ***REMOVED******REMOVED***</Stack.Item>
 ***REMOVED******REMOVED***)}
 ***REMOVED******REMOVED***</Stack>
