@@ -4,6 +4,7 @@ import { BroomRegular, DismissRegular, SquareRegular } from "@fluentui/react-ico
 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from 'remark-gfm'
+import rehypeRaw from "rehype-raw"; 
 
 import styles from "./Chat.module.css";
 import Sparkle from "../../assets/sparkle.svg";
@@ -89,12 +90,8 @@ const Chat = () => {
 ***REMOVED***useEffect(() => chatMessageStreamEnd.current?.scrollIntoView({ behavior: "smooth" }), [isLoading]);
 
 ***REMOVED***const onShowCitation = (citation: DocumentResult, index: number) => {
-***REMOVED***if (activeCitation && activeCitation[1] === citation.id && isCitationPanelOpen) {
-***REMOVED******REMOVED***setIsCitationPanelOpen(false);
-***REMOVED***
-***REMOVED******REMOVED***setActiveCitation([citation.content, citation.id, citation.title ?? "", citation.filepath ?? "", "", ""]);
-***REMOVED******REMOVED***setIsCitationPanelOpen(true);
-***REMOVED***
+***REMOVED***setActiveCitation([citation.content, citation.id, citation.title ?? "", citation.filepath ?? "", "", ""]);
+***REMOVED***setIsCitationPanelOpen(true);
 ***REMOVED***;
 
 ***REMOVED***return (
@@ -196,7 +193,7 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED***<DismissRegular className={styles.citationPanelDismiss} onClick={() => setIsCitationPanelOpen(false)}/>
 ***REMOVED******REMOVED******REMOVED***</Stack>
 ***REMOVED******REMOVED******REMOVED***<h5 className={styles.citationPanelTitle}>{activeCitation[2]}</h5>
-***REMOVED******REMOVED******REMOVED***<ReactMarkdown className={styles.citationPanelContent} children={activeCitation[0]} remarkPlugins={[remarkGfm]}/>
+***REMOVED******REMOVED******REMOVED***<ReactMarkdown className={styles.citationPanelContent} children={activeCitation[0]} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}/>
 ***REMOVED******REMOVED***</Stack.Item>
 ***REMOVED******REMOVED***)}
 ***REMOVED******REMOVED***</Stack>

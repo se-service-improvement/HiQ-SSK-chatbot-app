@@ -15,6 +15,7 @@
 ***REMOVED***"react-dom": "^18.2.0",
 ***REMOVED***"react-markdown": "^7.0.1",
 ***REMOVED***"react-router-dom": "^6.8.1",
+***REMOVED***"rehype-raw": "^6.1.1",
 ***REMOVED***"remark-gfm": "^3.0.1"
   },
   "devDependencies": {

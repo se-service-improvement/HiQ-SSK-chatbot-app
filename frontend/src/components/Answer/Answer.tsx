@@ -46,7 +46,7 @@ export const Answer = ({
 ***REMOVED***
 
 ***REMOVED***if (citation.chunk_id !== null) {
-***REMOVED******REMOVED***citationDisplay += `- Part ${parseInt(citation.chunk_id) + 1}`;
+***REMOVED******REMOVED***citationDisplay += ` - Part ${parseInt(citation.chunk_id) + 1}`;
 ***REMOVED***
 ***REMOVED***return citationDisplay;
 ***REMOVED***

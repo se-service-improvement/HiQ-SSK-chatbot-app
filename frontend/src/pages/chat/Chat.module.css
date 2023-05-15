@@ -245,13 +245,4 @@
 ***REMOVED***align-self: stretch;
 ***REMOVED***flex-grow: 0;
 ***REMOVED***white-space: pre-wrap;
-***REMOVED***overflow-y: scroll;
 } 
-
-.chatAnalysisPanel {
-***REMOVED***flex: 1;
-***REMOVED***overflow-y: auto;
-***REMOVED***max-height: 89vh;
-***REMOVED***margin-left: 20px;
-***REMOVED***margin-right: 20px;
-}
