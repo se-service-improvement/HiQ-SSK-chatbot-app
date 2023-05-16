@@ -11,8 +11,7 @@ body {
 
 html {
 ***REMOVED***background: #f2f2f2;
-
-***REMOVED***font-family: "Segoe UI";
+***REMOVED***font-family: "Segoe UI", "Segoe UI Web (West European)", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
 ***REMOVED***-webkit-font-smoothing: antialiased;
 ***REMOVED***-moz-osx-font-smoothing: grayscale;
 }
