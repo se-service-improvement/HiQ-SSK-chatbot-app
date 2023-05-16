@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Stack, TextField } from "@fluentui/react";
-import { Sparkle28Filled } from "@fluentui/react-icons";
-
+import { SendRegular } from "@fluentui/react-icons";
+import Send from "../../assets/Send.svg";
 import styles from "./QuestionInput.module.css";
 
 interface Props {
@@ -51,15 +51,20 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend }: Pr
 ***REMOVED******REMOVED***onChange={onQuestionChange}
 ***REMOVED******REMOVED***onKeyDown={onEnterPress}
 ***REMOVED******REMOVED***/>
-***REMOVED******REMOVED***<div className={styles.questionInputButtonsContainer}>
-***REMOVED******REMOVED***<div
-***REMOVED******REMOVED******REMOVED***className={`${styles.questionInputSendButton} ${sendQuestionDisabled ? styles.questionInputSendButtonDisabled : ""}`}
-***REMOVED******REMOVED******REMOVED***aria-label="Ask question button"
-***REMOVED******REMOVED******REMOVED***onClick={sendQuestion}
+***REMOVED******REMOVED***<div className={styles.questionInputSendButtonContainer} 
+***REMOVED******REMOVED***role="button" 
+***REMOVED******REMOVED***tabIndex={0}
+***REMOVED******REMOVED***aria-label="Ask question button"
+***REMOVED******REMOVED***onClick={sendQuestion}
+***REMOVED******REMOVED***onKeyDown={e => e.key === "Enter" || e.key === " " ? sendQuestion() : null}
 ***REMOVED******REMOVED***>
-***REMOVED******REMOVED******REMOVED***<Sparkle28Filled />
+***REMOVED******REMOVED***{ sendQuestionDisabled ? 
+***REMOVED******REMOVED******REMOVED***<SendRegular className={styles.questionInputSendButtonDisabled}/>
+***REMOVED******REMOVED******REMOVED***:
+***REMOVED******REMOVED******REMOVED***<img src={Send} className={styles.questionInputSendButton}/>
+***REMOVED******REMOVED***
 ***REMOVED******REMOVED***</div>
-***REMOVED******REMOVED***</div>
+***REMOVED******REMOVED***<div className={styles.questionInputBottomBorder} />
 ***REMOVED***</Stack>
 ***REMOVED***);
 };

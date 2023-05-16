@@ -20,6 +20,7 @@ export type DocumentResult = {
 ***REMOVED***filepath: string | null;
 ***REMOVED***url: string | null;
 ***REMOVED***metadata: string | null;
+***REMOVED***chunk_id: string | null;
 }
 
 export type ChatMessage = {
