@@ -138,7 +138,7 @@
 ***REMOVED***cursor:pointer;
 }
 
-sup {
+.clickableSup {
 ***REMOVED***box-sizing: border-box;
 ***REMOVED***display: inline-flex;
 ***REMOVED***flex-direction: column;
@@ -163,7 +163,7 @@ sup {
 ***REMOVED***cursor: pointer;
 }
 
-sup:hover {
+.clickableSup:hover {
 ***REMOVED***text-decoration: underline;
 ***REMOVED***cursor: pointer;
 }

@@ -7,6 +7,10 @@ import styles from "./Answer.module.css";
 import { AskResponse, DocumentResult } from "../../api";
 import { parseAnswerToJsx } from "./AnswerParser";
 
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import supersub from 'remark-supersub'
+
 interface Props {
 ***REMOVED***answer: AskResponse;
 ***REMOVED***onCitationClicked: (citedDocument: DocumentResult) => void;
@@ -22,6 +26,8 @@ export const Answer = ({
 ***REMOVED******REMOVED***toggleIsRefAccordionOpen();
 ***REMOVED***
 ***REMOVED***;
+
+***REMOVED***const useMarkdownFormat = false; // set to false to use inline clickable citations without markdown formatting
 
 ***REMOVED***const parsedAnswer = useMemo(() => parseAnswerToJsx(answer, onInlineCitationClicked), [answer]);
 ***REMOVED***const [chevronIsExpanded, setChevronIsExpanded] = useState(isRefAccordionOpen);
@@ -55,7 +61,13 @@ export const Answer = ({
 ***REMOVED***<>
 ***REMOVED******REMOVED***<Stack className={styles.answerContainer}>
 ***REMOVED******REMOVED***<Stack.Item grow>
-***REMOVED******REMOVED******REMOVED***<p className={styles.answerText}>{parsedAnswer.answerJsx}</p>
+***REMOVED******REMOVED******REMOVED***{useMarkdownFormat ? ( 
+***REMOVED******REMOVED******REMOVED***<ReactMarkdown
+***REMOVED******REMOVED******REMOVED******REMOVED***remarkPlugins={[remarkGfm, supersub]}
+***REMOVED******REMOVED******REMOVED******REMOVED***children={parsedAnswer.markdownFormatText}
+***REMOVED******REMOVED******REMOVED******REMOVED***className={styles.answerText}
+***REMOVED******REMOVED******REMOVED***/> ) : ( 
+***REMOVED******REMOVED******REMOVED***<p className={styles.answerText}>{parsedAnswer.answerJsx}</p>)}
 ***REMOVED******REMOVED***</Stack.Item>
 ***REMOVED******REMOVED***<Stack horizontal className={styles.answerFooter}>
 ***REMOVED******REMOVED***{!!parsedAnswer.citations.length && (
