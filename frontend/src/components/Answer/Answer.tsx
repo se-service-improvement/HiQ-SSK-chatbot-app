@@ -27,7 +27,7 @@ export const Answer = ({
 ***REMOVED***
 ***REMOVED***;
 
-***REMOVED***const useMarkdownFormat = false; // set to false to use inline clickable citations without markdown formatting
+***REMOVED***const useMarkdownFormat = true; // set to false to use inline clickable citations without markdown formatting
 
 ***REMOVED***const parsedAnswer = useMemo(() => parseAnswerToJsx(answer, onInlineCitationClicked), [answer]);
 ***REMOVED***const [chevronIsExpanded, setChevronIsExpanded] = useState(isRefAccordionOpen);
