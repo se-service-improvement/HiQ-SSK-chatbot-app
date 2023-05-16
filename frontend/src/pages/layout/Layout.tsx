@@ -1,6 +1,6 @@
 import { Outlet, Link } from "react-router-dom";
 import styles from "./Layout.module.css";
-import Sparkle from "../../assets/sparkle.svg";
+import AzureOpenAILogo from "../../assets/AzureOpenAILogo.svg";
 import { CopyRegular, ShareRegular } from "@fluentui/react-icons";
 import { Dialog, Stack, TextField } from "@fluentui/react";
 import { useEffect, useState } from "react";
@@ -37,7 +37,7 @@ const Layout = () => {
 ***REMOVED******REMOVED***<div className={styles.headerContainer}>
 ***REMOVED******REMOVED******REMOVED***<Stack horizontal verticalAlign="center">
 ***REMOVED******REMOVED******REMOVED***<img
-***REMOVED******REMOVED******REMOVED******REMOVED***src={Sparkle}
+***REMOVED******REMOVED******REMOVED******REMOVED***src={AzureOpenAILogo}
 ***REMOVED******REMOVED******REMOVED******REMOVED***className={styles.headerIcon}
 ***REMOVED******REMOVED******REMOVED******REMOVED***aria-hidden="true"
 ***REMOVED******REMOVED******REMOVED***/>
