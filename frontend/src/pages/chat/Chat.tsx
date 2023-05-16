@@ -7,7 +7,8 @@ import remarkGfm from 'remark-gfm'
 import rehypeRaw from "rehype-raw"; 
 
 import styles from "./Chat.module.css";
-import Sparkle from "../../assets/sparkle.svg";
+import AzureOpenAILogo from "../../assets/AzureOpenAILogo.svg";
+
 import {
 ***REMOVED***ChatMessage,
 ***REMOVED***ConversationRequest,
@@ -100,11 +101,11 @@ const Chat = () => {
 ***REMOVED******REMOVED***<div className={styles.chatContainer}>
 ***REMOVED******REMOVED******REMOVED***{!lastQuestionRef.current ? (
 ***REMOVED******REMOVED******REMOVED***<Stack className={styles.chatEmptyState}>
-***REMOVED******REMOVED******REMOVED******REMOVED***<img
-***REMOVED******REMOVED******REMOVED******REMOVED***src={Sparkle}
-***REMOVED******REMOVED******REMOVED******REMOVED***className={styles.chatSparkleIcon}
+***REMOVED******REMOVED******REMOVED******REMOVED***{/* <img
+***REMOVED******REMOVED******REMOVED******REMOVED***src={AzureOpenAILogo}
+***REMOVED******REMOVED******REMOVED******REMOVED***className={styles.chatIcon}
 ***REMOVED******REMOVED******REMOVED******REMOVED***aria-hidden="true"
-***REMOVED******REMOVED******REMOVED******REMOVED***/>
+***REMOVED******REMOVED******REMOVED******REMOVED***/> */}
 ***REMOVED******REMOVED******REMOVED******REMOVED***<h1 className={styles.chatEmptyStateTitle}>Start chatting</h1>
 ***REMOVED******REMOVED******REMOVED******REMOVED***<h2 className={styles.chatEmptyStateSubtitle}>This chatbot is configured to answer your questions.</h2>
 ***REMOVED******REMOVED******REMOVED***</Stack>

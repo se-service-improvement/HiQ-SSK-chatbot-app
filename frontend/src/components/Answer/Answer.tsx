@@ -28,6 +28,7 @@ export const Answer = ({
 ***REMOVED***;
 
 ***REMOVED***const useMarkdownFormat = true; // set to false to use inline clickable citations without markdown formatting
+***REMOVED***const filePathTruncationLimit = 50;
 
 ***REMOVED***const parsedAnswer = useMemo(() => parseAnswerToJsx(answer, onInlineCitationClicked), [answer]);
 ***REMOVED***const [chevronIsExpanded, setChevronIsExpanded] = useState(isRefAccordionOpen);
@@ -41,20 +42,22 @@ export const Answer = ({
 ***REMOVED***setChevronIsExpanded(isRefAccordionOpen);
 ***REMOVED***, [isRefAccordionOpen]);
 
-***REMOVED***const createCitationFilepath = (citation: DocumentResult) => {
-***REMOVED***let citationDisplay = "";
+***REMOVED***const createCitationFilepath = (citation: DocumentResult, index: number, truncate: boolean = false) => {
+***REMOVED***let citationFilename = "";
 
-***REMOVED***if (citation.filepath) {
-***REMOVED******REMOVED***citationDisplay = citation.filepath;
+***REMOVED***if (citation.filepath && citation.chunk_id) {
+***REMOVED******REMOVED***if (truncate && citation.filepath.length > filePathTruncationLimit) {
+***REMOVED******REMOVED***const citationLength = citation.filepath.length;
+***REMOVED******REMOVED***citationFilename = `${citation.filepath.substring(0, 20)}...${citation.filepath.substring(citationLength -20)} - Part ${parseInt(citation.chunk_id) + 1}`;
 ***REMOVED***
-***REMOVED***else if (citation.title) {
-***REMOVED******REMOVED***citationDisplay = citation.title;
+***REMOVED******REMOVED***else {
+***REMOVED******REMOVED***citationFilename = `${citation.filepath} - Part ${parseInt(citation.chunk_id) + 1}`;
 ***REMOVED***
-
-***REMOVED***if (citation.chunk_id !== null) {
-***REMOVED******REMOVED***citationDisplay += ` - Part ${parseInt(citation.chunk_id) + 1}`;
 ***REMOVED***
-***REMOVED***return citationDisplay;
+***REMOVED***else {
+***REMOVED******REMOVED***citationFilename = `Citation ${index}`;
+***REMOVED***
+***REMOVED***return citationFilename;
 ***REMOVED***
 
 ***REMOVED***return (
@@ -96,9 +99,9 @@ export const Answer = ({
 ***REMOVED******REMOVED******REMOVED***<div style={{ marginTop: 8, display: "flex", flexFlow: "wrap column", maxHeight: "150px", gap: "4px" }}>
 ***REMOVED******REMOVED******REMOVED***{parsedAnswer.citations.map((citation, idx) => {
 ***REMOVED******REMOVED******REMOVED******REMOVED***return (
-***REMOVED******REMOVED******REMOVED******REMOVED***<span key={idx} onClick={() => onCitationClicked(citation)} className={styles.citationContainer}>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.citation}>{++idx}</div>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***{createCitationFilepath(citation)}
+***REMOVED******REMOVED******REMOVED******REMOVED***<span title={createCitationFilepath(citation, ++idx)} key={idx} onClick={() => onCitationClicked(citation)} className={styles.citationContainer}>
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.citation}>{idx}</div>
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***{createCitationFilepath(citation, idx, true)}
 ***REMOVED******REMOVED******REMOVED******REMOVED***</span>);
 ***REMOVED******REMOVED******REMOVED***)}
 ***REMOVED******REMOVED******REMOVED***</div>
