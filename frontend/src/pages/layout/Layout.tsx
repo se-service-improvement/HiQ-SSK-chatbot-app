@@ -1,6 +1,6 @@
 import { Outlet, Link } from "react-router-dom";
 import styles from "./Layout.module.css";
-import AzureOpenAILogo from "../../assets/AzureOpenAILogo.svg";
+import Azure from "../../assets/Azure.svg";
 import { CopyRegular, ShareRegular } from "@fluentui/react-icons";
 import { Dialog, Stack, TextField } from "@fluentui/react";
 import { useEffect, useState } from "react";
@@ -37,12 +37,12 @@ const Layout = () => {
 ***REMOVED******REMOVED***<div className={styles.headerContainer}>
 ***REMOVED******REMOVED******REMOVED***<Stack horizontal verticalAlign="center">
 ***REMOVED******REMOVED******REMOVED***<img
-***REMOVED******REMOVED******REMOVED******REMOVED***src={AzureOpenAILogo}
+***REMOVED******REMOVED******REMOVED******REMOVED***src={Azure}
 ***REMOVED******REMOVED******REMOVED******REMOVED***className={styles.headerIcon}
 ***REMOVED******REMOVED******REMOVED******REMOVED***aria-hidden="true"
 ***REMOVED******REMOVED******REMOVED***/>
 ***REMOVED******REMOVED******REMOVED***<Link to="/" className={styles.headerTitleContainer}>
-***REMOVED******REMOVED******REMOVED******REMOVED***<h3 className={styles.headerTitle}>Azure OpenAI</h3>
+***REMOVED******REMOVED******REMOVED******REMOVED***<h3 className={styles.headerTitle}>Azure AI</h3>
 ***REMOVED******REMOVED******REMOVED***</Link>
 ***REMOVED******REMOVED******REMOVED***<div className={styles.shareButtonContainer} role="button" tabIndex={0} aria-label="Share" onClick={handleShareClick} onKeyDown={e => e.key === "Enter" || e.key === " " ? handleShareClick() : null}>
 ***REMOVED******REMOVED******REMOVED******REMOVED***<ShareRegular className={styles.shareButton} />
