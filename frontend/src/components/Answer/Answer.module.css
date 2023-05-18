@@ -22,6 +22,8 @@
 ***REMOVED***flex-grow: 0;
 ***REMOVED***margin: 11px;
 ***REMOVED***white-space: pre-wrap;
+***REMOVED***word-wrap: break-word;
+***REMOVED***max-width: 800px;
 }
 
 .answerFooter {
