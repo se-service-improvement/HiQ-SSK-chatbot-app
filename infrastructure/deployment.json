@@ -1,0 +1,341 @@
+{
+***REMOVED***"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+***REMOVED***"contentVersion": "1.0.0.0",
+***REMOVED***"parameters": {
+***REMOVED***"HostingPlanName": {
+***REMOVED******REMOVED***"type": "string",
+***REMOVED******REMOVED***"defaultValue": "[guid(resourceGroup().id)]",
+***REMOVED******REMOVED***"metadata": {
+***REMOVED******REMOVED***"description": "Name of App Service plan"
+***REMOVED***
+***REMOVED***,
+***REMOVED***"HostingPlanSku": {
+***REMOVED******REMOVED***"type": "string",
+***REMOVED******REMOVED***"defaultValue": "B3",
+***REMOVED******REMOVED***"allowedValues": [
+***REMOVED******REMOVED***"F1",
+***REMOVED******REMOVED***"D1",
+***REMOVED******REMOVED***"B1",
+***REMOVED******REMOVED***"B2",
+***REMOVED******REMOVED***"B3",
+***REMOVED******REMOVED***"S1",
+***REMOVED******REMOVED***"S2",
+***REMOVED******REMOVED***"S3",
+***REMOVED******REMOVED***"P1",
+***REMOVED******REMOVED***"P2",
+***REMOVED******REMOVED***"P3",
+***REMOVED******REMOVED***"P4"
+***REMOVED******REMOVED***],
+***REMOVED******REMOVED***"metadata": {
+***REMOVED******REMOVED***"description": "The pricing tier for the App Service plan"
+***REMOVED***
+***REMOVED***,
+***REMOVED***"WebsiteName": {
+***REMOVED******REMOVED***"type": "string",
+***REMOVED******REMOVED***"defaultValue": "[guid(resourceGroup().id)]",
+***REMOVED******REMOVED***"metadata": {
+***REMOVED******REMOVED***"description": "Name of Web App"
+***REMOVED***
+***REMOVED***,
+***REMOVED***"ApplicationInsightsName": {
+***REMOVED******REMOVED***"type": "string",
+***REMOVED******REMOVED***"defaultValue": "[guid(resourceGroup().id)]",
+***REMOVED******REMOVED***"metadata": {
+***REMOVED******REMOVED***"description": "Name of Application Insights"
+***REMOVED***
+***REMOVED***,
+***REMOVED***"AzureSearchService": {
+***REMOVED******REMOVED***"type": "string",
+***REMOVED******REMOVED***"defaultValue": "",
+***REMOVED******REMOVED***"metadata": {
+***REMOVED******REMOVED***"description": "Name of Azure Search Service"
+***REMOVED***
+***REMOVED***,
+***REMOVED***"AzureSearchIndex": {
+***REMOVED******REMOVED***"type": "string",
+***REMOVED******REMOVED***"defaultValue": "",
+***REMOVED******REMOVED***"metadata": {
+***REMOVED******REMOVED***"description": "Name of Azure Search Index"
+***REMOVED***
+***REMOVED***,
+***REMOVED***"AzureSearchKey": {
+***REMOVED******REMOVED***"type": "securestring",
+***REMOVED******REMOVED***"defaultValue": "",
+***REMOVED******REMOVED***"metadata": {
+***REMOVED******REMOVED***"description": "Azure Search Admin Key"
+***REMOVED***
+***REMOVED***,
+***REMOVED***"AzureSearchUseSemanticSearch": {
+***REMOVED******REMOVED***"type": "bool",
+***REMOVED******REMOVED***"defaultValue": false,
+***REMOVED******REMOVED***"metadata": {
+***REMOVED******REMOVED***"description": "Use semantic search"
+***REMOVED***
+***REMOVED***,
+***REMOVED***"AzureSearchSemanticSearchConfig": {
+***REMOVED******REMOVED***"type": "string",
+***REMOVED******REMOVED***"defaultValue": "default",
+***REMOVED******REMOVED***"metadata": {
+***REMOVED******REMOVED***"description": "Semantic search config"
+***REMOVED***
+***REMOVED***,
+***REMOVED***"AzureSearchIndexIsPrechunked": {
+***REMOVED******REMOVED***"type": "bool",
+***REMOVED******REMOVED***"defaultValue": false,
+***REMOVED******REMOVED***"metadata": {
+***REMOVED******REMOVED***"description": "Is the index prechunked"
+***REMOVED***
+***REMOVED***,
+***REMOVED***"AzureSearchTopK": {
+***REMOVED******REMOVED***"type": "int",
+***REMOVED******REMOVED***"defaultValue": 5,
+***REMOVED******REMOVED***"metadata": {
+***REMOVED******REMOVED***"description": "Top K results"
+***REMOVED***
+***REMOVED***,
+***REMOVED***"AzureSearchEnableInDomain": {
+***REMOVED******REMOVED***"type": "bool",
+***REMOVED******REMOVED***"defaultValue": false,
+***REMOVED******REMOVED***"metadata": {
+***REMOVED******REMOVED***"description": "Enable in domain"
+***REMOVED***
+***REMOVED***,
+***REMOVED***"AzureSearchContentColumns": {
+***REMOVED******REMOVED***"type": "string",
+***REMOVED******REMOVED***"defaultValue": "content",
+***REMOVED******REMOVED***"metadata": {
+***REMOVED******REMOVED***"description": "Content columns"
+***REMOVED***
+***REMOVED***,
+***REMOVED***"AzureSearchFilenameColumn": {
+***REMOVED******REMOVED***"type": "string",
+***REMOVED******REMOVED***"defaultValue": "filename",
+***REMOVED******REMOVED***"metadata": {
+***REMOVED******REMOVED***"description": "Filename column"
+***REMOVED***
+***REMOVED***,
+***REMOVED***"AzureSearchTitleColumn": {
+***REMOVED******REMOVED***"type": "string",
+***REMOVED******REMOVED***"defaultValue": "title",
+***REMOVED******REMOVED***"metadata": {
+***REMOVED******REMOVED***"description": "Title column"
+***REMOVED***
+***REMOVED***,
+***REMOVED***"AzureSearchUrlColumn": {
+***REMOVED******REMOVED***"type": "string",
+***REMOVED******REMOVED***"defaultValue": "url",
+***REMOVED******REMOVED***"metadata": {
+***REMOVED******REMOVED***"description": "Url column"
+***REMOVED***
+***REMOVED***,
+***REMOVED***"AzureOpenAIResource": {
+***REMOVED******REMOVED***"type": "string",
+***REMOVED******REMOVED***"metadata": {
+***REMOVED******REMOVED***"description": "Name of Azure OpenAI Resource"
+***REMOVED***
+***REMOVED***,
+***REMOVED***"AzureOpenAIModel": {
+***REMOVED******REMOVED***"type": "string",
+***REMOVED******REMOVED***"defaultValue": "text-davinci-003",
+***REMOVED******REMOVED***"metadata": {
+***REMOVED******REMOVED***"description": "Azure OpenAI Model"
+***REMOVED***
+***REMOVED***,
+***REMOVED***"AzureOpenAIKey": {
+***REMOVED******REMOVED***"type": "securestring",
+***REMOVED******REMOVED***"metadata": {
+***REMOVED******REMOVED***"description": "Azure OpenAI Key"
+***REMOVED***
+***REMOVED***,
+***REMOVED***"AzureOpenAIDeployment": {
+***REMOVED******REMOVED***"type": "string",
+***REMOVED******REMOVED***"defaultValue": "text-davinci-003",
+***REMOVED******REMOVED***"metadata": {
+***REMOVED******REMOVED***"description": "Azure OpenAI Deployment"
+***REMOVED***
+***REMOVED***,
+***REMOVED***"AzureOpenAITemperature": {
+***REMOVED******REMOVED***"type": "int",
+***REMOVED******REMOVED***"defaultValue": 0,
+***REMOVED******REMOVED***"metadata": {
+***REMOVED******REMOVED***"description": "Azure OpenAI Temperature"
+***REMOVED***
+***REMOVED***,
+***REMOVED***"AzureOpenAITopP": {
+***REMOVED******REMOVED***"type": "int",
+***REMOVED******REMOVED***"defaultValue": 1,
+***REMOVED******REMOVED***"metadata": {
+***REMOVED******REMOVED***"description": "Azure OpenAI Top P"
+***REMOVED***
+***REMOVED***,
+***REMOVED***"AzureOpenAIMaxTokens": {
+***REMOVED******REMOVED***"type": "int",
+***REMOVED******REMOVED***"defaultValue": 1000,
+***REMOVED******REMOVED***"metadata": {
+***REMOVED******REMOVED***"description": "Azure OpenAI Max Tokens"
+***REMOVED***
+***REMOVED***,
+***REMOVED***"AzureOpenAIStopSequence": {
+***REMOVED******REMOVED***"type": "string",
+***REMOVED******REMOVED***"defaultValue": "\n",
+***REMOVED******REMOVED***"metadata": {
+***REMOVED******REMOVED***"description": "Azure OpenAI Stop Sequence"
+***REMOVED***
+***REMOVED***,
+***REMOVED***"AzureOpenAISystemMessage": {
+***REMOVED******REMOVED***"type": "string",
+***REMOVED******REMOVED***"defaultValue": "You are an AI assistant that helps people find information.",
+***REMOVED******REMOVED***"metadata": {
+***REMOVED******REMOVED***"description": "Azure OpenAI System Message"
+***REMOVED***
+***REMOVED***,
+***REMOVED***"AzureOpenAIApiVersion": {
+***REMOVED******REMOVED***"type": "string",
+***REMOVED******REMOVED***"defaultValue": "2023-03-31-preview",
+***REMOVED******REMOVED***"metadata": {
+***REMOVED******REMOVED***"description": "Azure OpenAI Api Version"
+***REMOVED***
+***REMOVED***
+***REMOVED***,
+***REMOVED***"variables": {
+***REMOVED***"WebAppImageName": "DOCKER|fruocco/sample-chatgpt"
+***REMOVED***,
+***REMOVED***"resources": [
+***REMOVED***{
+***REMOVED******REMOVED***"apiVersion": "2020-06-01",
+***REMOVED******REMOVED***"name": "[parameters('HostingPlanName')]",
+***REMOVED******REMOVED***"type": "Microsoft.Web/serverfarms",
+***REMOVED******REMOVED***"location": "[resourceGroup().location]",
+***REMOVED******REMOVED***"sku": {
+***REMOVED******REMOVED***"name": "[parameters('HostingPlanSku')]"
+***REMOVED***,
+***REMOVED******REMOVED***"properties": {
+***REMOVED******REMOVED***"name": "[parameters('HostingPlanName')]",
+***REMOVED******REMOVED***"reserved": true
+***REMOVED***,
+***REMOVED******REMOVED***"kind": "linux"
+***REMOVED***,
+***REMOVED***{
+***REMOVED******REMOVED***"apiVersion": "2020-06-01",
+***REMOVED******REMOVED***"name": "[parameters('WebsiteName')]",
+***REMOVED******REMOVED***"type": "Microsoft.Web/sites",
+***REMOVED******REMOVED***"location": "[resourceGroup().location]",
+***REMOVED******REMOVED***"dependsOn": [
+***REMOVED******REMOVED***"[resourceId('Microsoft.Web/serverfarms', parameters('HostingPlanName'))]"
+***REMOVED******REMOVED***],
+***REMOVED******REMOVED***"properties": {
+***REMOVED******REMOVED***"serverFarmId": "[parameters('HostingPlanName')]",
+***REMOVED******REMOVED***"siteConfig": {
+***REMOVED******REMOVED******REMOVED***"appSettings": [
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[reference(resourceId('Microsoft.Insights/components', parameters('ApplicationInsightsName')), '2015-05-01').InstrumentationKey]"
+***REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_SEARCH_SERVICE",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureSearchService')]"
+***REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_SEARCH_INDEX",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureSearchIndex')]"
+***REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_SEARCH_KEY",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureSearchKey')]"
+***REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_SEARCH_USE_SEMANTIC_SEARCH",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureSearchUseSemanticSearch')]"
+***REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureSearchSemanticSearchConfig')]"
+***REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_SEARCH_INDEX_IS_PRECHUNKED",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureSearchIndexIsPrechunked')]"
+***REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_SEARCH_TOP_K",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureSearchTopK')]"
+***REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_SEARCH_ENABLE_IN_DOMAIN",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureSearchEnableInDomain')]"
+***REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_SEARCH_CONTENT_COLUMNS",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureSearchContentColumns')]"
+***REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_SEARCH_FILENAME_COLUMN",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureSearchFilenameColumn')]"
+***REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_SEARCH_TITLE_COLUMN",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureSearchTitleColumn')]"
+***REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_SEARCH_URL_COLUMN",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureSearchUrlColumn')]"
+***REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_OPENAI_RESOURCE",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureOpenAIResource')]"
+***REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_OPENAI_MODEL",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureOpenAIModel')]"
+***REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_OPENAI_KEY",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureOpenAIKey')]"
+***REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_OPENAI_DEPLOYMENT",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureOpenAIDeployment')]"
+***REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_OPENAI_TEMPERATURE",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureOpenAITemperature')]"
+***REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_OPENAI_TOP_P",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureOpenAITopP')]"
+***REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_OPENAI_MAX_TOKENS",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureOpenAIMaxTokens')]"
+***REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_OPENAI_STOP_SEQUENCE",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureOpenAIStopSequence')]"
+***REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_OPENAI_SYSTEM_MESSAGE",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureOpenAISystemMessage')]"
+***REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_OPENAI_PREVIEW_API_VERSION",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureOpenAIApiVersion')]"
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED***],
+***REMOVED******REMOVED******REMOVED***"linuxFxVersion": "[variables('WebAppImageName')]"
+***REMOVED******REMOVED***
+***REMOVED***
+***REMOVED***,
+***REMOVED***{
+***REMOVED******REMOVED***"type": "Microsoft.Insights/components",
+***REMOVED******REMOVED***"apiVersion": "2020-02-02",
+***REMOVED******REMOVED***"name": "[parameters('ApplicationInsightsName')]",
+***REMOVED******REMOVED***"location": "[resourceGroup().location]",
+***REMOVED******REMOVED***"tags": {
+***REMOVED******REMOVED***"[concat('hidden-link:', resourceId('Microsoft.Web/sites', parameters('ApplicationInsightsName')))]": "Resource"
+***REMOVED***,
+***REMOVED******REMOVED***"properties": {
+***REMOVED******REMOVED***"Application_Type": "web"
+***REMOVED***,
+***REMOVED******REMOVED***"kind": "web"
+***REMOVED***
+***REMOVED***]
+}
