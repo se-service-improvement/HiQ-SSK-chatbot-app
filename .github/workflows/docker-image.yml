@@ -1,0 +1,39 @@
+name: Docker Image CI
+
+on:
+  push:
+***REMOVED***branches:
+***REMOVED***- main
+  pull_request:
+***REMOVED***branches:
+***REMOVED***- main
+
+jobs:
+
+  build:
+
+***REMOVED***runs-on: ubuntu-latest
+
+***REMOVED***steps:
+***REMOVED***- name: Azure Container Registry Login
+***REMOVED***  uses: Azure/docker-login@v1
+***REMOVED***  with:
+***REMOVED***# Container registry username
+***REMOVED***username: ${{ secrets.ACR_USERNAME }}
+***REMOVED***# Container registry password
+***REMOVED***password: ${{ secrets.ACR_PASSWORD }}
+***REMOVED***# Container registry server url
+***REMOVED***login-server: ${{ secrets.ACR_LOGIN_SERVER }}
+***REMOVED***
+***REMOVED***- uses: actions/checkout@v3
+***REMOVED***- name: Build the Docker image
+***REMOVED***  run: 
+***REMOVED***docker build . --file Docker/Dockerfile --tag ${{ secrets.ACR_LOGIN_SERVER }}/web-ui:latest;
+***REMOVED***docker push ${{ secrets.ACR_LOGIN_SERVER }}/web-ui:latest
+***REMOVED***
+***REMOVED***
+***REMOVED***docker build . --file WebApp.Dockerfile --tag fruoccopublic.azurecr.io/sample-app-aoai-chatGPT:$(date +'%Y-%m-%d')_$GITHUB_RUN_NUMBER;
+***REMOVED***docker tag fruoccopublic.azurecr.io/sample-app-aoai-chatGPT:$(date +'%Y-%m-%d')_$GITHUB_RUN_NUMBER fruoccopublic.azurecr.io/sample-app-aoai-chatGPT:latest;
+***REMOVED***docker push fruoccopublic.azurecr.io/sample-app-aoai-chatGPT:$(date +'%Y-%m-%d')_$GITHUB_RUN_NUMBER;
+***REMOVED***docker push fruoccopublic.azurecr.io/sample-app-aoai-chatGPT:latest;
+***REMOVED***  
