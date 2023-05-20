@@ -13,9 +13,12 @@ export async function conversationApi(options: ConversationRequest, abortSignal:
 ***REMOVED***);
 
 ***REMOVED***const parsedResponse: ChatMessage = await response.json();
+***REMOVED***
 ***REMOVED***if (response.status > 299 || !response.ok) {
-***REMOVED***alert("Unknown error");
-***REMOVED***throw Error("Unknown error");
+***REMOVED***console.log("Error response from /conversation", parsedResponse)
+***REMOVED***const message = "An error occurred. Please try again. If the problem persists, please contact the site administrator.";
+***REMOVED***alert(message);
+***REMOVED***throw Error(message);
 ***REMOVED***
 
 ***REMOVED***return parsedResponse;

@@ -21,7 +21,7 @@ AZURE_SEARCH_USE_SEMANTIC_SEARCH = os.environ.get("AZURE_SEARCH_USE_SEMANTIC_SEA
 AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG = os.environ.get("AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG", "default")
 AZURE_SEARCH_INDEX_IS_PRECHUNKED = os.environ.get("AZURE_SEARCH_INDEX_IS_PRECHUNKED", "false")
 AZURE_SEARCH_TOP_K = os.environ.get("AZURE_SEARCH_TOP_K", 5)
-AZURE_SEARCH_ENABLE_IN_DOMAIN = os.environ.get("AZURE_SEARCH_ENABLE_IN_DOMAIN", False)
+AZURE_SEARCH_ENABLE_IN_DOMAIN = os.environ.get("AZURE_SEARCH_ENABLE_IN_DOMAIN", "true")
 AZURE_SEARCH_CONTENT_COLUMNS = os.environ.get("AZURE_SEARCH_CONTENT_COLUMNS")
 AZURE_SEARCH_FILENAME_COLUMN = os.environ.get("AZURE_SEARCH_FILENAME_COLUMN")
 AZURE_SEARCH_TITLE_COLUMN = os.environ.get("AZURE_SEARCH_TITLE_COLUMN")
@@ -83,7 +83,8 @@ def prepare_body_headers_with_data(request):
 ***REMOVED***"Ocp-Apim-Subscription-Key": AZURE_OPENAI_KEY,
 ***REMOVED***'api-key': AZURE_OPENAI_KEY,
 ***REMOVED***"azure_document_search_configuration": AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG if AZURE_SEARCH_USE_SEMANTIC_SEARCH.lower() == "true" and AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG else "",
-***REMOVED***"azure_document_search_query_type": "semantic" if AZURE_SEARCH_USE_SEMANTIC_SEARCH.lower() == "true" else "simple"
+***REMOVED***"azure_document_search_query_type": "semantic" if AZURE_SEARCH_USE_SEMANTIC_SEARCH.lower() == "true" else "simple",
+***REMOVED***"x-ms-useragent": "GitHubSampleWebApp/2.0.1"
 ***REMOVED***
 
 ***REMOVED***return body, headers
@@ -159,7 +160,7 @@ def conversation():
 ***REMOVED******REMOVED***,
 ***REMOVED***
 
-***REMOVED***return jsonify(r)
+***REMOVED***return jsonify(r), status_code
 ***REMOVED***except Exception as e:
 ***REMOVED***logging.exception("Exception in /conversation")
 ***REMOVED***return jsonify({"error": str(e)}), 500
