@@ -4,9 +4,6 @@ on:
   push:
 ***REMOVED***branches:
 ***REMOVED***- main
-  pull_request:
-***REMOVED***branches:
-***REMOVED***- main
 
 jobs:
 
