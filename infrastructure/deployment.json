@@ -198,7 +198,7 @@
 ***REMOVED***
 ***REMOVED***,
 ***REMOVED***"variables": {
-***REMOVED***"WebAppImageName": "DOCKER|fruocco/sample-chatgpt"
+***REMOVED***"WebAppImageName": "DOCKER|fruoccopublic.azurecr.io/sample-app-aoai-chatgpt:latest"
 ***REMOVED***,
 ***REMOVED***"resources": [
 ***REMOVED***{
