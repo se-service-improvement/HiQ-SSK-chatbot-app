@@ -28,8 +28,8 @@ jobs:
 ***REMOVED***- uses: actions/checkout@v3
 ***REMOVED***- name: Build the Docker image
 ***REMOVED***  run:***REMOVED*** 
-***REMOVED***docker build . --file WebApp.Dockerfile --tag fruoccopublic.azurecr.io/sample-app-aoai-chatGPT:$(date +'%Y-%m-%d')_$GITHUB_RUN_NUMBER;
-***REMOVED***docker tag fruoccopublic.azurecr.io/sample-app-aoai-chatGPT:$(date +'%Y-%m-%d')_$GITHUB_RUN_NUMBER fruoccopublic.azurecr.io/sample-app-aoai-chatGPT:latest;
-***REMOVED***docker push fruoccopublic.azurecr.io/sample-app-aoai-chatGPT:$(date +'%Y-%m-%d')_$GITHUB_RUN_NUMBER;
-***REMOVED***docker push fruoccopublic.azurecr.io/sample-app-aoai-chatGPT:latest;
+***REMOVED***docker build . --file WebApp.Dockerfile --tag fruoccopublic.azurecr.io/sample-app-aoai-chatgpt:$(date +'%Y-%m-%d')_$GITHUB_RUN_NUMBER;
+***REMOVED***docker tag fruoccopublic.azurecr.io/sample-app-aoai-chatgpt:$(date +'%Y-%m-%d')_$GITHUB_RUN_NUMBER fruoccopublic.azurecr.io/sample-app-aoai-chatgpt:latest;
+***REMOVED***docker push fruoccopublic.azurecr.io/sample-app-aoai-chatgpt:$(date +'%Y-%m-%d')_$GITHUB_RUN_NUMBER;
+***REMOVED***docker push fruoccopublic.azurecr.io/sample-app-aoai-chatgpt:latest;
 ***REMOVED***  
