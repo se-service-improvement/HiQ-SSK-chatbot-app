@@ -1,6 +1,6 @@
-import { ChatMessage, ConversationRequest } from "./models";
+import { ChatResponse, ConversationRequest } from "./models";
 
-export async function conversationApi(options: ConversationRequest, abortSignal: AbortSignal): Promise<ChatMessage> {
+export async function conversationApi(options: ConversationRequest, abortSignal: AbortSignal): Promise<ChatResponse> {
 ***REMOVED***const response = await fetch("/conversation", {
 ***REMOVED***method: "POST",
 ***REMOVED***headers: {
@@ -12,7 +12,7 @@ export async function conversationApi(options: ConversationRequest, abortSignal:
 ***REMOVED***signal: abortSignal
 ***REMOVED***);
 
-***REMOVED***const parsedResponse: ChatMessage = await response.json();
+***REMOVED***const parsedResponse: ChatResponse = await response.json();
 ***REMOVED***
 ***REMOVED***if (response.status > 299 || !response.ok) {
 ***REMOVED***console.log("Error response from /conversation", parsedResponse)

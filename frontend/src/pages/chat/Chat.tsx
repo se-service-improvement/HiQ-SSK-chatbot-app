@@ -13,8 +13,8 @@ import {
 ***REMOVED***ChatMessage,
 ***REMOVED***ConversationRequest,
 ***REMOVED***conversationApi,
-***REMOVED***MessageContent,
-***REMOVED***DocumentResult
+***REMOVED***Citation,
+***REMOVED***ToolMessageContent
 } from "../../api";
 import { Answer } from "../../components/Answer";
 import { QuestionInput } from "../../components/QuestionInput";
@@ -25,7 +25,7 @@ const Chat = () => {
 ***REMOVED***const [isLoading, setIsLoading] = useState<boolean>(false);
 ***REMOVED***const [activeCitation, setActiveCitation] = useState<[content: string, id: string, title: string, filepath: string, url: string, metadata: string]>();
 ***REMOVED***const [isCitationPanelOpen, setIsCitationPanelOpen] = useState<boolean>(false);
-***REMOVED***const [answers, setAnswers] = useState<[message_id: string, parent_message_id: string, role: string, content: MessageContent][]>([]);
+***REMOVED***const [answers, setAnswers] = useState<ChatMessage[]>([]);
 ***REMOVED***const abortFuncs = useRef([] as AbortController[]);
 
 ***REMOVED***const makeApiRequest = async (question: string) => {
@@ -35,40 +35,21 @@ const Chat = () => {
 ***REMOVED***const abortController = new AbortController();
 ***REMOVED***abortFuncs.current.unshift(abortController);
 
-***REMOVED***const prevMessages: ChatMessage[] = answers.map(a => ({
-***REMOVED******REMOVED***message_id: a[0],
-***REMOVED******REMOVED***parent_message_id: a[1] ?? "",
-***REMOVED******REMOVED***role: a[2],
-***REMOVED******REMOVED***content: a[3]
-***REMOVED***));
 ***REMOVED***const userMessage: ChatMessage = {
-***REMOVED******REMOVED***message_id: crypto.randomUUID(),
-***REMOVED******REMOVED***parent_message_id: prevMessages.length > 0 ? prevMessages[prevMessages.length - 1].message_id : "",
 ***REMOVED******REMOVED***role: "user",
-***REMOVED******REMOVED***content: {
-***REMOVED******REMOVED***content_type: "text",
-***REMOVED******REMOVED***parts: [question],
-***REMOVED******REMOVED***top_docs: [],
-***REMOVED******REMOVED***intent: ""
-***REMOVED***
+***REMOVED******REMOVED***content: question,
+***REMOVED******REMOVED***end_turn: null
 ***REMOVED***;
 
 ***REMOVED***const request: ConversationRequest = {
-***REMOVED******REMOVED***messages: [...prevMessages, userMessage]
+***REMOVED******REMOVED***messages: [...answers, userMessage]
 ***REMOVED***;
 
 ***REMOVED***try {
 ***REMOVED******REMOVED***const result = await conversationApi(request, abortController.signal);
-***REMOVED******REMOVED***setAnswers([
-***REMOVED******REMOVED***...answers,
-***REMOVED******REMOVED***[userMessage.message_id, userMessage.parent_message_id ?? "", userMessage.role, userMessage.content],
-***REMOVED******REMOVED***[result.message_id, result.parent_message_id ?? "", result.role, result.content]
-***REMOVED******REMOVED***]);
+***REMOVED******REMOVED***setAnswers([...answers, userMessage, ...result.choices[0].messages]);
 ***REMOVED*** catch {
-***REMOVED******REMOVED***setAnswers([
-***REMOVED******REMOVED***...answers,
-***REMOVED******REMOVED***[userMessage.message_id, userMessage.parent_message_id ?? "", userMessage.role, userMessage.content]
-***REMOVED******REMOVED***]);
+***REMOVED******REMOVED***setAnswers([...answers, userMessage]);
 ***REMOVED*** finally {
 ***REMOVED******REMOVED***setIsLoading(false);
 ***REMOVED******REMOVED***abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
@@ -90,10 +71,23 @@ const Chat = () => {
 
 ***REMOVED***useEffect(() => chatMessageStreamEnd.current?.scrollIntoView({ behavior: "smooth" }), [isLoading]);
 
-***REMOVED***const onShowCitation = (citation: DocumentResult, index: number) => {
+***REMOVED***const onShowCitation = (citation: Citation) => {
 ***REMOVED***setActiveCitation([citation.content, citation.id, citation.title ?? "", citation.filepath ?? "", "", ""]);
 ***REMOVED***setIsCitationPanelOpen(true);
 ***REMOVED***;
+
+***REMOVED***const parseCitationFromMessage = (message: ChatMessage) => {
+***REMOVED***if (message.role === "tool") {
+***REMOVED******REMOVED***try {
+***REMOVED******REMOVED***const toolMessage = JSON.parse(message.content) as ToolMessageContent;
+***REMOVED******REMOVED***return toolMessage.citations;
+***REMOVED***
+***REMOVED******REMOVED***catch {
+***REMOVED******REMOVED***return [];
+***REMOVED***
+***REMOVED***
+***REMOVED***return [];
+***REMOVED***
 
 ***REMOVED***return (
 ***REMOVED***<div className={styles.container}>
@@ -113,22 +107,20 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageStream}>
 ***REMOVED******REMOVED******REMOVED******REMOVED***{answers.map((answer, index) => (
 ***REMOVED******REMOVED******REMOVED******REMOVED***<>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***{answer[2] === "user" ? (
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***{answer.role === "user" ? (
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageUser}>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageUserMessage}>{answer[3].parts[0]}</div>
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageUserMessage}>{answer.content}</div>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***</div>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***) : (
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageGpt}>
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***answer.role === "assistant" ? <div className={styles.chatMessageGpt}>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<Answer
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***answer={{
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***answer: answer[3].parts[0],
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***thoughts: null,
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***data_points: [],
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***top_docs: answer[3].top_docs
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***answer: answer.content,
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***citations: parseCitationFromMessage(answers[index - 1]),
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onCitationClicked={c => onShowCitation(c, index)}
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onCitationClicked={c => onShowCitation(c)}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***/>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***</div>
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***</div> : null
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***)}
 ***REMOVED******REMOVED******REMOVED******REMOVED***</>
 ***REMOVED******REMOVED******REMOVED******REMOVED***))}
@@ -141,9 +133,7 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<Answer
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***answer={{
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***answer: "Generating answer...",
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***thoughts: null,
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***data_points: [],
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***top_docs: []
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***citations: []
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onCitationClicked={() => null}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***/>
