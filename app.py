@@ -92,8 +92,8 @@ def prepare_body_headers_without_data(request):
 
 ***REMOVED***for message in request_messages:
 ***REMOVED***body_messages.append({
-***REMOVED******REMOVED***"role": "assistant" if  message["role"] == "bot" else "user",
-***REMOVED******REMOVED***"content": message["content"]["parts"][0]
+***REMOVED******REMOVED***"role": message["role"] ,
+***REMOVED******REMOVED***"content": message["content"]
 ***REMOVED***)
 
 ***REMOVED***body = {
@@ -138,19 +138,10 @@ def conversation():
 
 ***REMOVED***if not use_data and status_code == 200:
 ***REMOVED******REMOVED***# convert to the same format as the data version
-***REMOVED******REMOVED***r = {
-***REMOVED******REMOVED***"message_id": r["id"],
-***REMOVED******REMOVED***"parent_message_id": "",
-***REMOVED******REMOVED***"role": "bot",
-***REMOVED******REMOVED***"content": {
-***REMOVED******REMOVED******REMOVED***"content_type": "text",
-***REMOVED******REMOVED******REMOVED***"parts": [
-***REMOVED******REMOVED******REMOVED***r["choices"][0]["message"]["content"]
-***REMOVED******REMOVED******REMOVED***],
-***REMOVED******REMOVED******REMOVED***"top_docs": [],
-***REMOVED******REMOVED******REMOVED***"intent": ""
-***REMOVED******REMOVED***,
-***REMOVED***
+***REMOVED******REMOVED***r["choices"][0]["messages"] = [{
+***REMOVED******REMOVED***"content": r["choices"][0]["message"]["content"],
+***REMOVED******REMOVED***"role": "assistant"
+***REMOVED******REMOVED***]
 
 ***REMOVED***return jsonify(r), status_code
 ***REMOVED***except Exception as e:
