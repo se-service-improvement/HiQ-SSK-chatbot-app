@@ -136,7 +136,6 @@
 ***REMOVED***,
 ***REMOVED***"AzureOpenAIModel": {
 ***REMOVED******REMOVED***"type": "string",
-***REMOVED******REMOVED***"defaultValue": "text-davinci-003",
 ***REMOVED******REMOVED***"metadata": {
 ***REMOVED******REMOVED***"description": "Azure OpenAI Model"
 ***REMOVED***
@@ -145,13 +144,6 @@
 ***REMOVED******REMOVED***"type": "securestring",
 ***REMOVED******REMOVED***"metadata": {
 ***REMOVED******REMOVED***"description": "Azure OpenAI Key"
-***REMOVED***
-***REMOVED***,
-***REMOVED***"AzureOpenAIDeployment": {
-***REMOVED******REMOVED***"type": "string",
-***REMOVED******REMOVED***"defaultValue": "text-davinci-003",
-***REMOVED******REMOVED***"metadata": {
-***REMOVED******REMOVED***"description": "Azure OpenAI Deployment"
 ***REMOVED***
 ***REMOVED***,
 ***REMOVED***"AzureOpenAITemperature": {
@@ -290,10 +282,6 @@
 ***REMOVED******REMOVED******REMOVED***{
 ***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_OPENAI_KEY",
 ***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureOpenAIKey')]"
-***REMOVED******REMOVED******REMOVED***,
-***REMOVED******REMOVED******REMOVED***{
-***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_OPENAI_DEPLOYMENT",
-***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureOpenAIDeployment')]"
 ***REMOVED******REMOVED******REMOVED***,
 ***REMOVED******REMOVED******REMOVED***{
 ***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_OPENAI_TEMPERATURE",
