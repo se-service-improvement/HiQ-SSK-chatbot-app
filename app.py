@@ -35,54 +35,48 @@ AZURE_OPENAI_TOP_P = os.environ.get("AZURE_OPENAI_TOP_P", 1.0)
 AZURE_OPENAI_MAX_TOKENS = os.environ.get("AZURE_OPENAI_MAX_TOKENS", 1000)
 AZURE_OPENAI_STOP_SEQUENCE = os.environ.get("AZURE_OPENAI_STOP_SEQUENCE")
 AZURE_OPENAI_SYSTEM_MESSAGE = os.environ.get("AZURE_OPENAI_SYSTEM_MESSAGE", "You are an AI assistant that helps people find information.")
-AZURE_OPENAI_PREVIEW_API_VERSION = os.environ.get("AZURE_OPENAI_PREVIEW_API_VERSION", "2023-03-31-preview")
+AZURE_OPENAI_PREVIEW_API_VERSION = os.environ.get("AZURE_OPENAI_PREVIEW_API_VERSION", "2023-06-01-preview")
 
 
 def prepare_body_headers_with_data(request):
-***REMOVED***messages = request.json["messages"]
+***REMOVED***request_messages = request.json["messages"]
+
 ***REMOVED***body = {
-***REMOVED***"messages": messages,
-***REMOVED***"enable_Indomain": True if AZURE_SEARCH_ENABLE_IN_DOMAIN.lower() == "true" else False,
-***REMOVED***"azure_document_search_top_k": AZURE_SEARCH_TOP_K,
+***REMOVED***"messages": request_messages,
 ***REMOVED***"temperature": AZURE_OPENAI_TEMPERATURE,
+***REMOVED***"max_tokens": AZURE_OPENAI_MAX_TOKENS,
 ***REMOVED***"top_p": AZURE_OPENAI_TOP_P,
-***REMOVED***"max_tokens": AZURE_OPENAI_MAX_TOKENS
+***REMOVED***"stop": AZURE_OPENAI_STOP_SEQUENCE.split("|") if AZURE_OPENAI_STOP_SEQUENCE else [],
+***REMOVED***"stream": False,
+***REMOVED***"dataSources": [
+***REMOVED******REMOVED***{
+***REMOVED******REMOVED***"type": "AzureCognitiveSearch",
+***REMOVED******REMOVED***"parameters": {
+***REMOVED******REMOVED******REMOVED***"endpoint": f"https://{AZURE_SEARCH_SERVICE}.search.windows.net",
+***REMOVED******REMOVED******REMOVED***"key": AZURE_SEARCH_KEY,
+***REMOVED******REMOVED******REMOVED***"indexName": AZURE_SEARCH_INDEX,
+***REMOVED******REMOVED******REMOVED***"fieldsMapping": {
+***REMOVED******REMOVED******REMOVED***"contentField": AZURE_SEARCH_CONTENT_COLUMNS.split("|") if AZURE_SEARCH_CONTENT_COLUMNS else [],
+***REMOVED******REMOVED******REMOVED***"titleField": AZURE_SEARCH_TITLE_COLUMN if AZURE_SEARCH_TITLE_COLUMN else None,
+***REMOVED******REMOVED******REMOVED***"urlField": AZURE_SEARCH_URL_COLUMN if AZURE_SEARCH_URL_COLUMN else None,
+***REMOVED******REMOVED******REMOVED***"filepathField": AZURE_SEARCH_FILENAME_COLUMN if AZURE_SEARCH_FILENAME_COLUMN else None
+***REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***"inScope": True if AZURE_SEARCH_ENABLE_IN_DOMAIN.lower() == "true" else False,
+***REMOVED******REMOVED******REMOVED***"topNDocuments": AZURE_SEARCH_TOP_K,
+***REMOVED******REMOVED******REMOVED***"queryType": "semantic" if AZURE_SEARCH_USE_SEMANTIC_SEARCH.lower() == "true" else "simple",
+***REMOVED******REMOVED******REMOVED***"semanticConfiguration": AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG if AZURE_SEARCH_USE_SEMANTIC_SEARCH.lower() == "true" and AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG else "",
+***REMOVED******REMOVED******REMOVED***"roleInformation": AZURE_OPENAI_SYSTEM_MESSAGE
+***REMOVED******REMOVED***
 ***REMOVED***
-
-***REMOVED***if AZURE_OPENAI_STOP_SEQUENCE:
-***REMOVED***sequences = AZURE_OPENAI_STOP_SEQUENCE.split("|")
-***REMOVED***body["stop"] = sequences
-
-***REMOVED***if AZURE_OPENAI_SYSTEM_MESSAGE:
-***REMOVED***body["system_message"] = AZURE_OPENAI_SYSTEM_MESSAGE
-
-***REMOVED***index_column_mapping = {}
-***REMOVED***if AZURE_SEARCH_CONTENT_COLUMNS:
-***REMOVED***index_column_mapping["content_column"] = AZURE_SEARCH_CONTENT_COLUMNS.split("|")
-***REMOVED***if AZURE_SEARCH_FILENAME_COLUMN:
-***REMOVED***index_column_mapping["filepath_column"] = AZURE_SEARCH_FILENAME_COLUMN
-***REMOVED***if AZURE_SEARCH_TITLE_COLUMN:
-***REMOVED***index_column_mapping["title_column"] = AZURE_SEARCH_TITLE_COLUMN
-***REMOVED***if AZURE_SEARCH_URL_COLUMN:
-***REMOVED***index_column_mapping["url_column"] = AZURE_SEARCH_URL_COLUMN
-***REMOVED***if index_column_mapping:
-***REMOVED***body["index_column_mapping"] = index_column_mapping
-
-***REMOVED***azure_openai_url = f"https://{AZURE_OPENAI_RESOURCE}.openai.azure.com/openai/deployments/{AZURE_OPENAI_MODEL}/completions?api-version=2022-12-01"
-***REMOVED***search_url = f"https://{AZURE_SEARCH_SERVICE}.search.windows.net"
-
+***REMOVED***]
+***REMOVED***
+***REMOVED***
 ***REMOVED***headers = {
-***REMOVED***"Content-Type": "application/json",
-***REMOVED***"azure_document_search_url": search_url,
-***REMOVED***"azure_document_search_api_key": AZURE_SEARCH_KEY,
-***REMOVED***"azure_document_search_index": AZURE_SEARCH_INDEX,
-***REMOVED***"chatgpt_url": azure_openai_url,
-***REMOVED***"chatgpt_key": AZURE_OPENAI_KEY,
-***REMOVED***"Ocp-Apim-Subscription-Key": AZURE_OPENAI_KEY,
+***REMOVED***'Content-Type': 'application/json',
 ***REMOVED***'api-key': AZURE_OPENAI_KEY,
-***REMOVED***"azure_document_search_configuration": AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG if AZURE_SEARCH_USE_SEMANTIC_SEARCH.lower() == "true" and AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG else "",
-***REMOVED***"azure_document_search_query_type": "semantic" if AZURE_SEARCH_USE_SEMANTIC_SEARCH.lower() == "true" else "simple",
-***REMOVED***"x-ms-useragent": "GitHubSampleWebApp/2.0.1"
+***REMOVED***'chatgpt_url': f"https://{AZURE_OPENAI_RESOURCE}.openai.azure.com/openai/deployments/{AZURE_OPENAI_MODEL}/completions?api-version=2023-03-31-preview",
+***REMOVED***'chatgpt_key': AZURE_OPENAI_KEY,
+***REMOVED***"x-ms-useragent": "GitHubSampleWebApp/PublicAPI/1.0.0"
 ***REMOVED***
 
 ***REMOVED***return body, headers
@@ -133,7 +127,7 @@ def conversation():
 ***REMOVED***use_data = should_use_data()
 ***REMOVED***if use_data:
 ***REMOVED******REMOVED***body, headers = prepare_body_headers_with_data(request)
-***REMOVED******REMOVED***endpoint = f"{base_url}/openai/wednesday-private/conversation?api-version={AZURE_OPENAI_PREVIEW_API_VERSION}"
+***REMOVED******REMOVED***endpoint = f"{base_url}/openai/deployments/{AZURE_OPENAI_MODEL}/extensions/chat/completions?api-version={AZURE_OPENAI_PREVIEW_API_VERSION}"
 ***REMOVED***else:
 ***REMOVED******REMOVED***body, headers = prepare_body_headers_without_data(request)
 ***REMOVED******REMOVED***endpoint = f"{base_url}/openai/deployments/{AZURE_OPENAI_MODEL}/chat/completions?api-version=2023-03-15-preview"

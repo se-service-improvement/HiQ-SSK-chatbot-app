@@ -11,6 +11,8 @@
   "dependencies": {
 ***REMOVED***"@fluentui/react": "^8.105.3",
 ***REMOVED***"@fluentui/react-icons": "^2.0.195",
+***REMOVED***"lodash": "^4.17.21",
+***REMOVED***"lodash-es": "^4.17.21",
 ***REMOVED***"react": "^18.2.0",
 ***REMOVED***"react-dom": "^18.2.0",
 ***REMOVED***"react-markdown": "^7.0.1",
@@ -20,6 +22,7 @@
 ***REMOVED***"remark-supersub": "^1.0.0"
   },
   "devDependencies": {
+***REMOVED***"@types/lodash-es": "^4.17.7",
 ***REMOVED***"@types/react": "^18.0.27",
 ***REMOVED***"@types/react-dom": "^18.0.10",
 ***REMOVED***"@vitejs/plugin-react": "^3.1.0",

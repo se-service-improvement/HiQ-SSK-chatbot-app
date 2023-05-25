@@ -4,8 +4,8 @@ import { FontIcon, Stack, Text } from "@fluentui/react";
 
 import styles from "./Answer.module.css";
 
-import { AskResponse, DocumentResult } from "../../api";
-import { parseAnswerToJsx } from "./AnswerParser";
+import { AskResponse, Citation } from "../../api";
+import { parseAnswer } from "./AnswerParser";
 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -13,7 +13,7 @@ import supersub from 'remark-supersub'
 
 interface Props {
 ***REMOVED***answer: AskResponse;
-***REMOVED***onCitationClicked: (citedDocument: DocumentResult) => void;
+***REMOVED***onCitationClicked: (citedDocument: Citation) => void;
 }
 
 export const Answer = ({
@@ -21,16 +21,9 @@ export const Answer = ({
 ***REMOVED***onCitationClicked
 }: Props) => {
 ***REMOVED***const [isRefAccordionOpen, { toggle: toggleIsRefAccordionOpen }] = useBoolean(false);
-***REMOVED***const onInlineCitationClicked = () => {
-***REMOVED***if (!isRefAccordionOpen) {
-***REMOVED******REMOVED***toggleIsRefAccordionOpen();
-***REMOVED***
-***REMOVED***;
-
-***REMOVED***const useMarkdownFormat = true; // set to false to use inline clickable citations without markdown formatting
 ***REMOVED***const filePathTruncationLimit = 50;
 
-***REMOVED***const parsedAnswer = useMemo(() => parseAnswerToJsx(answer, onInlineCitationClicked), [answer]);
+***REMOVED***const parsedAnswer = useMemo(() => parseAnswer(answer), [answer]);
 ***REMOVED***const [chevronIsExpanded, setChevronIsExpanded] = useState(isRefAccordionOpen);
 
 ***REMOVED***const handleChevronClick = () => {
@@ -42,7 +35,7 @@ export const Answer = ({
 ***REMOVED***setChevronIsExpanded(isRefAccordionOpen);
 ***REMOVED***, [isRefAccordionOpen]);
 
-***REMOVED***const createCitationFilepath = (citation: DocumentResult, index: number, truncate: boolean = false) => {
+***REMOVED***const createCitationFilepath = (citation: Citation, index: number, truncate: boolean = false) => {
 ***REMOVED***let citationFilename = "";
 
 ***REMOVED***if (citation.filepath && citation.chunk_id) {
@@ -64,13 +57,11 @@ export const Answer = ({
 ***REMOVED***<>
 ***REMOVED******REMOVED***<Stack className={styles.answerContainer}>
 ***REMOVED******REMOVED***<Stack.Item grow>
-***REMOVED******REMOVED******REMOVED***{useMarkdownFormat ? ( 
 ***REMOVED******REMOVED******REMOVED***<ReactMarkdown
-***REMOVED******REMOVED******REMOVED******REMOVED***remarkPlugins={[remarkGfm, supersub]}
-***REMOVED******REMOVED******REMOVED******REMOVED***children={parsedAnswer.markdownFormatText}
-***REMOVED******REMOVED******REMOVED******REMOVED***className={styles.answerText}
-***REMOVED******REMOVED******REMOVED***/> ) : ( 
-***REMOVED******REMOVED******REMOVED***<p className={styles.answerText}>{parsedAnswer.answerJsx}</p>)}
+***REMOVED******REMOVED******REMOVED***remarkPlugins={[remarkGfm, supersub]}
+***REMOVED******REMOVED******REMOVED***children={parsedAnswer.markdownFormatText}
+***REMOVED******REMOVED******REMOVED***className={styles.answerText}
+***REMOVED******REMOVED******REMOVED***/>
 ***REMOVED******REMOVED***</Stack.Item>
 ***REMOVED******REMOVED***<Stack horizontal className={styles.answerFooter}>
 ***REMOVED******REMOVED***{!!parsedAnswer.citations.length && (
