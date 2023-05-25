@@ -137,7 +137,7 @@
 ***REMOVED***"AzureOpenAIModel": {
 ***REMOVED******REMOVED***"type": "string",
 ***REMOVED******REMOVED***"metadata": {
-***REMOVED******REMOVED***"description": "Azure OpenAI Model"
+***REMOVED******REMOVED***"description": "Azure OpenAI Model Deployment name"
 ***REMOVED***
 ***REMOVED***,
 ***REMOVED***"AzureOpenAIKey": {
