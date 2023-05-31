@@ -1,7 +1,9 @@
+import json
 import os
 import logging
 import requests
-from flask import Flask, request, jsonify
+import openai
+from flask import Flask, Response, request, jsonify
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -36,7 +38,7 @@ AZURE_OPENAI_MAX_TOKENS = os.environ.get("AZURE_OPENAI_MAX_TOKENS", 1000)
 AZURE_OPENAI_STOP_SEQUENCE = os.environ.get("AZURE_OPENAI_STOP_SEQUENCE")
 AZURE_OPENAI_SYSTEM_MESSAGE = os.environ.get("AZURE_OPENAI_SYSTEM_MESSAGE", "You are an AI assistant that helps people find information.")
 AZURE_OPENAI_PREVIEW_API_VERSION = os.environ.get("AZURE_OPENAI_PREVIEW_API_VERSION", "2023-06-01-preview")
-
+AZURE_OPENAI_STREAM = os.environ.get("AZURE_OPENAI_STREAM", "true")
 
 def prepare_body_headers_with_data(request):
 ***REMOVED***request_messages = request.json["messages"]
@@ -47,7 +49,7 @@ def prepare_body_headers_with_data(request):
 ***REMOVED***"max_tokens": AZURE_OPENAI_MAX_TOKENS,
 ***REMOVED***"top_p": AZURE_OPENAI_TOP_P,
 ***REMOVED***"stop": AZURE_OPENAI_STOP_SEQUENCE.split("|") if AZURE_OPENAI_STOP_SEQUENCE else [],
-***REMOVED***"stream": False,
+***REMOVED***"stream": True if AZURE_OPENAI_STREAM.lower() == "true" else False,
 ***REMOVED***"dataSources": [
 ***REMOVED******REMOVED***{
 ***REMOVED******REMOVED***"type": "AzureCognitiveSearch",
@@ -81,9 +83,105 @@ def prepare_body_headers_with_data(request):
 
 ***REMOVED***return body, headers
 
-def prepare_body_headers_without_data(request):
+def should_use_data():
+***REMOVED***if AZURE_SEARCH_SERVICE and AZURE_SEARCH_INDEX and AZURE_SEARCH_KEY:
+***REMOVED***return True
+***REMOVED***return False
+
+def stream_with_data(body, headers, endpoint):
+***REMOVED***s = requests.Session()
+***REMOVED***response = {
+***REMOVED***"id": "",
+***REMOVED***"model": "",
+***REMOVED***"created": 0,
+***REMOVED***"object": "",
+***REMOVED***"choices": [{
+***REMOVED******REMOVED***"messages": []
+***REMOVED***]
+***REMOVED***
+***REMOVED***with s.post(endpoint, json=body, headers=headers, stream=True) as r:
+***REMOVED***for line in r.iter_lines(chunk_size=10):
+***REMOVED******REMOVED***if line:
+***REMOVED******REMOVED***lineJson = json.loads(line.lstrip(b'data:').decode('utf-8'))
+***REMOVED******REMOVED***response["id"] = lineJson["id"]
+***REMOVED******REMOVED***response["model"] = lineJson["model"]
+***REMOVED******REMOVED***response["created"] = lineJson["created"]
+***REMOVED******REMOVED***response["object"] = lineJson["object"]
+
+***REMOVED******REMOVED***role = lineJson["choices"][0]["messages"][0]["delta"].get("role")
+***REMOVED******REMOVED***if role == "tool":
+***REMOVED******REMOVED******REMOVED***response["choices"][0]["messages"].append(lineJson["choices"][0]["messages"][0]["delta"])
+***REMOVED******REMOVED***elif role == "assistant": 
+***REMOVED******REMOVED******REMOVED***response["choices"][0]["messages"].append({
+***REMOVED******REMOVED******REMOVED***"role": "assistant",
+***REMOVED******REMOVED******REMOVED***"content": ""
+***REMOVED******REMOVED***)
+***REMOVED******REMOVED***else:
+***REMOVED******REMOVED******REMOVED***deltaText = lineJson["choices"][0]["messages"][0]["delta"]["content"]
+***REMOVED******REMOVED******REMOVED***if deltaText != "[DONE]":
+***REMOVED******REMOVED******REMOVED***response["choices"][0]["messages"][1]["content"] += deltaText***REMOVED******REMOVED***
+
+***REMOVED******REMOVED***yield json.dumps(response)
+
+def conversation_with_data(request):
+***REMOVED***body, headers = prepare_body_headers_with_data(request)
+***REMOVED***endpoint = f"https://{AZURE_OPENAI_RESOURCE}.openai.azure.com/openai/deployments/{AZURE_OPENAI_MODEL}/extensions/chat/completions?api-version={AZURE_OPENAI_PREVIEW_API_VERSION}"
+***REMOVED***
+***REMOVED***if AZURE_OPENAI_STREAM.lower() != "true":
+***REMOVED***r = requests.post(endpoint, headers=headers, json=body)
+***REMOVED***status_code = r.status_code
+***REMOVED***r = r.json()
+
+***REMOVED***return Response(json.dumps(r), status=status_code)
+***REMOVED***else:
+***REMOVED***if request.method == "POST":
+***REMOVED******REMOVED***return Response(stream_with_data(body, headers, endpoint), mimetype='text/event-stream')
+***REMOVED***else:
+***REMOVED******REMOVED***return Response(None, mimetype='text/event-stream')
+
+def stream_without_data(messages):
+***REMOVED***response = {
+***REMOVED***"id": "",
+***REMOVED***"model": "",
+***REMOVED***"created": 0,
+***REMOVED***"object": "",
+***REMOVED***"choices": [{
+***REMOVED******REMOVED***"messages": [{
+***REMOVED******REMOVED***"role": "assistant",
+***REMOVED******REMOVED***"content": ""
+***REMOVED***]
+***REMOVED***]
+***REMOVED***
+***REMOVED***completion = openai.ChatCompletion.create(
+***REMOVED******REMOVED***engine=AZURE_OPENAI_MODEL,
+***REMOVED******REMOVED***messages = messages,
+***REMOVED******REMOVED***temperature=float(AZURE_OPENAI_TEMPERATURE),
+***REMOVED******REMOVED***max_tokens=int(AZURE_OPENAI_MAX_TOKENS),
+***REMOVED******REMOVED***top_p=float(AZURE_OPENAI_TOP_P),
+***REMOVED******REMOVED***stop=AZURE_OPENAI_STOP_SEQUENCE.split("|") if AZURE_OPENAI_STOP_SEQUENCE else None,
+***REMOVED******REMOVED***stream=True
+***REMOVED***)
+***REMOVED***for line in completion:
+***REMOVED***response["id"] = line["id"]
+***REMOVED***response["model"] = line["model"]
+***REMOVED***response["created"] = line["created"]
+***REMOVED***response["object"] = line["object"]
+
+***REMOVED***deltaText = line["choices"][0]["delta"].get('content')
+***REMOVED***if deltaText and deltaText != "[DONE]":
+***REMOVED******REMOVED***response["choices"][0]["messages"][0]["content"] += deltaText***REMOVED******REMOVED***
+
+***REMOVED***yield json.dumps(response)
+
+
+def conversation_without_data(request):
+***REMOVED***openai.api_type = "azure"
+***REMOVED***openai.api_base = f"https://{AZURE_OPENAI_RESOURCE}.openai.azure.com/"
+***REMOVED***openai.api_version = "2023-03-15-preview"
+***REMOVED***openai.api_key = AZURE_OPENAI_KEY
+
 ***REMOVED***request_messages = request.json["messages"]
-***REMOVED***body_messages = [
+***REMOVED***messages = [
 ***REMOVED***{
 ***REMOVED******REMOVED***"role": "system",
 ***REMOVED******REMOVED***"content": AZURE_OPENAI_SYSTEM_MESSAGE
@@ -91,59 +189,54 @@ def prepare_body_headers_without_data(request):
 ***REMOVED***]
 
 ***REMOVED***for message in request_messages:
-***REMOVED***body_messages.append({
+***REMOVED***messages.append({
 ***REMOVED******REMOVED***"role": message["role"] ,
 ***REMOVED******REMOVED***"content": message["content"]
 ***REMOVED***)
 
-***REMOVED***body = {
-***REMOVED***"messages": body_messages,
-***REMOVED***"temperature": float(AZURE_OPENAI_TEMPERATURE),
-***REMOVED***"top_p": float(AZURE_OPENAI_TOP_P),
-***REMOVED***"max_tokens": int(AZURE_OPENAI_MAX_TOKENS),
-***REMOVED***"stream": False
+***REMOVED***response_obj = {
+***REMOVED***"id": "",
+***REMOVED***"model": "",
+***REMOVED***"created": 0,
+***REMOVED***"object": "",
+***REMOVED***"choices": [{
+***REMOVED******REMOVED***"messages": []
+***REMOVED***]
 ***REMOVED***
 
-***REMOVED***headers = {
-***REMOVED***'Content-Type': 'application/json',
-***REMOVED***'api-key': AZURE_OPENAI_KEY
-***REMOVED***
+***REMOVED***if AZURE_OPENAI_STREAM.lower() != "true":
+***REMOVED***response = openai.ChatCompletion.create(
+***REMOVED******REMOVED***engine=AZURE_OPENAI_MODEL,
+***REMOVED******REMOVED***messages = messages,
+***REMOVED******REMOVED***temperature=float(AZURE_OPENAI_TEMPERATURE),
+***REMOVED******REMOVED***max_tokens=int(AZURE_OPENAI_MAX_TOKENS),
+***REMOVED******REMOVED***top_p=float(AZURE_OPENAI_TOP_P),
+***REMOVED******REMOVED***stop=AZURE_OPENAI_STOP_SEQUENCE.split("|") if AZURE_OPENAI_STOP_SEQUENCE else None
+***REMOVED***)
+***REMOVED***response_obj["id"] = response.id
+***REMOVED***response_obj["model"] = response.model
+***REMOVED***response_obj["created"] = response.created
+***REMOVED***response_obj["object"] = response.object
+***REMOVED***response_obj["choices"][0]["messages"] = [{
+***REMOVED******REMOVED***"role": "assistant",
+***REMOVED******REMOVED***"content": response.choices[0].message.content,
+***REMOVED******REMOVED***"end_turn": None
+***REMOVED***]
+***REMOVED***return jsonify(response_obj), 200
+***REMOVED***else:
+***REMOVED***if request.method == "POST":
+***REMOVED******REMOVED***return Response(stream_without_data(messages), mimetype='text/event-stream')
+***REMOVED***else:
+***REMOVED******REMOVED***return Response(None, mimetype='text/event-stream')
 
-***REMOVED***if AZURE_OPENAI_STOP_SEQUENCE:
-***REMOVED***sequences = AZURE_OPENAI_STOP_SEQUENCE.split("|")
-***REMOVED***body["stop"] = sequences
-
-***REMOVED***return body, headers
-
-def should_use_data():
-***REMOVED***if AZURE_SEARCH_SERVICE and AZURE_SEARCH_INDEX and AZURE_SEARCH_KEY:
-***REMOVED***return True
-***REMOVED***return False
-
-@app.route("/conversation", methods=["POST"])
+@app.route("/conversation", methods=["GET", "POST"])
 def conversation():
 ***REMOVED***try:
-***REMOVED***base_url = f"https://{AZURE_OPENAI_RESOURCE}.openai.azure.com"
 ***REMOVED***use_data = should_use_data()
 ***REMOVED***if use_data:
-***REMOVED******REMOVED***body, headers = prepare_body_headers_with_data(request)
-***REMOVED******REMOVED***endpoint = f"{base_url}/openai/deployments/{AZURE_OPENAI_MODEL}/extensions/chat/completions?api-version={AZURE_OPENAI_PREVIEW_API_VERSION}"
+***REMOVED******REMOVED***return conversation_with_data(request)
 ***REMOVED***else:
-***REMOVED******REMOVED***body, headers = prepare_body_headers_without_data(request)
-***REMOVED******REMOVED***endpoint = f"{base_url}/openai/deployments/{AZURE_OPENAI_MODEL}/chat/completions?api-version=2023-03-15-preview"
-
-***REMOVED***r = requests.post(endpoint, headers=headers, json=body)
-***REMOVED***status_code = r.status_code
-***REMOVED***r = r.json()
-
-***REMOVED***if not use_data and status_code == 200:
-***REMOVED******REMOVED***# convert to the same format as the data version
-***REMOVED******REMOVED***r["choices"][0]["messages"] = [{
-***REMOVED******REMOVED***"content": r["choices"][0]["message"]["content"],
-***REMOVED******REMOVED***"role": "assistant"
-***REMOVED******REMOVED***]
-
-***REMOVED***return jsonify(r), status_code
+***REMOVED******REMOVED***return conversation_without_data(request)
 ***REMOVED***except Exception as e:
 ***REMOVED***logging.exception("Exception in /conversation")
 ***REMOVED***return jsonify({"error": str(e)}), 500

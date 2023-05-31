@@ -23,7 +23,7 @@ export type ToolMessageContent = {
 export type ChatMessage = {
 ***REMOVED***role: string;
 ***REMOVED***content: string;
-***REMOVED***end_turn: boolean | null;
+***REMOVED***end_turn?: boolean;
 };
 
 export enum ChatCompletionType {
@@ -32,7 +32,6 @@ export enum ChatCompletionType {
 }
 
 export type ChatResponseChoice = {
-***REMOVED***index: number;
 ***REMOVED***messages: ChatMessage[];
 }
 

@@ -191,9 +191,16 @@
 ***REMOVED***,
 ***REMOVED***"AzureOpenAIApiVersion": {
 ***REMOVED******REMOVED***"type": "string",
-***REMOVED******REMOVED***"defaultValue": "2023-03-31-preview",
+***REMOVED******REMOVED***"defaultValue": "2023-06-01-preview",
 ***REMOVED******REMOVED***"metadata": {
 ***REMOVED******REMOVED***"description": "Azure OpenAI Api Version"
+***REMOVED***
+***REMOVED***,
+***REMOVED***"AzureOpenAIStream": {
+***REMOVED******REMOVED***"type": "bool",
+***REMOVED******REMOVED***"defaultValue": true,
+***REMOVED******REMOVED***"metadata": {
+***REMOVED******REMOVED***"description": "Whether or not to stream responses from Azure OpenAI"
 ***REMOVED***
 ***REMOVED***
 ***REMOVED***,
@@ -318,6 +325,10 @@
 ***REMOVED******REMOVED******REMOVED***{
 ***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_OPENAI_PREVIEW_API_VERSION",
 ***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureOpenAIApiVersion')]"
+***REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_OPENAI_STREAM",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureOpenAIStream')]"
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED******REMOVED***],
 ***REMOVED******REMOVED******REMOVED***"linuxFxVersion": "[variables('WebAppImageName')]"
