@@ -114,29 +114,35 @@ def stream_with_data(body, headers, endpoint):
 ***REMOVED******REMOVED***"messages": []
 ***REMOVED***]
 ***REMOVED***
+***REMOVED***try:
 ***REMOVED***with s.post(endpoint, json=body, headers=headers, stream=True) as r:
-***REMOVED***for line in r.iter_lines(chunk_size=10):
+***REMOVED******REMOVED***for line in r.iter_lines(chunk_size=10):
 ***REMOVED******REMOVED***if line:
-***REMOVED******REMOVED***lineJson = json.loads(line.lstrip(b'data:').decode('utf-8'))
-***REMOVED******REMOVED***response["id"] = lineJson["id"]
-***REMOVED******REMOVED***response["model"] = lineJson["model"]
-***REMOVED******REMOVED***response["created"] = lineJson["created"]
-***REMOVED******REMOVED***response["object"] = lineJson["object"]
+***REMOVED******REMOVED******REMOVED***lineJson = json.loads(line.lstrip(b'data:').decode('utf-8'))
+***REMOVED******REMOVED******REMOVED***if 'error' in lineJson:
+***REMOVED******REMOVED******REMOVED***yield json.dumps(lineJson) + "<newline>"
+***REMOVED******REMOVED******REMOVED***response["id"] = lineJson["id"]
+***REMOVED******REMOVED******REMOVED***response["model"] = lineJson["model"]
+***REMOVED******REMOVED******REMOVED***response["created"] = lineJson["created"]
+***REMOVED******REMOVED******REMOVED***response["object"] = lineJson["object"]
 
-***REMOVED******REMOVED***role = lineJson["choices"][0]["messages"][0]["delta"].get("role")
-***REMOVED******REMOVED***if role == "tool":
+***REMOVED******REMOVED******REMOVED***role = lineJson["choices"][0]["messages"][0]["delta"].get("role")
+***REMOVED******REMOVED******REMOVED***if role == "tool":
 ***REMOVED******REMOVED******REMOVED***response["choices"][0]["messages"].append(lineJson["choices"][0]["messages"][0]["delta"])
-***REMOVED******REMOVED***elif role == "assistant": 
+***REMOVED******REMOVED******REMOVED***elif role == "assistant": 
 ***REMOVED******REMOVED******REMOVED***response["choices"][0]["messages"].append({
-***REMOVED******REMOVED******REMOVED***"role": "assistant",
-***REMOVED******REMOVED******REMOVED***"content": ""
-***REMOVED******REMOVED***)
-***REMOVED******REMOVED***else:
+***REMOVED******REMOVED******REMOVED******REMOVED***"role": "assistant",
+***REMOVED******REMOVED******REMOVED******REMOVED***"content": ""
+***REMOVED******REMOVED******REMOVED***)
+***REMOVED******REMOVED******REMOVED***else:
 ***REMOVED******REMOVED******REMOVED***deltaText = lineJson["choices"][0]["messages"][0]["delta"]["content"]
 ***REMOVED******REMOVED******REMOVED***if deltaText != "[DONE]":
-***REMOVED******REMOVED******REMOVED***response["choices"][0]["messages"][1]["content"] += deltaText***REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED******REMOVED***response["choices"][0]["messages"][1]["content"] += deltaText***REMOVED******REMOVED***
 
-***REMOVED******REMOVED***yield json.dumps(response) + "<newline>"
+***REMOVED******REMOVED******REMOVED***yield json.dumps(response) + "<newline>"
+***REMOVED***except Exception as e:
+***REMOVED***yield json.dumps({"error": str(e)}) + "<newline>"
+
 
 def conversation_with_data(request):
 ***REMOVED***body, headers = prepare_body_headers_with_data(request)

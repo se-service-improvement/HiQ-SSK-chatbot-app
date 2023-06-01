@@ -68,9 +68,7 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED***setAnswers([...answers, userMessage, ...result.choices[0].messages]);
 ***REMOVED******REMOVED******REMOVED******REMOVED***runningText = "";
 ***REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED***catch {
-***REMOVED******REMOVED******REMOVED******REMOVED***console.log(runningText);
-***REMOVED******REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED***catch { }
 ***REMOVED******REMOVED***);
 ***REMOVED******REMOVED***
 ***REMOVED******REMOVED***setAnswers([...answers, userMessage, ...result.choices[0].messages]);
@@ -78,7 +76,7 @@ const Chat = () => {
 ***REMOVED******REMOVED***
 ***REMOVED*** catch ( e )  {
 ***REMOVED******REMOVED***if (!abortController.signal.aborted) {
-***REMOVED******REMOVED***console.log(result);
+***REMOVED******REMOVED***console.error(result);
 ***REMOVED******REMOVED***alert("An error occurred. Please try again. If the problem persists, please contact the site administrator.")
 ***REMOVED***
 ***REMOVED******REMOVED***setAnswers([...answers, userMessage]);
