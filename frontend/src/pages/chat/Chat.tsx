@@ -59,15 +59,8 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED***if (done) break;
 
 ***REMOVED******REMOVED******REMOVED***var text = new TextDecoder("utf-8").decode(value);
-***REMOVED******REMOVED******REMOVED***console.log(text);
-***REMOVED******REMOVED******REMOVED***const objects = text.split("}{");
-***REMOVED******REMOVED******REMOVED***objects.forEach((obj, index) => {
-***REMOVED******REMOVED******REMOVED***if (obj[0] !== "{" && index !== 0) {
-***REMOVED******REMOVED******REMOVED******REMOVED***obj = "{" + obj;
-***REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED***if (obj[obj.length - 1] !== "}" && index !== objects.length - 1) {
-***REMOVED******REMOVED******REMOVED******REMOVED***obj = obj + "}";
-***REMOVED******REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED***const objects = text.split("<newline>");
+***REMOVED******REMOVED******REMOVED***objects.forEach((obj) => {
 ***REMOVED******REMOVED******REMOVED***try {
 ***REMOVED******REMOVED******REMOVED******REMOVED***runningText += obj;
 ***REMOVED******REMOVED******REMOVED******REMOVED***result = JSON.parse(runningText);

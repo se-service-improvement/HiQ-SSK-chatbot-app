@@ -41,6 +41,8 @@ AZURE_OPENAI_PREVIEW_API_VERSION = os.environ.get("AZURE_OPENAI_PREVIEW_API_VERS
 AZURE_OPENAI_STREAM = os.environ.get("AZURE_OPENAI_STREAM", "true")
 AZURE_OPENAI_MODEL_NAME = os.environ.get("AZURE_OPENAI_MODEL_NAME", "gpt-35-turbo") # Name of the model, e.g. 'gpt-35-turbo' or 'gpt-4'
 
+SHOULD_STREAM = True if AZURE_OPENAI_STREAM.lower() == "true" else False
+
 def is_chat_model():
 ***REMOVED***if 'gpt-4' in AZURE_OPENAI_MODEL_NAME.lower():
 ***REMOVED***return True
@@ -60,7 +62,7 @@ def prepare_body_headers_with_data(request):
 ***REMOVED***"max_tokens": AZURE_OPENAI_MAX_TOKENS,
 ***REMOVED***"top_p": AZURE_OPENAI_TOP_P,
 ***REMOVED***"stop": AZURE_OPENAI_STOP_SEQUENCE.split("|") if AZURE_OPENAI_STOP_SEQUENCE else [],
-***REMOVED***"stream": True if AZURE_OPENAI_STREAM.lower() == "true" else False,
+***REMOVED***"stream": SHOULD_STREAM,
 ***REMOVED***"dataSources": [
 ***REMOVED******REMOVED***{
 ***REMOVED******REMOVED***"type": "AzureCognitiveSearch",
@@ -134,13 +136,13 @@ def stream_with_data(body, headers, endpoint):
 ***REMOVED******REMOVED******REMOVED***if deltaText != "[DONE]":
 ***REMOVED******REMOVED******REMOVED***response["choices"][0]["messages"][1]["content"] += deltaText***REMOVED******REMOVED***
 
-***REMOVED******REMOVED***yield json.dumps(response)
+***REMOVED******REMOVED***yield json.dumps(response) + "<newline>"
 
 def conversation_with_data(request):
 ***REMOVED***body, headers = prepare_body_headers_with_data(request)
 ***REMOVED***endpoint = f"https://{AZURE_OPENAI_RESOURCE}.openai.azure.com/openai/deployments/{AZURE_OPENAI_MODEL}/extensions/chat/completions?api-version={AZURE_OPENAI_PREVIEW_API_VERSION}"
 ***REMOVED***
-***REMOVED***if AZURE_OPENAI_STREAM.lower() != "true":
+***REMOVED***if not SHOULD_STREAM:
 ***REMOVED***r = requests.post(endpoint, headers=headers, json=body)
 ***REMOVED***status_code = r.status_code
 ***REMOVED***r = r.json()
@@ -152,39 +154,26 @@ def conversation_with_data(request):
 ***REMOVED***else:
 ***REMOVED******REMOVED***return Response(None, mimetype='text/event-stream')
 
-def stream_without_data(messages):
-***REMOVED***response = {
-***REMOVED***"id": "",
-***REMOVED***"model": "",
-***REMOVED***"created": 0,
-***REMOVED***"object": "",
-***REMOVED***"choices": [{
-***REMOVED******REMOVED***"messages": [{
-***REMOVED******REMOVED***"role": "assistant",
-***REMOVED******REMOVED***"content": ""
-***REMOVED***]
-***REMOVED***]
-***REMOVED***
-***REMOVED***completion = openai.ChatCompletion.create(
-***REMOVED******REMOVED***engine=AZURE_OPENAI_MODEL,
-***REMOVED******REMOVED***messages = messages,
-***REMOVED******REMOVED***temperature=float(AZURE_OPENAI_TEMPERATURE),
-***REMOVED******REMOVED***max_tokens=int(AZURE_OPENAI_MAX_TOKENS),
-***REMOVED******REMOVED***top_p=float(AZURE_OPENAI_TOP_P),
-***REMOVED******REMOVED***stop=AZURE_OPENAI_STOP_SEQUENCE.split("|") if AZURE_OPENAI_STOP_SEQUENCE else None,
-***REMOVED******REMOVED***stream=True
-***REMOVED***)
-***REMOVED***for line in completion:
-***REMOVED***response["id"] = line["id"]
-***REMOVED***response["model"] = line["model"]
-***REMOVED***response["created"] = line["created"]
-***REMOVED***response["object"] = line["object"]
-
+def stream_without_data(response):
+***REMOVED***responseText = ""
+***REMOVED***for line in response:
 ***REMOVED***deltaText = line["choices"][0]["delta"].get('content')
 ***REMOVED***if deltaText and deltaText != "[DONE]":
-***REMOVED******REMOVED***response["choices"][0]["messages"][0]["content"] += deltaText***REMOVED******REMOVED***
+***REMOVED******REMOVED***responseText += deltaText
 
-***REMOVED***yield json.dumps(response)
+***REMOVED***response_obj = {
+***REMOVED******REMOVED***"id": line["id"],
+***REMOVED******REMOVED***"model": line["model"],
+***REMOVED******REMOVED***"created": line["created"],
+***REMOVED******REMOVED***"object": line["object"],
+***REMOVED******REMOVED***"choices": [{
+***REMOVED******REMOVED***"messages": [{
+***REMOVED******REMOVED******REMOVED***"role": "assistant",
+***REMOVED******REMOVED******REMOVED***"content": responseText
+***REMOVED******REMOVED***]
+***REMOVED***]
+***REMOVED***
+***REMOVED***yield json.dumps(response_obj) + "<newline>"
 
 
 def conversation_without_data(request):
@@ -207,38 +196,34 @@ def conversation_without_data(request):
 ***REMOVED******REMOVED***"content": message["content"]
 ***REMOVED***)
 
+***REMOVED***response = openai.ChatCompletion.create(
+***REMOVED***engine=AZURE_OPENAI_MODEL,
+***REMOVED***messages = messages,
+***REMOVED***temperature=float(AZURE_OPENAI_TEMPERATURE),
+***REMOVED***max_tokens=int(AZURE_OPENAI_MAX_TOKENS),
+***REMOVED***top_p=float(AZURE_OPENAI_TOP_P),
+***REMOVED***stop=AZURE_OPENAI_STOP_SEQUENCE.split("|") if AZURE_OPENAI_STOP_SEQUENCE else None,
+***REMOVED***stream=SHOULD_STREAM
+***REMOVED***)
+
+***REMOVED***if not SHOULD_STREAM:
 ***REMOVED***response_obj = {
-***REMOVED***"id": "",
-***REMOVED***"model": "",
-***REMOVED***"created": 0,
-***REMOVED***"object": "",
-***REMOVED***"choices": [{
-***REMOVED******REMOVED***"messages": []
+***REMOVED******REMOVED***"id": response,
+***REMOVED******REMOVED***"model": response.model,
+***REMOVED******REMOVED***"created": response.created,
+***REMOVED******REMOVED***"object": response.object,
+***REMOVED******REMOVED***"choices": [{
+***REMOVED******REMOVED***"messages": [{
+***REMOVED******REMOVED******REMOVED***"role": "assistant",
+***REMOVED******REMOVED******REMOVED***"content": response.choices[0].message.content
+***REMOVED******REMOVED***]
 ***REMOVED***]
 ***REMOVED***
 
-***REMOVED***if AZURE_OPENAI_STREAM.lower() != "true":
-***REMOVED***response = openai.ChatCompletion.create(
-***REMOVED******REMOVED***engine=AZURE_OPENAI_MODEL,
-***REMOVED******REMOVED***messages = messages,
-***REMOVED******REMOVED***temperature=float(AZURE_OPENAI_TEMPERATURE),
-***REMOVED******REMOVED***max_tokens=int(AZURE_OPENAI_MAX_TOKENS),
-***REMOVED******REMOVED***top_p=float(AZURE_OPENAI_TOP_P),
-***REMOVED******REMOVED***stop=AZURE_OPENAI_STOP_SEQUENCE.split("|") if AZURE_OPENAI_STOP_SEQUENCE else None
-***REMOVED***)
-***REMOVED***response_obj["id"] = response.id
-***REMOVED***response_obj["model"] = response.model
-***REMOVED***response_obj["created"] = response.created
-***REMOVED***response_obj["object"] = response.object
-***REMOVED***response_obj["choices"][0]["messages"] = [{
-***REMOVED******REMOVED***"role": "assistant",
-***REMOVED******REMOVED***"content": response.choices[0].message.content,
-***REMOVED******REMOVED***"end_turn": None
-***REMOVED***]
 ***REMOVED***return jsonify(response_obj), 200
 ***REMOVED***else:
 ***REMOVED***if request.method == "POST":
-***REMOVED******REMOVED***return Response(stream_without_data(messages), mimetype='text/event-stream')
+***REMOVED******REMOVED***return Response(stream_without_data(response), mimetype='text/event-stream')
 ***REMOVED***else:
 ***REMOVED******REMOVED***return Response(None, mimetype='text/event-stream')
 
