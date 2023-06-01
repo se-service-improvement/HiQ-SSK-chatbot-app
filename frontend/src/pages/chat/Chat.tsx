@@ -59,7 +59,7 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED***if (done) break;
 
 ***REMOVED******REMOVED******REMOVED***var text = new TextDecoder("utf-8").decode(value);
-***REMOVED******REMOVED******REMOVED***const objects = text.split("<newline>");
+***REMOVED******REMOVED******REMOVED***const objects = text.split("\n");
 ***REMOVED******REMOVED******REMOVED***objects.forEach((obj) => {
 ***REMOVED******REMOVED******REMOVED***try {
 ***REMOVED******REMOVED******REMOVED******REMOVED***runningText += obj;

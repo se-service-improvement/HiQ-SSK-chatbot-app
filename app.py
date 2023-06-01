@@ -120,7 +120,7 @@ def stream_with_data(body, headers, endpoint):
 ***REMOVED******REMOVED***if line:
 ***REMOVED******REMOVED******REMOVED***lineJson = json.loads(line.lstrip(b'data:').decode('utf-8'))
 ***REMOVED******REMOVED******REMOVED***if 'error' in lineJson:
-***REMOVED******REMOVED******REMOVED***yield json.dumps(lineJson) + "<newline>"
+***REMOVED******REMOVED******REMOVED***yield json.dumps(lineJson).replace("\n", "\\n") + "\n"
 ***REMOVED******REMOVED******REMOVED***response["id"] = lineJson["id"]
 ***REMOVED******REMOVED******REMOVED***response["model"] = lineJson["model"]
 ***REMOVED******REMOVED******REMOVED***response["created"] = lineJson["created"]
@@ -139,9 +139,9 @@ def stream_with_data(body, headers, endpoint):
 ***REMOVED******REMOVED******REMOVED***if deltaText != "[DONE]":
 ***REMOVED******REMOVED******REMOVED******REMOVED***response["choices"][0]["messages"][1]["content"] += deltaText***REMOVED******REMOVED***
 
-***REMOVED******REMOVED******REMOVED***yield json.dumps(response) + "<newline>"
+***REMOVED******REMOVED******REMOVED***yield json.dumps(response).replace("\n", "\\n") + "\n"
 ***REMOVED***except Exception as e:
-***REMOVED***yield json.dumps({"error": str(e)}) + "<newline>"
+***REMOVED***yield json.dumps({"error": str(e)}).replace("\n", "\\n") + "\n"
 
 
 def conversation_with_data(request):
@@ -153,7 +153,7 @@ def conversation_with_data(request):
 ***REMOVED***status_code = r.status_code
 ***REMOVED***r = r.json()
 
-***REMOVED***return Response(json.dumps(r), status=status_code)
+***REMOVED***return Response(json.dumps(r).replace("\n", "\\n"), status=status_code)
 ***REMOVED***else:
 ***REMOVED***if request.method == "POST":
 ***REMOVED******REMOVED***return Response(stream_with_data(body, headers, endpoint), mimetype='text/event-stream')
@@ -179,7 +179,7 @@ def stream_without_data(response):
 ***REMOVED******REMOVED***]
 ***REMOVED***]
 ***REMOVED***
-***REMOVED***yield json.dumps(response_obj) + "<newline>"
+***REMOVED***yield json.dumps(response_obj).replace("\n", "\\n") + "\n"
 
 
 def conversation_without_data(request):
