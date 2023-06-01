@@ -14,7 +14,8 @@ import {
 ***REMOVED***ConversationRequest,
 ***REMOVED***conversationApi,
 ***REMOVED***Citation,
-***REMOVED***ToolMessageContent
+***REMOVED***ToolMessageContent,
+***REMOVED***ChatResponse
 } from "../../api";
 import { Answer } from "../../components/Answer";
 import { QuestionInput } from "../../components/QuestionInput";
@@ -23,6 +24,7 @@ const Chat = () => {
 ***REMOVED***const lastQuestionRef = useRef<string>("");
 ***REMOVED***const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null);
 ***REMOVED***const [isLoading, setIsLoading] = useState<boolean>(false);
+***REMOVED***const [showLoadingMessage, setShowLoadingMessage] = useState<boolean>(false);
 ***REMOVED***const [activeCitation, setActiveCitation] = useState<[content: string, id: string, title: string, filepath: string, url: string, metadata: string]>();
 ***REMOVED***const [isCitationPanelOpen, setIsCitationPanelOpen] = useState<boolean>(false);
 ***REMOVED***const [answers, setAnswers] = useState<ChatMessage[]>([]);
@@ -32,26 +34,55 @@ const Chat = () => {
 ***REMOVED***lastQuestionRef.current = question;
 
 ***REMOVED***setIsLoading(true);
+***REMOVED***setShowLoadingMessage(true);
 ***REMOVED***const abortController = new AbortController();
 ***REMOVED***abortFuncs.current.unshift(abortController);
 
 ***REMOVED***const userMessage: ChatMessage = {
 ***REMOVED******REMOVED***role: "user",
-***REMOVED******REMOVED***content: question,
-***REMOVED******REMOVED***end_turn: null
+***REMOVED******REMOVED***content: question
 ***REMOVED***;
 
 ***REMOVED***const request: ConversationRequest = {
 ***REMOVED******REMOVED***messages: [...answers, userMessage]
 ***REMOVED***;
 
+***REMOVED***let result = {} as ChatResponse;
 ***REMOVED***try {
-***REMOVED******REMOVED***const result = await conversationApi(request, abortController.signal);
+***REMOVED******REMOVED***const response = await conversationApi(request, abortController.signal);
+***REMOVED******REMOVED***if (response?.body) {
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***const reader = response.body.getReader();
+***REMOVED******REMOVED***let runningText = "";
+***REMOVED******REMOVED***while (true) {
+***REMOVED******REMOVED******REMOVED***const {done, value} = await reader.read();
+***REMOVED******REMOVED******REMOVED***if (done) break;
+
+***REMOVED******REMOVED******REMOVED***var text = new TextDecoder("utf-8").decode(value);
+***REMOVED******REMOVED******REMOVED***const objects = text.split("\n");
+***REMOVED******REMOVED******REMOVED***objects.forEach((obj) => {
+***REMOVED******REMOVED******REMOVED***try {
+***REMOVED******REMOVED******REMOVED******REMOVED***runningText += obj;
+***REMOVED******REMOVED******REMOVED******REMOVED***result = JSON.parse(runningText);
+***REMOVED******REMOVED******REMOVED******REMOVED***setShowLoadingMessage(false);
+***REMOVED******REMOVED******REMOVED******REMOVED***setAnswers([...answers, userMessage, ...result.choices[0].messages]);
+***REMOVED******REMOVED******REMOVED******REMOVED***runningText = "";
+***REMOVED******REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED***catch { }
+***REMOVED******REMOVED***);
+***REMOVED******REMOVED***
 ***REMOVED******REMOVED***setAnswers([...answers, userMessage, ...result.choices[0].messages]);
-***REMOVED*** catch {
+***REMOVED***
+***REMOVED******REMOVED***
+***REMOVED*** catch ( e )  {
+***REMOVED******REMOVED***if (!abortController.signal.aborted) {
+***REMOVED******REMOVED***console.error(result);
+***REMOVED******REMOVED***alert("An error occurred. Please try again. If the problem persists, please contact the site administrator.")
+***REMOVED***
 ***REMOVED******REMOVED***setAnswers([...answers, userMessage]);
 ***REMOVED*** finally {
 ***REMOVED******REMOVED***setIsLoading(false);
+***REMOVED******REMOVED***setShowLoadingMessage(false);
 ***REMOVED******REMOVED***abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
 ***REMOVED***
 
@@ -66,10 +97,11 @@ const Chat = () => {
 
 ***REMOVED***const stopGenerating = () => {
 ***REMOVED***abortFuncs.current.forEach(a => a.abort());
+***REMOVED***setShowLoadingMessage(false);
 ***REMOVED***setIsLoading(false);
 ***REMOVED***
 
-***REMOVED***useEffect(() => chatMessageStreamEnd.current?.scrollIntoView({ behavior: "smooth" }), [isLoading]);
+***REMOVED***useEffect(() => chatMessageStreamEnd.current?.scrollIntoView({ behavior: "smooth" }), [showLoadingMessage]);
 
 ***REMOVED***const onShowCitation = (citation: Citation) => {
 ***REMOVED***setActiveCitation([citation.content, citation.id, citation.title ?? "", citation.filepath ?? "", "", ""]);
@@ -104,7 +136,7 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED***<h2 className={styles.chatEmptyStateSubtitle}>This chatbot is configured to answer your questions</h2>
 ***REMOVED******REMOVED******REMOVED***</Stack>
 ***REMOVED******REMOVED******REMOVED***) : (
-***REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageStream}>
+***REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageStream} style={{ marginBottom: isLoading ? "40px" : "0px"}}>
 ***REMOVED******REMOVED******REMOVED******REMOVED***{answers.map((answer, index) => (
 ***REMOVED******REMOVED******REMOVED******REMOVED***<>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***{answer.role === "user" ? (
@@ -124,7 +156,7 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***)}
 ***REMOVED******REMOVED******REMOVED******REMOVED***</>
 ***REMOVED******REMOVED******REMOVED******REMOVED***))}
-***REMOVED******REMOVED******REMOVED******REMOVED***{isLoading && (
+***REMOVED******REMOVED******REMOVED******REMOVED***{showLoadingMessage && (
 ***REMOVED******REMOVED******REMOVED******REMOVED***<>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageUser}>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageUserMessage}>{lastQuestionRef.current}</div>
