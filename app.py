@@ -39,6 +39,17 @@ AZURE_OPENAI_STOP_SEQUENCE = os.environ.get("AZURE_OPENAI_STOP_SEQUENCE")
 AZURE_OPENAI_SYSTEM_MESSAGE = os.environ.get("AZURE_OPENAI_SYSTEM_MESSAGE", "You are an AI assistant that helps people find information.")
 AZURE_OPENAI_PREVIEW_API_VERSION = os.environ.get("AZURE_OPENAI_PREVIEW_API_VERSION", "2023-06-01-preview")
 AZURE_OPENAI_STREAM = os.environ.get("AZURE_OPENAI_STREAM", "true")
+AZURE_OPENAI_MODEL_NAME = os.environ.get("AZURE_OPENAI_MODEL_NAME", "gpt-35-turbo") # Name of the model, e.g. 'gpt-35-turbo' or 'gpt-4'
+
+def is_chat_model():
+***REMOVED***if 'gpt-4' in AZURE_OPENAI_MODEL_NAME.lower():
+***REMOVED***return True
+***REMOVED***return False
+
+def should_use_data():
+***REMOVED***if AZURE_SEARCH_SERVICE and AZURE_SEARCH_INDEX and AZURE_SEARCH_KEY:
+***REMOVED***return True
+***REMOVED***return False
 
 def prepare_body_headers_with_data(request):
 ***REMOVED***request_messages = request.json["messages"]
@@ -73,20 +84,22 @@ def prepare_body_headers_with_data(request):
 ***REMOVED***]
 ***REMOVED***
 ***REMOVED***
+***REMOVED***chatgpt_url = f"https://{AZURE_OPENAI_RESOURCE}.openai.azure.com/openai/deployments/{AZURE_OPENAI_MODEL}"
+***REMOVED***if is_chat_model():
+***REMOVED***chatgpt_url += "/chat/completions?api-version=2023-03-15-preview"
+***REMOVED***else:
+***REMOVED***chatgpt_url += "/completions?api-version=2023-03-15-preview"
+
 ***REMOVED***headers = {
 ***REMOVED***'Content-Type': 'application/json',
 ***REMOVED***'api-key': AZURE_OPENAI_KEY,
-***REMOVED***'chatgpt_url': f"https://{AZURE_OPENAI_RESOURCE}.openai.azure.com/openai/deployments/{AZURE_OPENAI_MODEL}/completions?api-version=2023-03-31-preview",
+***REMOVED***'chatgpt_url': chatgpt_url,
 ***REMOVED***'chatgpt_key': AZURE_OPENAI_KEY,
 ***REMOVED***"x-ms-useragent": "GitHubSampleWebApp/PublicAPI/1.0.0"
 ***REMOVED***
 
 ***REMOVED***return body, headers
 
-def should_use_data():
-***REMOVED***if AZURE_SEARCH_SERVICE and AZURE_SEARCH_INDEX and AZURE_SEARCH_KEY:
-***REMOVED***return True
-***REMOVED***return False
 
 def stream_with_data(body, headers, endpoint):
 ***REMOVED***s = requests.Session()
