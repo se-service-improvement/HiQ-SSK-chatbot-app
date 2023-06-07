@@ -1,6 +1,7 @@
 """Data Preparation Script for an Azure Cognitive Search Index."""
 import argparse
 import json
+import logging
 import time
 import requests
 import subprocess
@@ -12,6 +13,19 @@ from data_utils import chunk_directory
 from azure.search.documents import SearchClient
 from azure.ai.formrecognizer import DocumentAnalysisClient
 
+SUPPORTED_LANGUAGE_CODES = {
+***REMOVED***"ja": "Japanese",
+***REMOVED***"ar": "Arabic",
+***REMOVED***"zh-Hans": "Chinese Simplified",
+***REMOVED***"zh-Hant": "Chinese Traditional",
+***REMOVED***"en": "English",
+***REMOVED***"fr": "French",
+***REMOVED***"de": "German",
+***REMOVED***"it": "Italian",
+***REMOVED***"pt-Pt": "Portuguese (Portugal)",
+***REMOVED***"pt-Br": "Portuguese (Brazil)",
+***REMOVED***"ru": "Russian"
+}
 def check_if_search_service_exists(search_service_name: str,
 ***REMOVED***subscription_id: str,
 ***REMOVED***resource_group: str,
@@ -90,7 +104,7 @@ def create_search_service(
 ***REMOVED***raise Exception(
 ***REMOVED******REMOVED***f"Failed to create search service. Error: {response.text}")
 
-def create_or_update_search_index(service_name, subscription_id, resource_group, index_name, semantic_config_name, credential):
+def create_or_update_search_index(service_name, subscription_id, resource_group, index_name, semantic_config_name, credential, language):
 ***REMOVED***if credential is None:
 ***REMOVED***raise ValueError("credential cannot be None")
 ***REMOVED***admin_key = json.loads(
@@ -123,7 +137,7 @@ def create_or_update_search_index(service_name, subscription_id, resource_group,
 ***REMOVED******REMOVED***"sortable": False,
 ***REMOVED******REMOVED***"facetable": False,
 ***REMOVED******REMOVED***"filterable": False,
-***REMOVED******REMOVED***"analyzer": "en.lucene",
+***REMOVED******REMOVED***"analyzer": f"{language}.lucene",
 ***REMOVED***,
 ***REMOVED******REMOVED***{
 ***REMOVED******REMOVED***"name": "title",
@@ -132,7 +146,7 @@ def create_or_update_search_index(service_name, subscription_id, resource_group,
 ***REMOVED******REMOVED***"sortable": False,
 ***REMOVED******REMOVED***"facetable": False,
 ***REMOVED******REMOVED***"filterable": False,
-***REMOVED******REMOVED***"analyzer": "en.lucene",
+***REMOVED******REMOVED***"analyzer": f"{language}.lucene",
 ***REMOVED***,
 ***REMOVED******REMOVED***{
 ***REMOVED******REMOVED***"name": "filepath",
@@ -187,6 +201,7 @@ def upload_documents_to_index(service_name, subscription_id, resource_group, ind
 
 ***REMOVED***id = 0
 ***REMOVED***for document in docs:
+***REMOVED***print(f"Doc-{document.filepath}")
 ***REMOVED***d = dataclasses.asdict(document)
 ***REMOVED***# add id to documents
 ***REMOVED***d.update({"@search.action": "upload", "id": str(id)})
@@ -268,6 +283,11 @@ def create_index(config, credential, form_recognizer_client=None, use_layout=Fal
 ***REMOVED***resource_group = config["resource_group"]
 ***REMOVED***location = config["location"]
 ***REMOVED***index_name = config["index_name"]
+***REMOVED***language = config.get("language", "en")
+
+***REMOVED***if language not in SUPPORTED_LANGUAGE_CODES:
+***REMOVED***print(f"ERROR: Ingestion does not support {language} documents")
+***REMOVED***print(f"Please use one of {SUPPORTED_LANGUAGE_CODES}. Language is set as two letter code for e.g. 'en' for English.")
 
 ***REMOVED***# check if search service exists, create if not
 ***REMOVED***if check_if_search_service_exists(service_name, subscription_id, resource_group, credential):
@@ -277,7 +297,7 @@ def create_index(config, credential, form_recognizer_client=None, use_layout=Fal
 ***REMOVED***create_search_service(service_name, subscription_id, resource_group, location, credential=credential)
 
 ***REMOVED***# create or update search index with compatible schema
-***REMOVED***if not create_or_update_search_index(service_name, subscription_id, resource_group, index_name, config["semantic_config_name"], credential):
+***REMOVED***if not create_or_update_search_index(service_name, subscription_id, resource_group, index_name, config["semantic_config_name"], credential, language):
 ***REMOVED***raise Exception(f"Failed to create or update index {index_name}")
 ***REMOVED***
 ***REMOVED***# chunk directory
