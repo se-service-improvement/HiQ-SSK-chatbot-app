@@ -227,7 +227,6 @@ def upload_documents_to_index(service_name, subscription_id, resource_group, ind
 
 ***REMOVED***id = 0
 ***REMOVED***for document in docs:
-***REMOVED***print(f"Doc-{document.filepath}")
 ***REMOVED***d = dataclasses.asdict(document)
 ***REMOVED***# add id to documents
 ***REMOVED***d.update({"@search.action": "upload", "id": str(id)})
