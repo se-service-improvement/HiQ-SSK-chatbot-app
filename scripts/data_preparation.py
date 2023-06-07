@@ -50,6 +50,8 @@ SUPPORTED_LANGUAGE_CODES = {
 ***REMOVED***"th": "Thai",
 ***REMOVED***"tr": "Turkish"
 }
+
+
 def check_if_search_service_exists(search_service_name: str,
 ***REMOVED***subscription_id: str,
 ***REMOVED***resource_group: str,
