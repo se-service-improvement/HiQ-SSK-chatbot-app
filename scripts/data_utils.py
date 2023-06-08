@@ -172,33 +172,28 @@ class HTMLParser(BaseParser):
 
 ***REMOVED***# Collect all text nodes and anchor tags in a list
 ***REMOVED***elements = []
-
+***REMOVED***skip_elements = []
 ***REMOVED***for elem in soup.descendants:
+***REMOVED******REMOVED***if elem in skip_elements:
+***REMOVED******REMOVED***continue
 ***REMOVED******REMOVED***if isinstance(elem, (Tag, NavigableString)):
 ***REMOVED******REMOVED***page_element: Union[Tag, NavigableString] = elem
-***REMOVED******REMOVED***if page_element.name in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'code']:
-***REMOVED******REMOVED******REMOVED***if elements and not elements[-1].endswith('\n'):
-***REMOVED******REMOVED******REMOVED***elements.append(self.NEWLINE_TEMPL)
-***REMOVED******REMOVED***if isinstance(page_element, str):
+***REMOVED******REMOVED***if page_element.name in ['title', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'code']:
+***REMOVED******REMOVED******REMOVED***if isinstance(page_element, Tag):
+***REMOVED******REMOVED******REMOVED***del page_element['id']
+***REMOVED******REMOVED******REMOVED***skip_elements += list(page_element.descendants)
+***REMOVED******REMOVED******REMOVED***elements.append(page_element)
+***REMOVED******REMOVED***if isinstance(page_element, str) and \
+***REMOVED******REMOVED******REMOVED***(
+***REMOVED******REMOVED******REMOVED******REMOVED***(not elements) or
+***REMOVED******REMOVED******REMOVED******REMOVED***(isinstance(elements[-1], Tag) and (page_element not in elements[-1].descendants))
+***REMOVED******REMOVED******REMOVED***):
 ***REMOVED******REMOVED******REMOVED***elements.append(process_text(page_element))
 ***REMOVED******REMOVED***elif page_element.name == 'a':
 ***REMOVED******REMOVED******REMOVED***elements.append(process_anchor_tag(page_element))
 
-
 ***REMOVED***# Join the list into a single string and return but ensure that either of newlines or space are used.
-***REMOVED***result = ''
-***REMOVED***is_prev_newline = False
-***REMOVED***for elem in elements:
-***REMOVED******REMOVED***if elem:
-***REMOVED******REMOVED***if elem == self.NEWLINE_TEMPL:
-***REMOVED******REMOVED******REMOVED***result += "\n"
-***REMOVED******REMOVED******REMOVED***is_prev_newline = True
-***REMOVED******REMOVED***else:
-***REMOVED******REMOVED******REMOVED***if not is_prev_newline:
-***REMOVED******REMOVED******REMOVED***result += " "
-***REMOVED******REMOVED******REMOVED***else:
-***REMOVED******REMOVED******REMOVED***is_prev_newline = False
-***REMOVED******REMOVED******REMOVED***result += f"{elem}"
+***REMOVED***result = '\n'.join([str(elem) for elem in elements])
 
 ***REMOVED***if title is None:
 ***REMOVED******REMOVED***title = '' # ensure no 'None' type title
