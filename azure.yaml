@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: sample-app-aoai-chatgpt
+metadata:
+  template: sample-app-aoai-chatgpt@0.0.1-beta
+services:
+  backend:
+***REMOVED***project: .
+***REMOVED***language: py
+***REMOVED***host: appservice
+***REMOVED***hooks:
+***REMOVED***  prepackage:
+***REMOVED***windows:
+***REMOVED***  shell: pwsh
+***REMOVED***  run:  cd ./frontend;npm install;npm run build
+***REMOVED***  interactive: true
+***REMOVED***  continueOnError: false
+***REMOVED***posix:
+***REMOVED***  shell: sh
+***REMOVED***  run:  cd ./frontend;npm install;npm run build
+***REMOVED***  interactive: true
+***REMOVED***  continueOnError: false
+hooks:
+***REMOVED***postprovision:
+***REMOVED***  windows:
+***REMOVED***shell: pwsh
+***REMOVED***run: $output = azd env get-values; Add-Content -Path .env -Value $output;
+***REMOVED***interactive: true
+***REMOVED***continueOnError: false
+***REMOVED***  posix:
+***REMOVED***shell: sh
+***REMOVED***run: azd env get-values > .env
+***REMOVED***interactive: true
+***REMOVED***continueOnError: false
