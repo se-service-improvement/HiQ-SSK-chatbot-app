@@ -384,7 +384,6 @@ def extract_pdf_content(file_path, form_recognizer_client, use_layout=False):
 ***REMOVED***with open(file_path, "rb") as f:
 ***REMOVED***poller = form_recognizer_client.begin_analyze_document(model, document = f)
 ***REMOVED***form_recognizer_results = poller.result()
-***REMOVED***title = next((p.content for p in form_recognizer_results.paragraphs if p.role == "title"), None)
 
 ***REMOVED***for page_num, page in enumerate(form_recognizer_results.pages):
 ***REMOVED***tables_on_page = [table for table in form_recognizer_results.tables if table.bounding_regions[0].page_number == page_num + 1]
@@ -516,7 +515,7 @@ def chunk_content(
 
 def chunk_file(
 ***REMOVED***file_path: str,
-***REMOVED***ignore_errors: bool = False,
+***REMOVED***ignore_errors: bool = True,
 ***REMOVED***num_tokens=256,
 ***REMOVED***min_chunk_size=10,
 ***REMOVED***url = None,
@@ -564,7 +563,7 @@ def chunk_file(
 
 def chunk_directory(
 ***REMOVED***directory_path: str,
-***REMOVED***ignore_errors: bool = False,
+***REMOVED***ignore_errors: bool = True,
 ***REMOVED***num_tokens: int = 1024,
 ***REMOVED***min_chunk_size: int = 10,
 ***REMOVED***url_prefix = None,
@@ -597,7 +596,6 @@ def chunk_directory(
 ***REMOVED***num_files_with_errors = 0
 ***REMOVED***skipped_chunks = 0
 ***REMOVED***for file_path in tqdm(get_files_recursively(directory_path)):
-***REMOVED***print(file_path)
 ***REMOVED***if os.path.isfile(file_path):
 ***REMOVED******REMOVED***# get relpath
 ***REMOVED******REMOVED***url_path = None
