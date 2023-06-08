@@ -58,6 +58,7 @@ export const Answer = ({
 ***REMOVED******REMOVED***<Stack className={styles.answerContainer}>
 ***REMOVED******REMOVED***<Stack.Item grow>
 ***REMOVED******REMOVED******REMOVED***<ReactMarkdown
+***REMOVED******REMOVED******REMOVED***linkTarget="_blank"
 ***REMOVED******REMOVED******REMOVED***remarkPlugins={[remarkGfm, supersub]}
 ***REMOVED******REMOVED******REMOVED***children={parsedAnswer.markdownFormatText}
 ***REMOVED******REMOVED******REMOVED***className={styles.answerText}

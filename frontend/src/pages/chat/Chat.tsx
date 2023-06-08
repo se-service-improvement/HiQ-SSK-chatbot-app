@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
-import { Stack } from "@fluentui/react";
-import { BroomRegular, DismissRegular, SquareRegular } from "@fluentui/react-icons";
+import { DefaultButton, Stack } from "@fluentui/react";
+import { BroomRegular, DismissRegular, SquareRegular, ErrorCircleRegular } from "@fluentui/react-icons";
 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from 'remark-gfm'
@@ -15,7 +15,8 @@ import {
 ***REMOVED***conversationApi,
 ***REMOVED***Citation,
 ***REMOVED***ToolMessageContent,
-***REMOVED***ChatResponse
+***REMOVED***ChatResponse,
+***REMOVED***getUserInfo
 } from "../../api";
 import { Answer } from "../../components/Answer";
 import { QuestionInput } from "../../components/QuestionInput";
@@ -29,6 +30,17 @@ const Chat = () => {
 ***REMOVED***const [isCitationPanelOpen, setIsCitationPanelOpen] = useState<boolean>(false);
 ***REMOVED***const [answers, setAnswers] = useState<ChatMessage[]>([]);
 ***REMOVED***const abortFuncs = useRef([] as AbortController[]);
+***REMOVED***const [showAuthMessage, setShowAuthMessage] = useState<boolean>(true);
+***REMOVED***
+***REMOVED***const getUserInfoList = async () => {
+***REMOVED***const userInfoList = await getUserInfo();
+***REMOVED***if (userInfoList.length === 0 && window.location.hostname !== "127.0.0.1") {
+***REMOVED******REMOVED***setShowAuthMessage(true);
+***REMOVED***
+***REMOVED***else {
+***REMOVED******REMOVED***setShowAuthMessage(false);
+***REMOVED***
+***REMOVED***
 
 ***REMOVED***const makeApiRequest = async (question: string) => {
 ***REMOVED***lastQuestionRef.current = question;
@@ -76,6 +88,7 @@ const Chat = () => {
 ***REMOVED******REMOVED***
 ***REMOVED*** catch ( e )  {
 ***REMOVED******REMOVED***if (!abortController.signal.aborted) {
+***REMOVED******REMOVED***console.error(e);
 ***REMOVED******REMOVED***console.error(result);
 ***REMOVED******REMOVED***alert("An error occurred. Please try again. If the problem persists, please contact the site administrator.")
 ***REMOVED***
@@ -101,6 +114,10 @@ const Chat = () => {
 ***REMOVED***setIsLoading(false);
 ***REMOVED***
 
+***REMOVED***useEffect(() => {
+***REMOVED***getUserInfoList();
+***REMOVED***, []);
+
 ***REMOVED***useEffect(() => chatMessageStreamEnd.current?.scrollIntoView({ behavior: "smooth" }), [showLoadingMessage]);
 
 ***REMOVED***const onShowCitation = (citation: Citation) => {
@@ -123,104 +140,117 @@ const Chat = () => {
 
 ***REMOVED***return (
 ***REMOVED***<div className={styles.container}>
+***REMOVED******REMOVED***{showAuthMessage ? (
+***REMOVED******REMOVED***<Stack className={styles.chatEmptyState}>
+***REMOVED******REMOVED******REMOVED***<ErrorCircleRegular className={styles.chatIcon} style={{color: 'crimson'}}/>
+***REMOVED******REMOVED******REMOVED***<h1 className={styles.chatEmptyStateTitle}>Authentication Not Configured</h1>
+***REMOVED******REMOVED******REMOVED***<h2 className={styles.chatEmptyStateSubtitle}>This app does not have authentication configured. Please add an identity provider.</h2>
+***REMOVED******REMOVED***</Stack>
+***REMOVED******REMOVED***) : (
 ***REMOVED******REMOVED***<Stack horizontal className={styles.chatRoot}>
-***REMOVED******REMOVED***<div className={styles.chatContainer}>
+***REMOVED******REMOVED******REMOVED***<div className={styles.chatContainer}>
 ***REMOVED******REMOVED******REMOVED***{!lastQuestionRef.current ? (
-***REMOVED******REMOVED******REMOVED***<Stack className={styles.chatEmptyState}>
+***REMOVED******REMOVED******REMOVED******REMOVED***<Stack className={styles.chatEmptyState}>
 ***REMOVED******REMOVED******REMOVED******REMOVED***<img
-***REMOVED******REMOVED******REMOVED******REMOVED***src={Azure}
-***REMOVED******REMOVED******REMOVED******REMOVED***className={styles.chatIcon}
-***REMOVED******REMOVED******REMOVED******REMOVED***aria-hidden="true"
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***src={Azure}
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***className={styles.chatIcon}
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***aria-hidden="true"
 ***REMOVED******REMOVED******REMOVED******REMOVED***/>
 ***REMOVED******REMOVED******REMOVED******REMOVED***<h1 className={styles.chatEmptyStateTitle}>Start chatting</h1>
 ***REMOVED******REMOVED******REMOVED******REMOVED***<h2 className={styles.chatEmptyStateSubtitle}>This chatbot is configured to answer your questions</h2>
-***REMOVED******REMOVED******REMOVED***</Stack>
+***REMOVED******REMOVED******REMOVED******REMOVED***</Stack>
 ***REMOVED******REMOVED******REMOVED***) : (
-***REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageStream} style={{ marginBottom: isLoading ? "40px" : "0px"}}>
+***REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageStream} style={{ marginBottom: isLoading ? "40px" : "0px"}}>
 ***REMOVED******REMOVED******REMOVED******REMOVED***{answers.map((answer, index) => (
-***REMOVED******REMOVED******REMOVED******REMOVED***<>
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***{answer.role === "user" ? (
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageUser}>
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageUser}>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageUserMessage}>{answer.content}</div>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***</div>
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***</div>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***) : (
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***answer.role === "assistant" ? <div className={styles.chatMessageGpt}>
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***answer.role === "assistant" ? <div className={styles.chatMessageGpt}>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<Answer
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***answer={{
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***answer={{
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***answer: answer.content,
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***citations: parseCitationFromMessage(answers[index - 1]),
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onCitationClicked={c => onShowCitation(c)}
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onCitationClicked={c => onShowCitation(c)}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***/>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***</div> : null
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***</div> : null
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***)}
-***REMOVED******REMOVED******REMOVED******REMOVED***</>
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***</>
 ***REMOVED******REMOVED******REMOVED******REMOVED***))}
 ***REMOVED******REMOVED******REMOVED******REMOVED***{showLoadingMessage && (
-***REMOVED******REMOVED******REMOVED******REMOVED***<>
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageUser}>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageUserMessage}>{lastQuestionRef.current}</div>
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageUserMessage}>{lastQuestionRef.current}</div>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***</div>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageGpt}>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<Answer
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<Answer
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***answer={{
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***answer: "Generating answer...",
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***citations: []
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***}
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***answer: "Generating answer...",
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***citations: []
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onCitationClicked={() => null}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***/>
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***/>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***</div>
-***REMOVED******REMOVED******REMOVED******REMOVED***</>
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***</>
 ***REMOVED******REMOVED******REMOVED******REMOVED***)}
 ***REMOVED******REMOVED******REMOVED******REMOVED***<div ref={chatMessageStreamEnd} />
-***REMOVED******REMOVED******REMOVED***</div>
+***REMOVED******REMOVED******REMOVED******REMOVED***</div>
 ***REMOVED******REMOVED******REMOVED***)}
 
 ***REMOVED******REMOVED******REMOVED***<Stack horizontal className={styles.chatInput}>
-***REMOVED******REMOVED******REMOVED***{isLoading && (
+***REMOVED******REMOVED******REMOVED******REMOVED***{isLoading && (
 ***REMOVED******REMOVED******REMOVED******REMOVED***<Stack 
-***REMOVED******REMOVED******REMOVED******REMOVED***horizontal
-***REMOVED******REMOVED******REMOVED******REMOVED***className={styles.stopGeneratingContainer}
-***REMOVED******REMOVED******REMOVED******REMOVED***role="button"
-***REMOVED******REMOVED******REMOVED******REMOVED***aria-label="Stop generating"
-***REMOVED******REMOVED******REMOVED******REMOVED***tabIndex={0}
-***REMOVED******REMOVED******REMOVED******REMOVED***onClick={stopGenerating}
-***REMOVED******REMOVED******REMOVED******REMOVED***onKeyDown={e => e.key === "Enter" || e.key === " " ? stopGenerating() : null}
-***REMOVED******REMOVED******REMOVED******REMOVED***>
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***horizontal
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***className={styles.stopGeneratingContainer}
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***role="button"
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***aria-label="Stop generating"
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***tabIndex={0}
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onClick={stopGenerating}
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onKeyDown={e => e.key === "Enter" || e.key === " " ? stopGenerating() : null}
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<SquareRegular className={styles.stopGeneratingIcon} aria-hidden="true"/>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<span className={styles.stopGeneratingText} aria-hidden="true">Stop generating</span>
 ***REMOVED******REMOVED******REMOVED******REMOVED***</Stack>
-***REMOVED******REMOVED******REMOVED***)}
-***REMOVED******REMOVED******REMOVED***<BroomRegular
+***REMOVED******REMOVED******REMOVED******REMOVED***)}
+***REMOVED******REMOVED******REMOVED******REMOVED***<BroomRegular
 ***REMOVED******REMOVED******REMOVED******REMOVED***className={styles.clearChatBroom}
 ***REMOVED******REMOVED******REMOVED******REMOVED***style={{ background: isLoading || answers.length === 0 ? "#BDBDBD" : "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #0F6CBD 33.63%, #2D87C3 70.31%, #8DDDD8 100%)", 
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED*** cursor: isLoading || answers.length === 0 ? "" : "pointer"}}
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***cursor: isLoading || answers.length === 0 ? "" : "pointer"}}
 ***REMOVED******REMOVED******REMOVED******REMOVED***onClick={clearChat}
 ***REMOVED******REMOVED******REMOVED******REMOVED***onKeyDown={e => e.key === "Enter" || e.key === " " ? clearChat() : null}
 ***REMOVED******REMOVED******REMOVED******REMOVED***aria-label="Clear session"
 ***REMOVED******REMOVED******REMOVED******REMOVED***role="button"
 ***REMOVED******REMOVED******REMOVED******REMOVED***tabIndex={0}
-***REMOVED******REMOVED******REMOVED***/>
-***REMOVED******REMOVED******REMOVED***<QuestionInput
+***REMOVED******REMOVED******REMOVED******REMOVED***/>
+***REMOVED******REMOVED******REMOVED******REMOVED***<QuestionInput
 ***REMOVED******REMOVED******REMOVED******REMOVED***clearOnSend
 ***REMOVED******REMOVED******REMOVED******REMOVED***placeholder="Type a new question..."
 ***REMOVED******REMOVED******REMOVED******REMOVED***disabled={isLoading}
 ***REMOVED******REMOVED******REMOVED******REMOVED***onSend={question => makeApiRequest(question)}
-***REMOVED******REMOVED******REMOVED***/>
+***REMOVED******REMOVED******REMOVED******REMOVED***/>
 ***REMOVED******REMOVED******REMOVED***</Stack>
-***REMOVED******REMOVED***</div>
-***REMOVED******REMOVED***{answers.length > 0 && isCitationPanelOpen && activeCitation && (
-***REMOVED******REMOVED***<Stack.Item className={styles.citationPanel}>
+***REMOVED******REMOVED******REMOVED***</div>
+***REMOVED******REMOVED******REMOVED***{answers.length > 0 && isCitationPanelOpen && activeCitation && (
+***REMOVED******REMOVED******REMOVED***<Stack.Item className={styles.citationPanel}>
 ***REMOVED******REMOVED******REMOVED***<Stack horizontal className={styles.citationPanelHeaderContainer} horizontalAlign="space-between" verticalAlign="center">
-***REMOVED******REMOVED******REMOVED***<span className={styles.citationPanelHeader}>Citations</span>
-***REMOVED******REMOVED******REMOVED***<DismissRegular className={styles.citationPanelDismiss} onClick={() => setIsCitationPanelOpen(false)}/>
+***REMOVED******REMOVED******REMOVED******REMOVED***<span className={styles.citationPanelHeader}>Citations</span>
+***REMOVED******REMOVED******REMOVED******REMOVED***<DismissRegular className={styles.citationPanelDismiss} onClick={() => setIsCitationPanelOpen(false)}/>
 ***REMOVED******REMOVED******REMOVED***</Stack>
 ***REMOVED******REMOVED******REMOVED***<h5 className={styles.citationPanelTitle}>{activeCitation[2]}</h5>
-***REMOVED******REMOVED******REMOVED***<ReactMarkdown className={styles.citationPanelContent} children={activeCitation[0]} remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}/>
-***REMOVED******REMOVED***</Stack.Item>
+***REMOVED******REMOVED******REMOVED***<ReactMarkdown 
+***REMOVED******REMOVED******REMOVED******REMOVED***linkTarget="_blank"
+***REMOVED******REMOVED******REMOVED******REMOVED***className={styles.citationPanelContent}
+***REMOVED******REMOVED******REMOVED******REMOVED***children={activeCitation[0]} 
+***REMOVED******REMOVED******REMOVED******REMOVED***remarkPlugins={[remarkGfm]} 
+***REMOVED******REMOVED******REMOVED******REMOVED***rehypePlugins={[rehypeRaw]}
+***REMOVED******REMOVED******REMOVED***/>
+***REMOVED******REMOVED******REMOVED***</Stack.Item>
 ***REMOVED******REMOVED***)}
 ***REMOVED******REMOVED***</Stack>
-***REMOVED******REMOVED***
+***REMOVED******REMOVED***)}
 ***REMOVED***</div>
 ***REMOVED***);
 };
