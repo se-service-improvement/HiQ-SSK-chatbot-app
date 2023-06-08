@@ -41,11 +41,7 @@ param openAISystemMessage string = 'You are an AI assistant that helps people fi
 param openAIApiVersion string = '2023-06-01-preview'
 param openAIStream bool = true
 
-// Used by prepdocs.py: Storage and form recognizer
-param storageAccountName string = ''
-param storageResourceGroupName string = ''
-param storageResourceGroupLocation string = location
-param storageContainerName string = 'content'
+// Used by prepdocs.py: Form recognizer
 param formRecognizerServiceName string = ''
 param formRecognizerResourceGroupName string = ''
 param formRecognizerResourceGroupLocation string = location
@@ -252,10 +248,6 @@ module docPrepResources 'docprep.bicep' = {
 ***REMOVED***tags: tags
 ***REMOVED***principalId: principalId
 ***REMOVED***resourceGroupName: resourceGroup.name
-***REMOVED***storageAccountName: storageAccountName
-***REMOVED***storageResourceGroupName: storageResourceGroupName
-***REMOVED***storageResourceGroupLocation: storageResourceGroupLocation
-***REMOVED***storageContainerName: storageContainerName
 ***REMOVED***formRecognizerServiceName: formRecognizerServiceName
 ***REMOVED***formRecognizerResourceGroupName: formRecognizerResourceGroupName
 ***REMOVED***formRecognizerResourceGroupLocation: formRecognizerResourceGroupLocation
@@ -302,6 +294,3 @@ output AZURE_OPENAI_STREAM bool = openAIStream
 output AZURE_FORMRECOGNIZER_SERVICE string = docPrepResources.outputs.AZURE_FORMRECOGNIZER_SERVICE
 output AZURE_FORMRECOGNIZER_RESOURCE_GROUP string = docPrepResources.outputs.AZURE_FORMRECOGNIZER_RESOURCE_GROUP
 output AZURE_FORMRECOGNIZER_SKU_NAME string = docPrepResources.outputs.AZURE_FORMRECOGNIZER_SKU_NAME
-output AZURE_STORAGE_ACCOUNT string = docPrepResources.outputs.AZURE_STORAGE_ACCOUNT
-output AZURE_STORAGE_CONTAINER string = docPrepResources.outputs.AZURE_STORAGE_CONTAINER
-output AZURE_STORAGE_RESOURCE_GROUP string = docPrepResources.outputs.AZURE_STORAGE_RESOURCE_GROUP
