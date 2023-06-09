@@ -3,7 +3,7 @@
 ***REMOVED***"build": {
 ***REMOVED***"dockerfile": "Dockerfile",
 ***REMOVED***"args": {
-***REMOVED******REMOVED***"VARIANT": "bullseye"
+***REMOVED******REMOVED***"IMAGE": "python:3.10"
 ***REMOVED***
 ***REMOVED***,
 ***REMOVED***"features": {
