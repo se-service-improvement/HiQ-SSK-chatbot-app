@@ -137,7 +137,6 @@ def stream_with_data(body, headers, endpoint):
 ***REMOVED******REMOVED******REMOVED***deltaText = lineJson["choices"][0]["messages"][0]["delta"]["content"]
 ***REMOVED******REMOVED******REMOVED***if deltaText != "[DONE]":
 ***REMOVED******REMOVED******REMOVED******REMOVED***response["choices"][0]["messages"][1]["content"] += deltaText
-***REMOVED******REMOVED******REMOVED***app.logger.info(response)
 ***REMOVED******REMOVED******REMOVED***yield json.dumps(response).replace("\n", "\\n") + "\n"
 ***REMOVED***except Exception as e:
 ***REMOVED***yield json.dumps({"error": str(e)}).replace("\n", "\\n") + "\n"
