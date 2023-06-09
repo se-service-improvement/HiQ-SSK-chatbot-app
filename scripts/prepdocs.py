@@ -1,5 +1,6 @@
 import argparse
 import dataclasses
+import time
 
 from tqdm import tqdm
 from azure.identity import AzureDeveloperCliCredential
@@ -89,6 +90,21 @@ def upload_documents_to_index(docs, search_client, upload_batch_size=50):
 ***REMOVED******REMOVED***f"To Debug: PLEASE CHECK chunk_size and upload_batch_size. \n Error Messages: {list(errors)}"
 ***REMOVED******REMOVED***)
 
+def validate_index(index_name, index_client):
+***REMOVED***for retry_count in range(5):
+***REMOVED***stats = index_client.get_index_statistics(index_name)
+***REMOVED***num_chunks = stats["document_count"]
+***REMOVED***if num_chunks == 0 and retry_count < 4:
+***REMOVED******REMOVED***print("Index is empty. Waiting 60 seconds to check again...")
+***REMOVED******REMOVED***time.sleep(60)
+***REMOVED***elif num_chunks == 0 and retry_count == 4:
+***REMOVED******REMOVED***print("Index is empty. Please investigate and re-index.")
+***REMOVED***else:
+***REMOVED******REMOVED***print(f"The index contains {num_chunks} chunks.")
+***REMOVED******REMOVED***average_chunk_size = stats['storage_size']/num_chunks
+***REMOVED******REMOVED***print(f"The average chunk size of the index is {average_chunk_size} bytes.")
+***REMOVED******REMOVED***break
+***REMOVED***
 
 def create_and_populate_index(
 ***REMOVED***index_name, index_client, search_client, form_recognizer_client
@@ -118,9 +134,9 @@ def create_and_populate_index(
 ***REMOVED***upload_documents_to_index(result.chunks, search_client)
 
 ***REMOVED***# check if index is ready/validate index
-***REMOVED***# print("Validating index...")
-***REMOVED***# TODO: validate_index(index_name) - Port to Azure CLI
-***REMOVED***# print("Index validation completed")
+***REMOVED***print("Validating index...")
+***REMOVED***validate_index(index_name, index_client)
+***REMOVED***print("Index validation completed")
 
 
 if __name__ == "__main__":
@@ -187,7 +203,6 @@ if __name__ == "__main__":
 ***REMOVED***endpoint=f"https://{args.formrecognizerservice}.cognitiveservices.azure.com/",
 ***REMOVED***credential=formrecognizer_creds,
 ***REMOVED***)
-
 ***REMOVED***create_and_populate_index(
 ***REMOVED***args.index, index_client, search_client, form_recognizer_client
 ***REMOVED***)
