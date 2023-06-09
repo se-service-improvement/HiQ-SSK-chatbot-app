@@ -90,6 +90,7 @@ def upload_documents_to_index(docs, search_client, upload_batch_size=50):
 ***REMOVED******REMOVED***f"To Debug: PLEASE CHECK chunk_size and upload_batch_size. \n Error Messages: {list(errors)}"
 ***REMOVED******REMOVED***)
 
+
 def validate_index(index_name, index_client):
 ***REMOVED***for retry_count in range(5):
 ***REMOVED***stats = index_client.get_index_statistics(index_name)
@@ -101,10 +102,10 @@ def validate_index(index_name, index_client):
 ***REMOVED******REMOVED***print("Index is empty. Please investigate and re-index.")
 ***REMOVED***else:
 ***REMOVED******REMOVED***print(f"The index contains {num_chunks} chunks.")
-***REMOVED******REMOVED***average_chunk_size = stats['storage_size']/num_chunks
+***REMOVED******REMOVED***average_chunk_size = stats["storage_size"] / num_chunks
 ***REMOVED******REMOVED***print(f"The average chunk size of the index is {average_chunk_size} bytes.")
 ***REMOVED******REMOVED***break
-***REMOVED***
+
 
 def create_and_populate_index(
 ***REMOVED***index_name, index_client, search_client, form_recognizer_client
@@ -180,9 +181,7 @@ if __name__ == "__main__":
 ***REMOVED***if args.tenantid == None
 ***REMOVED***else AzureDeveloperCliCredential(tenant_id=args.tenantid, process_timeout=60)
 ***REMOVED***)
-***REMOVED***default_creds = (
-***REMOVED***azd_credential if args.searchkey == None else None
-***REMOVED***)
+***REMOVED***default_creds = azd_credential if args.searchkey == None else None
 ***REMOVED***search_creds = (
 ***REMOVED***default_creds if args.searchkey == None else AzureKeyCredential(args.searchkey)
 ***REMOVED***)
