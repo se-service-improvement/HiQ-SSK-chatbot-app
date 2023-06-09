@@ -46,3 +46,12 @@ export type ChatResponse = {
 export type ConversationRequest = {
 ***REMOVED***messages: ChatMessage[];
 };
+
+export type UserInfo = {
+***REMOVED***access_token: string;
+***REMOVED***expires_on: string;
+***REMOVED***id_token: string;
+***REMOVED***provider_name: string;
+***REMOVED***user_claims: any[];
+***REMOVED***user_id: string;
+};
