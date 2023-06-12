@@ -21,6 +21,12 @@ services:
 ***REMOVED***  interactive: true
 ***REMOVED***  continueOnError: false
 hooks:
+***REMOVED***preprovision:
+***REMOVED***  posix:
+***REMOVED***shell: sh
+***REMOVED***run: ./scripts/auth_init.sh
+***REMOVED***interactive: true
+***REMOVED***continueOnError: false
 ***REMOVED***postprovision:
 ***REMOVED***  windows:
 ***REMOVED***shell: pwsh
