@@ -15,7 +15,10 @@ resp = urllib3.request(
 ***REMOVED***json={
 ***REMOVED***"displayName": "WebApp",
 ***REMOVED***"signInAudience": "AzureADandPersonalMicrosoftAccount",
-***REMOVED***"web": {"redirectUris": ["http://localhost:5000/.auth/login/aad/callback"]},
+***REMOVED***"web": {"redirectUris": ["http://localhost:5000/.auth/login/aad/callback"],
+***REMOVED******REMOVED***"implicitGrantSettings": {
+***REMOVED******REMOVED***"enableIdTokenIssuance": True
+***REMOVED***},
 ***REMOVED***,
 ***REMOVED***timeout=urllib3.Timeout(connect=10, read=10),
 )

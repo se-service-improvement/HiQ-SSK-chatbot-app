@@ -26,6 +26,7 @@ param appCommandLine string = ''
 param appSettings object = {}
 param authClientId string
 param authClientSecret string
+param authIssuerUri string
 param clientAffinityEnabled bool = false
 param enableOryxBuild bool = contains(kind, 'linux')
 param functionAppScaleLimit int = -1
@@ -96,7 +97,8 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
 ***REMOVED***properties: {
 ***REMOVED***  globalValidation: {
 ***REMOVED***requireAuthentication: true
-***REMOVED***unauthenticatedClientAction: 'Return401'
+***REMOVED***unauthenticatedClientAction: 'RedirectToLoginPage'
+***REMOVED***redirectToProvider: 'azureactivedirectory'
   ***REMOVED***
 ***REMOVED***  identityProviders: {
 ***REMOVED***azureActiveDirectory: {
@@ -104,8 +106,13 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
 ***REMOVED***  registration: {
 ***REMOVED******REMOVED***clientId: authClientId
 ***REMOVED******REMOVED***clientSecretSettingName: 'AUTH_CLIENT_SECRET'
-***REMOVED******REMOVED***openIdIssuer: environment().authentication.loginEndpoint
+***REMOVED******REMOVED***openIdIssuer: authIssuerUri
   ***REMOVED***
+***REMOVED***
+  ***REMOVED***
+***REMOVED***  login: {
+***REMOVED***tokenStore: {
+***REMOVED***  enabled: true
 ***REMOVED***
   ***REMOVED***
 ***REMOVED***
