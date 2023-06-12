@@ -248,3 +248,8 @@
 ***REMOVED***align-self: stretch;
 ***REMOVED***flex-grow: 0;
 } 
+
+a {
+***REMOVED***padding-left: 5px;
+***REMOVED***padding-right: 5px;
+}
