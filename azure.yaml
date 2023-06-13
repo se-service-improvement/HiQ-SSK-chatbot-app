@@ -22,6 +22,11 @@ services:
 ***REMOVED***  continueOnError: false
 hooks:
 ***REMOVED***preprovision:
+***REMOVED***  windows:
+***REMOVED***shell: pwsh
+***REMOVED***run: ./scripts/auth_init.ps1
+***REMOVED***interactive: true
+***REMOVED***continueOnError: false
 ***REMOVED***  posix:
 ***REMOVED***shell: sh
 ***REMOVED***run: ./scripts/auth_init.sh
@@ -30,11 +35,11 @@ hooks:
 ***REMOVED***postprovision:
 ***REMOVED***  windows:
 ***REMOVED***shell: pwsh
-***REMOVED***run: ./scripts/prepdocs.ps1
+***REMOVED***run: ./scripts/auth_update.ps1;./scripts/prepdocs.ps1
 ***REMOVED***interactive: true
 ***REMOVED***continueOnError: false
 ***REMOVED***  posix:
 ***REMOVED***shell: sh
-***REMOVED***run: ./scripts/prepdocs.sh
+***REMOVED***run: ./scripts/auth_update.sh;./scripts/prepdocs.sh
 ***REMOVED***interactive: true
 ***REMOVED***continueOnError: false
