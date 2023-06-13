@@ -86,4 +86,3 @@ if __name__ == "__main__":
 ***REMOVED***update_azd_env("AUTH_APP_ID", app_id)
 ***REMOVED***update_azd_env("AUTH_CLIENT_ID", client_id)
 ***REMOVED***update_azd_env("AUTH_CLIENT_SECRET", client_secret)
-
