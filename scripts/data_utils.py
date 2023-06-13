@@ -172,7 +172,7 @@ class HTMLParser(BaseParser):
 
 ***REMOVED***# Collect all text nodes and anchor tags in a list
 ***REMOVED***elements = []
-***REMOVED***skip_elements = []
+***REMOVED***skip_elements = set()
 ***REMOVED***for elem in soup.descendants:
 ***REMOVED******REMOVED***if elem in skip_elements:
 ***REMOVED******REMOVED***continue
@@ -181,13 +181,9 @@ class HTMLParser(BaseParser):
 ***REMOVED******REMOVED***if page_element.name in ['title', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'code']:
 ***REMOVED******REMOVED******REMOVED***if isinstance(page_element, Tag):
 ***REMOVED******REMOVED******REMOVED***del page_element['id']
-***REMOVED******REMOVED******REMOVED***skip_elements += list(page_element.descendants)
+***REMOVED******REMOVED******REMOVED***skip_elements.update(list(page_element.descendants))
 ***REMOVED******REMOVED******REMOVED***elements.append(page_element)
-***REMOVED******REMOVED***if isinstance(page_element, str) and \
-***REMOVED******REMOVED******REMOVED***(
-***REMOVED******REMOVED******REMOVED******REMOVED***(not elements) or
-***REMOVED******REMOVED******REMOVED******REMOVED***(isinstance(elements[-1], Tag) and (page_element not in elements[-1].descendants))
-***REMOVED******REMOVED******REMOVED***):
+***REMOVED******REMOVED***if isinstance(page_element, str):
 ***REMOVED******REMOVED******REMOVED***elements.append(process_text(page_element))
 ***REMOVED******REMOVED***elif page_element.name == 'a':
 ***REMOVED******REMOVED******REMOVED***elements.append(process_anchor_tag(page_element))

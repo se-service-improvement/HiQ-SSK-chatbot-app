@@ -153,7 +153,6 @@ def create_or_update_search_index(service_name, subscription_id, resource_group,
 ***REMOVED******REMOVED***"name": "id",
 ***REMOVED******REMOVED***"type": "Edm.String",
 ***REMOVED******REMOVED***"searchable": True,
-***REMOVED******REMOVED***"analyzer": "en.lucene",
 ***REMOVED******REMOVED***"key": True,
 ***REMOVED***,
 ***REMOVED******REMOVED***{
@@ -163,7 +162,7 @@ def create_or_update_search_index(service_name, subscription_id, resource_group,
 ***REMOVED******REMOVED***"sortable": False,
 ***REMOVED******REMOVED***"facetable": False,
 ***REMOVED******REMOVED***"filterable": False,
-***REMOVED******REMOVED***"analyzer": f"{language}.lucene",
+***REMOVED******REMOVED***"analyzer": f"{language}.lucene" if language else None,
 ***REMOVED***,
 ***REMOVED******REMOVED***{
 ***REMOVED******REMOVED***"name": "title",
@@ -172,7 +171,7 @@ def create_or_update_search_index(service_name, subscription_id, resource_group,
 ***REMOVED******REMOVED***"sortable": False,
 ***REMOVED******REMOVED***"facetable": False,
 ***REMOVED******REMOVED***"filterable": False,
-***REMOVED******REMOVED***"analyzer": f"{language}.lucene",
+***REMOVED******REMOVED***"analyzer": f"{language}.lucene" if language else None,
 ***REMOVED***,
 ***REMOVED******REMOVED***{
 ***REMOVED******REMOVED***"name": "filepath",
@@ -308,11 +307,14 @@ def create_index(config, credential, form_recognizer_client=None, use_layout=Fal
 ***REMOVED***resource_group = config["resource_group"]
 ***REMOVED***location = config["location"]
 ***REMOVED***index_name = config["index_name"]
-***REMOVED***language = config.get("language", "en")
+***REMOVED***language = config.get("language", None)
 
-***REMOVED***if language not in SUPPORTED_LANGUAGE_CODES:
-***REMOVED***print(f"ERROR: Ingestion does not support {language} documents")
-***REMOVED***print(f"Please use one of {SUPPORTED_LANGUAGE_CODES}. Language is set as two letter code for e.g. 'en' for English.")
+***REMOVED***if language and language not in SUPPORTED_LANGUAGE_CODES:
+***REMOVED***raise Exception(f"ERROR: Ingestion does not support {language} documents. "
+***REMOVED******REMOVED******REMOVED***f"Please use one of {SUPPORTED_LANGUAGE_CODES}."
+***REMOVED******REMOVED******REMOVED***f"Language is set as two letter code for e.g. 'en' for English."
+***REMOVED******REMOVED******REMOVED***f"If you donot want to set a language just remove this prompt config or set as None")
+
 
 ***REMOVED***# check if search service exists, create if not
 ***REMOVED***if check_if_search_service_exists(service_name, subscription_id, resource_group, credential):
