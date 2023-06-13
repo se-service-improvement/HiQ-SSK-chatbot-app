@@ -5,10 +5,6 @@ import urllib3
 
 
 def update_redirect_uris(credential, app_id, uri):
-***REMOVED***redirect_uris = [
-***REMOVED******REMOVED******REMOVED***"http://localhost:5000/.auth/login/aad/callback",
-***REMOVED******REMOVED******REMOVED***f"{uri}/.auth/login/aad/callback",
-***REMOVED******REMOVED***]
 ***REMOVED***urllib3.request(
 ***REMOVED***"PATCH",
 ***REMOVED***f"https://graph.microsoft.com/v1.0/applications/{app_id}",
@@ -18,7 +14,10 @@ def update_redirect_uris(credential, app_id, uri):
 ***REMOVED***,
 ***REMOVED***json={
 ***REMOVED******REMOVED***"web": {
-***REMOVED******REMOVED***"redirectUris": redirect_uris
+***REMOVED******REMOVED***"redirectUris": [
+***REMOVED******REMOVED******REMOVED***"http://localhost:5000/.auth/login/aad/callback",
+***REMOVED******REMOVED******REMOVED***f"{uri}/.auth/login/aad/callback",
+***REMOVED******REMOVED***]
 ***REMOVED***
 ***REMOVED***,
 ***REMOVED***)
@@ -43,5 +42,7 @@ if __name__ == "__main__":
 
 ***REMOVED***credential = AzureDeveloperCliCredential()
 
-***REMOVED***print(f"Updating application registration {args.appid} with redirect URI for {args.uri}")
+***REMOVED***print(
+***REMOVED***f"Updating application registration {args.appid} with redirect URI for {args.uri}"
+***REMOVED***)
 ***REMOVED***update_redirect_uris(credential, args.appid, args.uri)

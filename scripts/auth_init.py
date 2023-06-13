@@ -4,17 +4,20 @@ import subprocess
 from azure.identity import AzureDeveloperCliCredential
 import urllib3
 
+
 def get_auth_headers(credential):
 ***REMOVED***return {
 ***REMOVED***"Authorization": "Bearer "
-***REMOVED******REMOVED***+ credential.get_token("https://graph.microsoft.com/.default").token
+***REMOVED***+ credential.get_token("https://graph.microsoft.com/.default").token
 ***REMOVED***
+
 
 def check_for_application(credential, app_id):
 ***REMOVED***resp = urllib3.request(
 ***REMOVED***"GET",
 ***REMOVED***f"https://graph.microsoft.com/v1.0/applications/{app_id}",
-***REMOVED***headers=get_auth_headers(credential))
+***REMOVED***headers=get_auth_headers(credential),
+***REMOVED***)
 ***REMOVED***if resp.status != 200:
 ***REMOVED***print("Application not found")
 ***REMOVED***return False
@@ -29,10 +32,10 @@ def create_application(credential):
 ***REMOVED***json={
 ***REMOVED******REMOVED***"displayName": "WebApp",
 ***REMOVED******REMOVED***"signInAudience": "AzureADandPersonalMicrosoftAccount",
-***REMOVED******REMOVED***"web": {"redirectUris": ["http://localhost:5000/.auth/login/aad/callback"],
-***REMOVED******REMOVED******REMOVED***"implicitGrantSettings": {
-***REMOVED******REMOVED***"enableIdTokenIssuance": True
-***REMOVED***},
+***REMOVED******REMOVED***"web": {
+***REMOVED******REMOVED***"redirectUris": ["http://localhost:5000/.auth/login/aad/callback"],
+***REMOVED******REMOVED***"implicitGrantSettings": {"enableIdTokenIssuance": True},
+***REMOVED***,
 ***REMOVED***,
 ***REMOVED***timeout=urllib3.Timeout(connect=10, read=10),
 ***REMOVED***)
@@ -41,6 +44,7 @@ def create_application(credential):
 ***REMOVED***client_id = resp.json()["appId"]
 
 ***REMOVED***return app_id, client_id
+
 
 def add_client_secret(credential, app_id):
 ***REMOVED***resp = urllib3.request(
@@ -53,8 +57,10 @@ def add_client_secret(credential, app_id):
 ***REMOVED***client_secret = resp.json()["secretText"]
 ***REMOVED***return client_secret
 
+
 def update_azd_env(name, val):
 ***REMOVED***subprocess.run(f"azd env set {name} {val}", shell=True)
+
 
 if __name__ == "__main__":
 ***REMOVED***parser = argparse.ArgumentParser(
@@ -75,13 +81,13 @@ if __name__ == "__main__":
 ***REMOVED***if check_for_application(credential, args.appid):
 ***REMOVED******REMOVED***print("Application already exists, not creating new one.")
 ***REMOVED******REMOVED***exit(0)
-***REMOVED***
+
 ***REMOVED***print("Creating application registration")
 ***REMOVED***app_id, client_id = create_application(credential)
 
 ***REMOVED***print(f"Adding client secret to {app_id}")
 ***REMOVED***client_secret = add_client_secret(credential, app_id)
-***REMOVED***
+
 ***REMOVED***print("Updating azd env with AUTH_APP_ID, AUTH_CLIENT_ID, AUTH_CLIENT_SECRET")
 ***REMOVED***update_azd_env("AUTH_APP_ID", app_id)
 ***REMOVED***update_azd_env("AUTH_CLIENT_ID", client_id)
