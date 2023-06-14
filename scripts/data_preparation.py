@@ -353,8 +353,8 @@ def create_index(config, credential, form_recognizer_client=None, use_layout=Fal
 
 def valid_range(n):
 ***REMOVED***n = int(n)
-***REMOVED***if n < 1 or n > 8:
-***REMOVED***raise argparse.ArgumentTypeError("njobs must be an Integer between 1 and 8.")
+***REMOVED***if n < 1 or n > 32:
+***REMOVED***raise argparse.ArgumentTypeError("njobs must be an Integer between 1 and 32.")
 ***REMOVED***return n
 
 if __name__ == "__main__": 
@@ -363,7 +363,7 @@ if __name__ == "__main__":
 ***REMOVED***parser.add_argument("--form-rec-resource", type=str, help="Name of your Form Recognizer resource to use for PDF cracking.")
 ***REMOVED***parser.add_argument("--form-rec-key", type=str, help="Key for your Form Recognizer resource to use for PDF cracking.")
 ***REMOVED***parser.add_argument("--form-rec-use-layout", default=False, action='store_true', help="Whether to use Layout model for PDF cracking, if False will use Read model.")
-***REMOVED***parser.add_argument("--njobs", type=valid_range, default=4, help="Number of jobs to run (between 1 and 8). Default=4")
+***REMOVED***parser.add_argument("--njobs", type=valid_range, default=4, help="Number of jobs to run (between 1 and 32). Default=4")
 ***REMOVED***args = parser.parse_args()
 
 ***REMOVED***with open(args.config) as f:
