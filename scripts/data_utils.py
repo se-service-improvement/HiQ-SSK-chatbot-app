@@ -1,19 +1,22 @@
 """Data utilities for index preparation."""
-import os
 import ast
-import markdown
-import re
-import tiktoken
 import html
 import json
-
-from tqdm import tqdm
+import os
+import re
 from abc import ABC, abstractmethod
-from bs4 import BeautifulSoup, Tag, NavigableString
+from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
+from functools import partial
+from typing import List, Dict, Optional, Generator, Tuple
 
-from typing import List, Dict, Optional, Generator, Tuple, Union
+import markdown
+import tiktoken
+from azure.ai.formrecognizer import DocumentAnalysisClient
+from azure.core.credentials import AzureKeyCredential
+from bs4 import BeautifulSoup
 from langchain.text_splitter import MarkdownTextSplitter, RecursiveCharacterTextSplitter, PythonCodeTextSplitter
+from tqdm import tqdm
 
 FILE_FORMAT_DICT = {
 ***REMOVED***"md": "markdown",
@@ -161,38 +164,12 @@ class HTMLParser(BaseParser):
 ***REMOVED******REMOVED***title = file_name
 
 ***REMOVED******REMOVED***# Helper function to process text nodes
-***REMOVED***def process_text(text):
-***REMOVED******REMOVED***return text.strip()
 
-***REMOVED***# Helper function to process anchor tags
-***REMOVED***def process_anchor_tag(tag):
-***REMOVED******REMOVED***href = tag.get('href', '')
-***REMOVED******REMOVED***text = tag.get_text(strip=True)
-***REMOVED******REMOVED***return f'{text} ({href})'
-
-***REMOVED***# Collect all text nodes and anchor tags in a list
-***REMOVED***elements = []
-***REMOVED***skip_elements = set()
-***REMOVED***for elem in soup.descendants:
-***REMOVED******REMOVED***if elem in skip_elements:
-***REMOVED******REMOVED***continue
-***REMOVED******REMOVED***if isinstance(elem, (Tag, NavigableString)):
-***REMOVED******REMOVED***page_element: Union[Tag, NavigableString] = elem
-***REMOVED******REMOVED***if page_element.name in ['title', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'code']:
-***REMOVED******REMOVED******REMOVED***if isinstance(page_element, Tag):
-***REMOVED******REMOVED******REMOVED***del page_element['id']
-***REMOVED******REMOVED******REMOVED***skip_elements.update(list(page_element.descendants))
-***REMOVED******REMOVED******REMOVED***elements.append(page_element)
-***REMOVED******REMOVED***if isinstance(page_element, str):
-***REMOVED******REMOVED******REMOVED***elements.append(process_text(page_element))
-***REMOVED******REMOVED***elif page_element.name == 'a':
-***REMOVED******REMOVED******REMOVED***elements.append(process_anchor_tag(page_element))
-
-***REMOVED***# Join the list into a single string and return but ensure that either of newlines or space are used.
-***REMOVED***result = '\n'.join([str(elem) for elem in elements])
-
+***REMOVED***# Parse the content as it is without any formatting changes
+***REMOVED***result = content
 ***REMOVED***if title is None:
 ***REMOVED******REMOVED***title = '' # ensure no 'None' type title
+
 ***REMOVED***return Document(content=cleanup_content(result), title=str(title))
 
 class TextParser(BaseParser):
@@ -408,28 +385,55 @@ def extract_pdf_content(file_path, form_recognizer_client, use_layout=False):
 ***REMOVED***full_text = "".join([page_text for _, _, page_text in page_map])
 ***REMOVED***return full_text
 
+def merge_chunks_serially(chunked_content_list: List[str], num_tokens: int) -> Generator[Tuple[str, int], None, None]:
+***REMOVED***# TODO: solve for token overlap
+***REMOVED***current_chunk = ""
+***REMOVED***total_size = 0
+***REMOVED***for chunked_content in chunked_content_list:
+***REMOVED***chunk_size = TOKEN_ESTIMATOR.estimate_tokens(chunked_content)
+***REMOVED***if total_size > 0:
+***REMOVED******REMOVED***new_size = total_size + chunk_size
+***REMOVED******REMOVED***if new_size > num_tokens:
+***REMOVED******REMOVED***yield current_chunk, total_size
+***REMOVED******REMOVED***current_chunk = ""
+***REMOVED******REMOVED***total_size = 0
+***REMOVED***total_size += chunk_size
+***REMOVED***current_chunk += chunked_content
+***REMOVED***if total_size > 0:
+***REMOVED***yield current_chunk, total_size
+
+
 def chunk_content_helper(
 ***REMOVED***content: str, file_format: str, file_name: Optional[str],
 ***REMOVED***token_overlap: int,
 ***REMOVED***num_tokens: int = 256
 ) -> Generator[Tuple[str, int, Document], None, None]:
-***REMOVED***parser = parser_factory(file_format)
-***REMOVED***doc = parser.parse(content, file_name=file_name)
-***REMOVED***if num_tokens == None:
+***REMOVED***if num_tokens is None:
 ***REMOVED***num_tokens = 1000000000
 
+***REMOVED***parser = parser_factory(file_format)
+***REMOVED***doc = parser.parse(content, file_name=file_name)
 ***REMOVED***if file_format == "markdown":
-***REMOVED***splitter = MarkdownTextSplitter.from_tiktoken_encoder(chunk_size=num_tokens, chunk_overlap=token_overlap)
-***REMOVED***elif file_format == "python":
-***REMOVED***splitter = PythonCodeTextSplitter.from_tiktoken_encoder(chunk_size=num_tokens, chunk_overlap=token_overlap)
+***REMOVED***splitter = MarkdownTextSplitter.from_tiktoken_encoder(
+***REMOVED******REMOVED***chunk_size=num_tokens, chunk_overlap=token_overlap)
+***REMOVED***chunked_content_list = splitter.split_text(
+***REMOVED******REMOVED***content)  # chunk the original content
+***REMOVED***for chunked_content, chunk_size in merge_chunks_serially(chunked_content_list, num_tokens):
+***REMOVED******REMOVED***chunk_doc = parser.parse(chunked_content, file_name=file_name)
+***REMOVED******REMOVED***chunk_doc.title = doc.title
+***REMOVED******REMOVED***yield chunk_doc.content, chunk_size, chunk_doc
 ***REMOVED***else:
-***REMOVED***splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
+***REMOVED***if file_format == "python":
+***REMOVED******REMOVED***splitter = PythonCodeTextSplitter.from_tiktoken_encoder(
+***REMOVED******REMOVED***chunk_size=num_tokens, chunk_overlap=token_overlap)
+***REMOVED***else:
+***REMOVED******REMOVED***splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
 ***REMOVED******REMOVED***separators=SENTENCE_ENDINGS + WORDS_BREAKS,
 ***REMOVED******REMOVED***chunk_size=num_tokens, chunk_overlap=token_overlap)
 ***REMOVED***chunked_content_list = splitter.split_text(doc.content)
 ***REMOVED***for chunked_content in chunked_content_list:
-***REMOVED***chunk_size = TOKEN_ESTIMATOR.estimate_tokens(chunked_content)
-***REMOVED***yield chunked_content, chunk_size, doc
+***REMOVED******REMOVED***chunk_size = TOKEN_ESTIMATOR.estimate_tokens(chunked_content)
+***REMOVED******REMOVED***yield chunked_content, chunk_size, doc
 
 def chunk_content(
 ***REMOVED***content: str,
@@ -552,7 +556,9 @@ def chunk_file(
 ***REMOVED***cracked_pdf=cracked_pdf
 ***REMOVED***)
 
-def chunk_directory(
+
+def process_file(
+***REMOVED***file_path: str, # !IMP: Please keep this as the first argument
 ***REMOVED***directory_path: str,
 ***REMOVED***ignore_errors: bool = True,
 ***REMOVED***num_tokens: int = 1024,
@@ -562,6 +568,53 @@ def chunk_directory(
 ***REMOVED***extensions_to_process: List[str] = FILE_FORMAT_DICT.keys(),
 ***REMOVED***form_recognizer_client = None,
 ***REMOVED***use_layout = False
+***REMOVED***):
+
+***REMOVED***if not form_recognizer_client:
+***REMOVED***form_recognizer_client = SingletonFormRecognizerClient()
+
+***REMOVED***is_error = False
+***REMOVED***try:
+***REMOVED***url_path = None
+***REMOVED***rel_file_path = os.path.relpath(file_path, directory_path)
+***REMOVED***if url_prefix:
+***REMOVED******REMOVED***url_path = url_prefix + rel_file_path
+***REMOVED******REMOVED***url_path = convert_escaped_to_posix(url_path)
+
+***REMOVED***result = chunk_file(
+***REMOVED******REMOVED***file_path,
+***REMOVED******REMOVED***ignore_errors=ignore_errors,
+***REMOVED******REMOVED***num_tokens=num_tokens,
+***REMOVED******REMOVED***min_chunk_size=min_chunk_size,
+***REMOVED******REMOVED***url=url_path,
+***REMOVED******REMOVED***token_overlap=token_overlap,
+***REMOVED******REMOVED***extensions_to_process=extensions_to_process,
+***REMOVED******REMOVED***form_recognizer_client=form_recognizer_client,
+***REMOVED******REMOVED***use_layout=use_layout
+***REMOVED***)
+***REMOVED***for chunk_idx, chunk_doc in enumerate(result.chunks):
+***REMOVED******REMOVED***chunk_doc.filepath = rel_file_path
+***REMOVED******REMOVED***chunk_doc.metadata = json.dumps({"chunk_id": str(chunk_idx)})
+***REMOVED***except Exception as e:
+***REMOVED***if not ignore_errors:
+***REMOVED******REMOVED***raise
+***REMOVED***print(f"File ({file_path}) failed with ", e)
+***REMOVED***is_error = True
+***REMOVED***result =None
+***REMOVED***return result, is_error
+
+
+def chunk_directory(
+***REMOVED***directory_path: str,
+***REMOVED***ignore_errors: bool = True,
+***REMOVED***num_tokens: int = 1024,
+***REMOVED***min_chunk_size: int = 10,
+***REMOVED***url_prefix = None,
+***REMOVED***token_overlap: int = 0,
+***REMOVED***extensions_to_process: List[str] = list(FILE_FORMAT_DICT.keys()),
+***REMOVED***form_recognizer_client = None,
+***REMOVED***use_layout = False,
+***REMOVED***njobs=4
 ):
 ***REMOVED***"""
 ***REMOVED***Chunks the given directory recursively
@@ -586,39 +639,48 @@ def chunk_directory(
 ***REMOVED***num_unsupported_format_files = 0
 ***REMOVED***num_files_with_errors = 0
 ***REMOVED***skipped_chunks = 0
-***REMOVED***for file_path in tqdm(get_files_recursively(directory_path)):
-***REMOVED***if os.path.isfile(file_path):
-***REMOVED******REMOVED***# get relpath
-***REMOVED******REMOVED***url_path = None
-***REMOVED******REMOVED***rel_file_path = os.path.relpath(file_path, directory_path)
-***REMOVED******REMOVED***if url_prefix:
-***REMOVED******REMOVED***url_path = url_prefix + rel_file_path
-***REMOVED******REMOVED***url_path = convert_escaped_to_posix(url_path)
-***REMOVED******REMOVED***try:
-***REMOVED******REMOVED***result = chunk_file(
-***REMOVED******REMOVED******REMOVED***file_path,
-***REMOVED******REMOVED******REMOVED***ignore_errors=ignore_errors,
-***REMOVED******REMOVED******REMOVED***num_tokens=num_tokens,
-***REMOVED******REMOVED******REMOVED***min_chunk_size=min_chunk_size,
-***REMOVED******REMOVED******REMOVED***url=url_path,
-***REMOVED******REMOVED******REMOVED***token_overlap=token_overlap,
-***REMOVED******REMOVED******REMOVED***extensions_to_process=extensions_to_process,
-***REMOVED******REMOVED******REMOVED***form_recognizer_client=form_recognizer_client,
-***REMOVED******REMOVED******REMOVED***use_layout=use_layout
-***REMOVED******REMOVED***)
-***REMOVED******REMOVED***for chunk_idx, chunk_doc in enumerate(result.chunks):
-***REMOVED******REMOVED******REMOVED***chunk_doc.filepath = rel_file_path
-***REMOVED******REMOVED******REMOVED***chunk_doc.metadata = json.dumps({"chunk_id": str(chunk_idx)})
+
+***REMOVED***all_files_directory = get_files_recursively(directory_path)
+***REMOVED***files_to_process = [file_path for file_path in all_files_directory if os.path.isfile(file_path)]
+***REMOVED***print(f"Total files to process={len(files_to_process)} out of total directory size={len(all_files_directory)}")
+
+
+***REMOVED***if njobs==1:
+***REMOVED***print("Single process to chunk and parse the files. --njobs > 1 can help performance.")
+***REMOVED***for file_path in tqdm(files_to_process):
+***REMOVED******REMOVED***total_files += 1
+***REMOVED******REMOVED***result, is_error = process_file(file_path=file_path,directory_path=directory_path, ignore_errors=ignore_errors,
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   num_tokens=num_tokens,
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   min_chunk_size=min_chunk_size, url_prefix=url_prefix,
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   token_overlap=token_overlap,
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   extensions_to_process=extensions_to_process,
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   form_recognizer_client=form_recognizer_client, use_layout=use_layout)
+***REMOVED******REMOVED***if is_error:
+***REMOVED******REMOVED***num_files_with_errors += 1
+***REMOVED******REMOVED***continue
 ***REMOVED******REMOVED***chunks.extend(result.chunks)
 ***REMOVED******REMOVED***num_unsupported_format_files += result.num_unsupported_format_files
 ***REMOVED******REMOVED***num_files_with_errors += result.num_files_with_errors
 ***REMOVED******REMOVED***skipped_chunks += result.skipped_chunks
-***REMOVED******REMOVED***except Exception as e:
-***REMOVED******REMOVED***if not ignore_errors:
-***REMOVED******REMOVED******REMOVED***raise
-***REMOVED******REMOVED***print(f"File ({file_path}) failed with ", e)
-***REMOVED******REMOVED***num_files_with_errors += 1
+***REMOVED***elif njobs > 1:
+***REMOVED***print(f"Multiprocessing with njobs={njobs}")
+***REMOVED***process_file_partial = partial(process_file, directory_path=directory_path, ignore_errors=ignore_errors,
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   num_tokens=num_tokens,
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   min_chunk_size=min_chunk_size, url_prefix=url_prefix,
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   token_overlap=token_overlap,
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   extensions_to_process=extensions_to_process,
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   form_recognizer_client=None, use_layout=use_layout)
+***REMOVED***with ProcessPoolExecutor(max_workers=njobs) as executor:
+***REMOVED******REMOVED***futures = list(tqdm(executor.map(process_file_partial, files_to_process), total=len(files_to_process)))
+***REMOVED******REMOVED***for result, is_error in futures:
 ***REMOVED******REMOVED***total_files += 1
+***REMOVED******REMOVED***if is_error:
+***REMOVED******REMOVED******REMOVED***num_files_with_errors += 1
+***REMOVED******REMOVED******REMOVED***continue
+***REMOVED******REMOVED***chunks.extend(result.chunks)
+***REMOVED******REMOVED***num_unsupported_format_files += result.num_unsupported_format_files
+***REMOVED******REMOVED***num_files_with_errors += result.num_files_with_errors
+***REMOVED******REMOVED***skipped_chunks += result.skipped_chunks
 
 ***REMOVED***return ChunkingResult(
 ***REMOVED******REMOVED***chunks=chunks,
@@ -627,3 +689,26 @@ def chunk_directory(
 ***REMOVED******REMOVED***num_files_with_errors=num_files_with_errors,
 ***REMOVED******REMOVED***skipped_chunks=skipped_chunks,
 ***REMOVED***)
+
+
+class SingletonFormRecognizerClient:
+***REMOVED***instance = None
+***REMOVED***url = os.getenv("FORM_RECOGNIZER_ENDPOINT")
+***REMOVED***key = os.getenv("FORM_RECOGNIZER_KEY")
+
+***REMOVED***def __new__(cls, *args, **kwargs):
+***REMOVED***if not cls.instance:
+***REMOVED******REMOVED***print("SingletonFormRecognizerClient: Creating instance of Form recognizer per process")
+***REMOVED******REMOVED***if cls.url and cls.key:
+***REMOVED******REMOVED***cls.instance = DocumentAnalysisClient(endpoint=cls.url, credential=AzureKeyCredential(cls.key))
+***REMOVED******REMOVED***else:
+***REMOVED******REMOVED***print("SingletonFormRecognizerClient: Skipping since credentials not provided. Assuming NO form recognizer extensions(like .pdf) in directory")
+***REMOVED******REMOVED***cls.instance = object() # dummy object
+***REMOVED***return cls.instance
+
+***REMOVED***def __getstate__(self):
+***REMOVED***return self.url, self.key
+
+***REMOVED***def __setstate__(self, state):
+***REMOVED***url, key = state
+***REMOVED***self.instance = DocumentAnalysisClient(endpoint=url, credential=AzureKeyCredential(key))
