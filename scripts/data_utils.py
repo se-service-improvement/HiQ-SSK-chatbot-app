@@ -413,25 +413,31 @@ def chunk_content_helper(
 
 ***REMOVED***parser = parser_factory(file_format)
 ***REMOVED***doc = parser.parse(content, file_name=file_name)
+
+***REMOVED***# if the original doc after parsing is < num_tokens return as it is
+***REMOVED***doc_content_size = TOKEN_ESTIMATOR.estimate_tokens(doc.content)
+***REMOVED***if doc_content_size < num_tokens:
+***REMOVED***yield doc.content, doc_content_size, doc
+***REMOVED***else:
 ***REMOVED***if file_format == "markdown":
-***REMOVED***splitter = MarkdownTextSplitter.from_tiktoken_encoder(
+***REMOVED******REMOVED***splitter = MarkdownTextSplitter.from_tiktoken_encoder(
 ***REMOVED******REMOVED***chunk_size=num_tokens, chunk_overlap=token_overlap)
-***REMOVED***chunked_content_list = splitter.split_text(
+***REMOVED******REMOVED***chunked_content_list = splitter.split_text(
 ***REMOVED******REMOVED***content)  # chunk the original content
-***REMOVED***for chunked_content, chunk_size in merge_chunks_serially(chunked_content_list, num_tokens):
+***REMOVED******REMOVED***for chunked_content, chunk_size in merge_chunks_serially(chunked_content_list, num_tokens):
 ***REMOVED******REMOVED***chunk_doc = parser.parse(chunked_content, file_name=file_name)
 ***REMOVED******REMOVED***chunk_doc.title = doc.title
 ***REMOVED******REMOVED***yield chunk_doc.content, chunk_size, chunk_doc
 ***REMOVED***else:
-***REMOVED***if file_format == "python":
+***REMOVED******REMOVED***if file_format == "python":
 ***REMOVED******REMOVED***splitter = PythonCodeTextSplitter.from_tiktoken_encoder(
-***REMOVED******REMOVED***chunk_size=num_tokens, chunk_overlap=token_overlap)
-***REMOVED***else:
+***REMOVED******REMOVED******REMOVED***chunk_size=num_tokens, chunk_overlap=token_overlap)
+***REMOVED******REMOVED***else:
 ***REMOVED******REMOVED***splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
-***REMOVED******REMOVED***separators=SENTENCE_ENDINGS + WORDS_BREAKS,
-***REMOVED******REMOVED***chunk_size=num_tokens, chunk_overlap=token_overlap)
-***REMOVED***chunked_content_list = splitter.split_text(doc.content)
-***REMOVED***for chunked_content in chunked_content_list:
+***REMOVED******REMOVED******REMOVED***separators=SENTENCE_ENDINGS + WORDS_BREAKS,
+***REMOVED******REMOVED******REMOVED***chunk_size=num_tokens, chunk_overlap=token_overlap)
+***REMOVED******REMOVED***chunked_content_list = splitter.split_text(doc.content)
+***REMOVED******REMOVED***for chunked_content in chunked_content_list:
 ***REMOVED******REMOVED***chunk_size = TOKEN_ESTIMATOR.estimate_tokens(chunked_content)
 ***REMOVED******REMOVED***yield chunked_content, chunk_size, doc
 
