@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
-import { DefaultButton, Stack } from "@fluentui/react";
-import { BroomRegular, DismissRegular, SquareRegular, ErrorCircleRegular } from "@fluentui/react-icons";
+import { Stack } from "@fluentui/react";
+import { BroomRegular, DismissRegular, SquareRegular, ShieldLockRegular } from "@fluentui/react-icons";
 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from 'remark-gfm'
@@ -142,15 +142,16 @@ const Chat = () => {
 ***REMOVED***<div className={styles.container}>
 ***REMOVED******REMOVED***{showAuthMessage ? (
 ***REMOVED******REMOVED***<Stack className={styles.chatEmptyState}>
-***REMOVED******REMOVED******REMOVED***<ErrorCircleRegular className={styles.chatIcon} style={{color: 'crimson'}}/>
+***REMOVED******REMOVED******REMOVED***<ShieldLockRegular className={styles.chatIcon} style={{color: 'darkorange', height: "200px", width: "200px"}}/>
 ***REMOVED******REMOVED******REMOVED***<h1 className={styles.chatEmptyStateTitle}>Authentication Not Configured</h1>
-***REMOVED******REMOVED******REMOVED***<h2 className={styles.chatEmptyStateSubtitle}>This app does not have authentication configured. Please add an identity provider.</h2>
 ***REMOVED******REMOVED******REMOVED***<h2 className={styles.chatEmptyStateSubtitle}>
-***REMOVED******REMOVED******REMOVED***Go to your app in the 
+***REMOVED******REMOVED******REMOVED***This app does not have authentication configured. Please add an identity provider by finding your app in the 
 ***REMOVED******REMOVED******REMOVED***<a href="https://portal.azure.com/" target="_blank"> Azure Portal </a>
-***REMOVED******REMOVED******REMOVED*** and follow 
+***REMOVED******REMOVED******REMOVED***and following 
 ***REMOVED******REMOVED******REMOVED*** <a href="https://learn.microsoft.com/en-us/azure/app-service/scenario-secure-app-authentication-app-service#3-configure-authentication-and-authorization" target="_blank"> these instructions</a>.
 ***REMOVED******REMOVED******REMOVED***</h2>
+***REMOVED******REMOVED******REMOVED***<h2 className={styles.chatEmptyStateSubtitle} style={{fontSize: "20px"}}><strong>Authentication configuration takes a few minutes to apply. </strong></h2>
+***REMOVED******REMOVED******REMOVED***<h2 className={styles.chatEmptyStateSubtitle} style={{fontSize: "20px"}}><strong>If you deployed in the last 10 minutes, please wait and reload the page after 10 minutes.</strong></h2>
 ***REMOVED******REMOVED***</Stack>
 ***REMOVED******REMOVED***) : (
 ***REMOVED******REMOVED***<Stack horizontal className={styles.chatRoot}>
