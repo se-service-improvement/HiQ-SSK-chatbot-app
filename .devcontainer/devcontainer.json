@@ -30,7 +30,7 @@
 ***REMOVED***"forwardPorts": [
 ***REMOVED***5000
 ***REMOVED***],
-***REMOVED***"postCreateCommand": "",
+***REMOVED***"postCreateCommand": "python3 -m pip install -r requirements-dev.txt",
 ***REMOVED***"remoteUser": "vscode",
 ***REMOVED***"hostRequirements": {
 ***REMOVED***"memory": "8gb"

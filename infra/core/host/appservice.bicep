@@ -24,6 +24,9 @@ param allowedOrigins array = []
 param alwaysOn bool = true
 param appCommandLine string = ''
 param appSettings object = {}
+param authClientId string
+param authClientSecret string
+param authIssuerUri string
 param clientAffinityEnabled bool = false
 param enableOryxBuild bool = contains(kind, 'linux')
 param functionAppScaleLimit int = -1
@@ -70,7 +73,9 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
 ***REMOVED***ENABLE_ORYX_BUILD: string(enableOryxBuild)
   ***REMOVED***,
 ***REMOVED***  !empty(applicationInsightsName) ? { APPLICATIONINSIGHTS_CONNECTION_STRING: applicationInsights.properties.ConnectionString } : {},
-***REMOVED***  !empty(keyVaultName) ? { AZURE_KEY_VAULT_ENDPOINT: keyVault.properties.vaultUri } : {})
+***REMOVED***  !empty(keyVaultName) ? { AZURE_KEY_VAULT_ENDPOINT: keyVault.properties.vaultUri } : {},
+***REMOVED***  !empty(authClientSecret) ? { AUTH_CLIENT_SECRET: authClientSecret } : {}
+***REMOVED***  )
   }
 
   resource configLogs 'config' = {
@@ -84,6 +89,33 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
 ***REMOVED***dependsOn: [
 ***REMOVED***  configAppSettings
 ***REMOVED***]
+  }
+
+
+  resource configAuth 'config' = if (!(empty(authClientId))) {
+***REMOVED***name: 'authsettingsV2'
+***REMOVED***properties: {
+***REMOVED***  globalValidation: {
+***REMOVED***requireAuthentication: true
+***REMOVED***unauthenticatedClientAction: 'RedirectToLoginPage'
+***REMOVED***redirectToProvider: 'azureactivedirectory'
+  ***REMOVED***
+***REMOVED***  identityProviders: {
+***REMOVED***azureActiveDirectory: {
+***REMOVED***  enabled: true
+***REMOVED***  registration: {
+***REMOVED******REMOVED***clientId: authClientId
+***REMOVED******REMOVED***clientSecretSettingName: 'AUTH_CLIENT_SECRET'
+***REMOVED******REMOVED***openIdIssuer: authIssuerUri
+  ***REMOVED***
+***REMOVED***
+  ***REMOVED***
+***REMOVED***  login: {
+***REMOVED***tokenStore: {
+***REMOVED***  enabled: true
+***REMOVED***
+  ***REMOVED***
+***REMOVED***
   }
 }
 
