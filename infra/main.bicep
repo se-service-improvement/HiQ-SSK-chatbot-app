@@ -157,9 +157,7 @@ module openAi 'core/ai/cognitiveservices.bicep' = {
 ***REMOVED***  name: openAIModelName
 ***REMOVED***  version: '0301'
 ***REMOVED***
-***REMOVED***scaleSettings: {
-***REMOVED***  scaleType: 'Standard'
-***REMOVED***
+***REMOVED***capacity: 30
   ***REMOVED***
 ***REMOVED***]
   }
