@@ -37,6 +37,12 @@
 ***REMOVED***,
 ***REMOVED***"formRecognizerSkuName": {
 ***REMOVED***  "value": "${AZURE_FORMRECOGNIZER_SKU_NAME}"
+***REMOVED***,
+***REMOVED***"authClientId": {
+***REMOVED***  "value": "${AUTH_CLIENT_ID}"
+***REMOVED***,
+***REMOVED***"authClientSecret": {
+***REMOVED***  "value": "${AUTH_CLIENT_SECRET}"
 ***REMOVED***
   }
 }
