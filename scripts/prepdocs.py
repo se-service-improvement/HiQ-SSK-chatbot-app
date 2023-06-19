@@ -120,6 +120,7 @@ def create_and_populate_index(
 ***REMOVED***form_recognizer_client=form_recognizer_client,
 ***REMOVED***use_layout=True,
 ***REMOVED***ignore_errors=False,
+***REMOVED***njobs=1,
 ***REMOVED***)
 
 ***REMOVED***if len(result.chunks) == 0:
