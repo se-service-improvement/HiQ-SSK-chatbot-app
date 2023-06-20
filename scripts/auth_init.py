@@ -76,7 +76,7 @@ if __name__ == "__main__":
 
 ***REMOVED***credential = AzureDeveloperCliCredential()
 
-***REMOVED***if args.appid:
+***REMOVED***if args.appid and args.appid != "no-id":
 ***REMOVED***print(f"Checking if application {args.appid} exists")
 ***REMOVED***if check_for_application(credential, args.appid):
 ***REMOVED******REMOVED***print("Application already exists, not creating new one.")
