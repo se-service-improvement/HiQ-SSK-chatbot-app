@@ -1,0 +1,38 @@
+{
+***REMOVED***"name": "Azure Developer CLI",
+***REMOVED***"build": {
+***REMOVED***"dockerfile": "Dockerfile",
+***REMOVED***"args": {
+***REMOVED******REMOVED***"IMAGE": "python:3.10"
+***REMOVED***
+***REMOVED***,
+***REMOVED***"features": {
+***REMOVED***"ghcr.io/devcontainers/features/node:1": {
+***REMOVED******REMOVED***"version": "16",
+***REMOVED******REMOVED***"nodeGypDependencies": false
+***REMOVED***,
+***REMOVED***"ghcr.io/devcontainers/features/azure-cli:1.0.8": {}
+***REMOVED***,
+***REMOVED***"customizations": {
+***REMOVED***"vscode": {
+***REMOVED******REMOVED***"extensions": [
+***REMOVED******REMOVED***"ms-azuretools.azure-dev",
+***REMOVED******REMOVED***"ms-azuretools.vscode-bicep",
+***REMOVED******REMOVED***"ms-python.python"
+***REMOVED******REMOVED***]
+***REMOVED***,
+***REMOVED***"codespaces": {
+***REMOVED******REMOVED***"openFiles": [
+***REMOVED******REMOVED***  "README.md"
+***REMOVED******REMOVED***]
+***REMOVED***
+***REMOVED***,
+***REMOVED***"forwardPorts": [
+***REMOVED***5000
+***REMOVED***],
+***REMOVED***"postCreateCommand": "python3 -m pip install -r requirements-dev.txt",
+***REMOVED***"remoteUser": "vscode",
+***REMOVED***"hostRequirements": {
+***REMOVED***"memory": "8gb"
+***REMOVED***
+}
