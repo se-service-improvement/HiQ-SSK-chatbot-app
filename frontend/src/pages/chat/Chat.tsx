@@ -139,7 +139,7 @@ const Chat = () => {
 ***REMOVED***
 
 ***REMOVED***return (
-***REMOVED***<div className={styles.container}>
+***REMOVED***<div className={styles.container} role="main">
 ***REMOVED******REMOVED***{showAuthMessage ? (
 ***REMOVED******REMOVED***<Stack className={styles.chatEmptyState}>
 ***REMOVED******REMOVED******REMOVED***<ShieldLockRegular className={styles.chatIcon} style={{color: 'darkorange', height: "200px", width: "200px"}}/>
@@ -167,11 +167,11 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED***<h2 className={styles.chatEmptyStateSubtitle}>This chatbot is configured to answer your questions</h2>
 ***REMOVED******REMOVED******REMOVED******REMOVED***</Stack>
 ***REMOVED******REMOVED******REMOVED***) : (
-***REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageStream} style={{ marginBottom: isLoading ? "40px" : "0px"}}>
+***REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageStream} style={{ marginBottom: isLoading ? "40px" : "0px"}} role="log">
 ***REMOVED******REMOVED******REMOVED******REMOVED***{answers.map((answer, index) => (
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***{answer.role === "user" ? (
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageUser}>
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageUser} aria-readonly="true" tabIndex={0}>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageUserMessage}>{answer.content}</div>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***</div>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***) : (
@@ -222,16 +222,20 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<span className={styles.stopGeneratingText} aria-hidden="true">Stop generating</span>
 ***REMOVED******REMOVED******REMOVED******REMOVED***</Stack>
 ***REMOVED******REMOVED******REMOVED******REMOVED***)}
-***REMOVED******REMOVED******REMOVED******REMOVED***<BroomRegular
-***REMOVED******REMOVED******REMOVED******REMOVED***className={styles.clearChatBroom}
-***REMOVED******REMOVED******REMOVED******REMOVED***style={{ background: isLoading || answers.length === 0 ? "#BDBDBD" : "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #0F6CBD 33.63%, #2D87C3 70.31%, #8DDDD8 100%)", 
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***cursor: isLoading || answers.length === 0 ? "" : "pointer"}}
+***REMOVED******REMOVED******REMOVED******REMOVED***<div
+***REMOVED******REMOVED******REMOVED******REMOVED***role="button"
+***REMOVED******REMOVED******REMOVED******REMOVED***tabIndex={0}
 ***REMOVED******REMOVED******REMOVED******REMOVED***onClick={clearChat}
 ***REMOVED******REMOVED******REMOVED******REMOVED***onKeyDown={e => e.key === "Enter" || e.key === " " ? clearChat() : null}
 ***REMOVED******REMOVED******REMOVED******REMOVED***aria-label="Clear session"
-***REMOVED******REMOVED******REMOVED******REMOVED***role="button"
-***REMOVED******REMOVED******REMOVED******REMOVED***tabIndex={0}
+***REMOVED******REMOVED******REMOVED******REMOVED***>
+***REMOVED******REMOVED******REMOVED******REMOVED***<BroomRegular
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***className={styles.clearChatBroom}
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***style={{ background: isLoading || answers.length === 0 ? "#BDBDBD" : "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #0F6CBD 33.63%, #2D87C3 70.31%, #8DDDD8 100%)", 
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***cursor: isLoading || answers.length === 0 ? "" : "pointer"}}
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***aria-hidden="true"
 ***REMOVED******REMOVED******REMOVED******REMOVED***/>
+***REMOVED******REMOVED******REMOVED******REMOVED***</div>
 ***REMOVED******REMOVED******REMOVED******REMOVED***<QuestionInput
 ***REMOVED******REMOVED******REMOVED******REMOVED***clearOnSend
 ***REMOVED******REMOVED******REMOVED******REMOVED***placeholder="Type a new question..."
@@ -241,12 +245,13 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED***</Stack>
 ***REMOVED******REMOVED******REMOVED***</div>
 ***REMOVED******REMOVED******REMOVED***{answers.length > 0 && isCitationPanelOpen && activeCitation && (
-***REMOVED******REMOVED******REMOVED***<Stack.Item className={styles.citationPanel}>
+***REMOVED******REMOVED******REMOVED***<Stack.Item className={styles.citationPanel} tabIndex={0} role="tabpanel" aria-label="Citations Panel">
 ***REMOVED******REMOVED******REMOVED***<Stack horizontal className={styles.citationPanelHeaderContainer} horizontalAlign="space-between" verticalAlign="center">
 ***REMOVED******REMOVED******REMOVED******REMOVED***<span className={styles.citationPanelHeader}>Citations</span>
 ***REMOVED******REMOVED******REMOVED******REMOVED***<DismissRegular className={styles.citationPanelDismiss} onClick={() => setIsCitationPanelOpen(false)}/>
 ***REMOVED******REMOVED******REMOVED***</Stack>
-***REMOVED******REMOVED******REMOVED***<h5 className={styles.citationPanelTitle}>{activeCitation[2]}</h5>
+***REMOVED******REMOVED******REMOVED***<h5 className={styles.citationPanelTitle} tabIndex={0}>{activeCitation[2]}</h5>
+***REMOVED******REMOVED******REMOVED***<div tabIndex={0}> 
 ***REMOVED******REMOVED******REMOVED***<ReactMarkdown 
 ***REMOVED******REMOVED******REMOVED******REMOVED***linkTarget="_blank"
 ***REMOVED******REMOVED******REMOVED******REMOVED***className={styles.citationPanelContent}
@@ -254,6 +259,8 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED***remarkPlugins={[remarkGfm]} 
 ***REMOVED******REMOVED******REMOVED******REMOVED***rehypePlugins={[rehypeRaw]}
 ***REMOVED******REMOVED******REMOVED***/>
+***REMOVED******REMOVED******REMOVED***</div>
+***REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED******REMOVED***</Stack.Item>
 ***REMOVED******REMOVED***)}
 ***REMOVED******REMOVED***</Stack>

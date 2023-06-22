@@ -55,7 +55,7 @@ export const Answer = ({
 
 ***REMOVED***return (
 ***REMOVED***<>
-***REMOVED******REMOVED***<Stack className={styles.answerContainer}>
+***REMOVED******REMOVED***<Stack className={styles.answerContainer}  aria-readonly="true" tabIndex={0}>
 ***REMOVED******REMOVED***<Stack.Item grow>
 ***REMOVED******REMOVED******REMOVED***<ReactMarkdown
 ***REMOVED******REMOVED******REMOVED***linkTarget="_blank"
@@ -66,12 +66,16 @@ export const Answer = ({
 ***REMOVED******REMOVED***</Stack.Item>
 ***REMOVED******REMOVED***<Stack horizontal className={styles.answerFooter}>
 ***REMOVED******REMOVED***{!!parsedAnswer.citations.length && (
-***REMOVED******REMOVED******REMOVED***<Stack.Item aria-label="References">
+***REMOVED******REMOVED******REMOVED***<Stack.Item>
 ***REMOVED******REMOVED******REMOVED***<Stack style={{width: "100%"}} >
 ***REMOVED******REMOVED******REMOVED******REMOVED***<Stack horizontal horizontalAlign='start' verticalAlign='center'>
 ***REMOVED******REMOVED******REMOVED******REMOVED***<Text
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***className={styles.accordionTitle}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onClick={toggleIsRefAccordionOpen}
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***aria-readonly="true"
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***aria-label="Open references"
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***tabIndex={0}
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***role="button"
 ***REMOVED******REMOVED******REMOVED******REMOVED***>
 ***REMOVED******REMOVED******REMOVED******REMOVED***<span>{parsedAnswer.citations.length > 1 ? parsedAnswer.citations.length + " references" : "1 reference"}</span>
 ***REMOVED******REMOVED******REMOVED******REMOVED***</Text>
@@ -91,7 +95,15 @@ export const Answer = ({
 ***REMOVED******REMOVED******REMOVED***<div style={{ marginTop: 8, display: "flex", flexFlow: "wrap column", maxHeight: "150px", gap: "4px" }}>
 ***REMOVED******REMOVED******REMOVED***{parsedAnswer.citations.map((citation, idx) => {
 ***REMOVED******REMOVED******REMOVED******REMOVED***return (
-***REMOVED******REMOVED******REMOVED******REMOVED***<span title={createCitationFilepath(citation, ++idx)} key={idx} onClick={() => onCitationClicked(citation)} className={styles.citationContainer}>
+***REMOVED******REMOVED******REMOVED******REMOVED***<span 
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***title={createCitationFilepath(citation, ++idx)} 
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***tabIndex={0} 
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***role="link" 
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***key={idx} 
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onClick={() => onCitationClicked(citation)} 
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***className={styles.citationContainer}
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***aria-label={createCitationFilepath(citation, idx)}
+***REMOVED******REMOVED******REMOVED******REMOVED***>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.citation}>{idx}</div>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***{createCitationFilepath(citation, idx, true)}
 ***REMOVED******REMOVED******REMOVED******REMOVED***</span>);

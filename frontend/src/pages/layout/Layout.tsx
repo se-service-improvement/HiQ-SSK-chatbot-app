@@ -42,7 +42,7 @@ const Layout = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED***aria-hidden="true"
 ***REMOVED******REMOVED******REMOVED***/>
 ***REMOVED******REMOVED******REMOVED***<Link to="/" className={styles.headerTitleContainer}>
-***REMOVED******REMOVED******REMOVED******REMOVED***<h3 className={styles.headerTitle}>Azure AI</h3>
+***REMOVED******REMOVED******REMOVED******REMOVED***<h1 className={styles.headerTitle}>Azure AI</h1>
 ***REMOVED******REMOVED******REMOVED***</Link>
 ***REMOVED******REMOVED******REMOVED***<div className={styles.shareButtonContainer} role="button" tabIndex={0} aria-label="Share" onClick={handleShareClick} onKeyDown={e => e.key === "Enter" || e.key === " " ? handleShareClick() : null}>
 ***REMOVED******REMOVED******REMOVED******REMOVED***<ShareRegular className={styles.shareButton} />
