@@ -171,7 +171,7 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED***{answers.map((answer, index) => (
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***{answer.role === "user" ? (
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageUser} aria-readonly="true" tabIndex={0}>
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageUser} tabIndex={0}>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageUserMessage}>{answer.content}</div>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***</div>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***) : (

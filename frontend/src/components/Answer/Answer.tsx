@@ -55,7 +55,7 @@ export const Answer = ({
 
 ***REMOVED***return (
 ***REMOVED***<>
-***REMOVED******REMOVED***<Stack className={styles.answerContainer}  aria-readonly="true" tabIndex={0}>
+***REMOVED******REMOVED***<Stack className={styles.answerContainer} tabIndex={0}>
 ***REMOVED******REMOVED***<Stack.Item grow>
 ***REMOVED******REMOVED******REMOVED***<ReactMarkdown
 ***REMOVED******REMOVED******REMOVED***linkTarget="_blank"
@@ -72,7 +72,6 @@ export const Answer = ({
 ***REMOVED******REMOVED******REMOVED******REMOVED***<Text
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***className={styles.accordionTitle}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onClick={toggleIsRefAccordionOpen}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***aria-readonly="true"
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***aria-label="Open references"
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***tabIndex={0}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***role="button"
