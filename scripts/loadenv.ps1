@@ -1,15 +1,23 @@
-Write-Host "Loading azd .env file from current environment"
-
-$output = azd env get-values
-
-foreach ($line in $output) {
-  if (!$line.Contains('=')) {
+# Only load env from azd if azd command and azd environment exist
+if (-not (Get-Command azd -ErrorAction SilentlyContinue)) {
+  Write-Host "azd command not found, skipping .env file load"
+} else {
+  $output = azd env list
+  if (!($output -like "*true*")) {
+***REMOVED***Write-Output "No azd environments found, skipping .env file load"
+  } else {
+***REMOVED***Write-Host "Loading azd .env file from current environment"
+***REMOVED***$output = azd env get-values
+***REMOVED***foreach ($line in $output) {
+***REMOVED***  if (!$line.Contains('=')) {
 ***REMOVED***continue
-  }
+  ***REMOVED***
 
-  $name, $value = $line.Split("=")
-  $value = $value -replace '^\"|\"$'
-  [Environment]::SetEnvironmentVariable($name, $value)
+***REMOVED***  $name, $value = $line.Split("=")
+***REMOVED***  $value = $value -replace '^\"|\"$'
+***REMOVED***  [Environment]::SetEnvironmentVariable($name, $value)
+***REMOVED***
+  }
 }
 
 $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
@@ -19,7 +27,7 @@ if (-not $pythonCmd) {
 }
 
 Write-Host 'Creating Python virtual environment ".venv" in root'
-Start-Process -FilePath ($pythonCmd).Source -ArgumentList "-m venv ./venv" -Wait -NoNewWindow
+Start-Process -FilePath ($pythonCmd).Source -ArgumentList "-m venv ./.venv" -Wait -NoNewWindow
 
 $venvPythonPath = "./.venv/scripts/python.exe"
 if (Test-Path -Path "/usr") {
