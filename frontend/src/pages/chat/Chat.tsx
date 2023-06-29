@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { Stack } from "@fluentui/react";
-import { BroomRegular, DismissRegular, SquareRegular, ShieldLockRegular } from "@fluentui/react-icons";
+import { BroomRegular, DismissRegular, SquareRegular, ShieldLockRegular, ErrorCircleRegular } from "@fluentui/react-icons";
 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from 'remark-gfm'
@@ -56,7 +56,7 @@ const Chat = () => {
 ***REMOVED***;
 
 ***REMOVED***const request: ConversationRequest = {
-***REMOVED******REMOVED***messages: [...answers, userMessage]
+***REMOVED******REMOVED***messages: [...answers.filter((answer) => answer.role !== "error"), userMessage]
 ***REMOVED***;
 
 ***REMOVED***let result = {} as ChatResponse;
@@ -88,11 +88,21 @@ const Chat = () => {
 ***REMOVED******REMOVED***
 ***REMOVED*** catch ( e )  {
 ***REMOVED******REMOVED***if (!abortController.signal.aborted) {
-***REMOVED******REMOVED***console.error(e);
 ***REMOVED******REMOVED***console.error(result);
-***REMOVED******REMOVED***alert("An error occurred. Please try again. If the problem persists, please contact the site administrator.")
-***REMOVED***
+***REMOVED******REMOVED***let errorMessage = "An error occurred. Please try again. If the problem persists, please contact the site administrator.";
+***REMOVED******REMOVED***if (result.error?.message) {
+***REMOVED******REMOVED******REMOVED***errorMessage = result.error.message;
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***else if (typeof result.error === "string") {
+***REMOVED******REMOVED******REMOVED***errorMessage = result.error;
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***setAnswers([...answers, userMessage, {
+***REMOVED******REMOVED******REMOVED***role: "error",
+***REMOVED******REMOVED******REMOVED***content: errorMessage
+***REMOVED******REMOVED***]);
+***REMOVED******REMOVED***
 ***REMOVED******REMOVED***setAnswers([...answers, userMessage]);
+***REMOVED***
 ***REMOVED*** finally {
 ***REMOVED******REMOVED***setIsLoading(false);
 ***REMOVED******REMOVED***setShowLoadingMessage(false);
@@ -183,6 +193,12 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onCitationClicked={c => onShowCitation(c)}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***/>
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***</div> : answer.role === "error" ? <div className={styles.chatMessageError}>
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<Stack horizontal className={styles.chatMessageErrorContent}>
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<ErrorCircleRegular className={styles.errorIcon} style={{color: "rgba(182, 52, 67, 1)"}} />
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<span>Error</span>
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***</Stack>
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<span className={styles.chatMessageErrorContent}>{answer.content}</span>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***</div> : null
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***)}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***</>

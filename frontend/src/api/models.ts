@@ -41,6 +41,7 @@ export type ChatResponse = {
 ***REMOVED***created: number;
 ***REMOVED***object: ChatCompletionType;
 ***REMOVED***choices: ChatResponseChoice[];
+***REMOVED***error?: any;
 }
 
 export type ConversationRequest = {
