@@ -391,11 +391,13 @@ def extract_pdf_content(file_path, form_recognizer_client, use_layout=False):
 ***REMOVED******REMOVED***position = page_offset + idx
 ***REMOVED******REMOVED***if position in roles_start.keys():
 ***REMOVED******REMOVED******REMOVED***role = roles_start[position]
+***REMOVED******REMOVED******REMOVED***if role in PDF_HEADERS:
 ***REMOVED******REMOVED******REMOVED***page_text += f"<{PDF_HEADERS[role]}>"
 ***REMOVED******REMOVED***if position in roles_end.keys():
 ***REMOVED******REMOVED******REMOVED***role = roles_end[position]
+***REMOVED******REMOVED******REMOVED***if role in PDF_HEADERS:
 ***REMOVED******REMOVED******REMOVED***page_text += f"</{PDF_HEADERS[role]}>"
-***REMOVED******REMOVED***
+
 ***REMOVED******REMOVED***page_text += form_recognizer_results.content[page_offset + idx]
 ***REMOVED******REMOVED***
 ***REMOVED******REMOVED***elif not table_id in added_tables:
