@@ -75,7 +75,7 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
 ***REMOVED***  !empty(applicationInsightsName) ? { APPLICATIONINSIGHTS_CONNECTION_STRING: applicationInsights.properties.ConnectionString } : {},
 ***REMOVED***  !empty(keyVaultName) ? { AZURE_KEY_VAULT_ENDPOINT: keyVault.properties.vaultUri } : {},
 ***REMOVED***  !empty(authClientSecret) ? { AUTH_CLIENT_SECRET: authClientSecret } : {}
-***REMOVED***  )
+***REMOVED***)
   }
 
   resource configLogs 'config' = {
@@ -90,7 +90,6 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
 ***REMOVED***  configAppSettings
 ***REMOVED***]
   }
-
 
   resource configAuth 'config' = if (!(empty(authClientId))) {
 ***REMOVED***name: 'authsettingsV2'
@@ -107,6 +106,11 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
 ***REMOVED******REMOVED***clientId: authClientId
 ***REMOVED******REMOVED***clientSecretSettingName: 'AUTH_CLIENT_SECRET'
 ***REMOVED******REMOVED***openIdIssuer: authIssuerUri
+  ***REMOVED***
+***REMOVED***  validation: {
+***REMOVED******REMOVED***defaultAuthorizationPolicy: {
+***REMOVED******REMOVED***  allowedApplications: []
+***REMOVED***
   ***REMOVED***
 ***REMOVED***
   ***REMOVED***
