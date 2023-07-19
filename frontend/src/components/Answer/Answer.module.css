@@ -10,7 +10,6 @@
 }
 
 .answerText {
-***REMOVED***font-family: "Segoe UI";
 ***REMOVED***font-style: normal;
 ***REMOVED***font-weight: 400;
 ***REMOVED***font-size: 14px;
@@ -42,7 +41,6 @@
 }
 
 .answerDisclaimer {
-***REMOVED***font-family: "Segoe UI";
 ***REMOVED***font-style: normal;
 ***REMOVED***font-weight: 400;
 ***REMOVED***font-size: 12px;
@@ -59,7 +57,6 @@
 
 .citationContainer {
 ***REMOVED***margin-left: 10px;
-***REMOVED***font-family: "Segoe UI";
 ***REMOVED***font-style: normal;
 ***REMOVED***font-weight: 600;
 ***REMOVED***font-size: 12px;
@@ -94,7 +91,6 @@
 ***REMOVED***flex: none;
 ***REMOVED***flex-grow: 0;
 ***REMOVED***z-index: 2;
-***REMOVED***font-family: "Segoe UI";
 ***REMOVED***font-style: normal;
 ***REMOVED***font-weight: 600;
 ***REMOVED***font-size: 10px;
@@ -127,7 +123,6 @@
 .accordionTitle {
 ***REMOVED***margin-right: 5px;
 ***REMOVED***margin-left: 10px;
-***REMOVED***font-family: "Segoe UI";
 ***REMOVED***font-style: normal;
 ***REMOVED***font-weight: 400;
 ***REMOVED***font-size: 12px;
@@ -156,7 +151,6 @@
 ***REMOVED***order: 2;
 ***REMOVED***flex-grow: 0;
 ***REMOVED***z-index: 2;
-***REMOVED***font-family: "Segoe UI";
 ***REMOVED***font-style: normal;
 ***REMOVED***font-weight: 600;
 ***REMOVED***font-size: 10px;
