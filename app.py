@@ -80,7 +80,7 @@ def prepare_body_headers_with_data(request):
 ***REMOVED******REMOVED******REMOVED***"key": AZURE_SEARCH_KEY,
 ***REMOVED******REMOVED******REMOVED***"indexName": AZURE_SEARCH_INDEX,
 ***REMOVED******REMOVED******REMOVED***"fieldsMapping": {
-***REMOVED******REMOVED******REMOVED***"contentField": AZURE_SEARCH_CONTENT_COLUMNS.split("|") if AZURE_SEARCH_CONTENT_COLUMNS else [],
+***REMOVED******REMOVED******REMOVED***"contentFields": AZURE_SEARCH_CONTENT_COLUMNS.split("|") if AZURE_SEARCH_CONTENT_COLUMNS else [],
 ***REMOVED******REMOVED******REMOVED***"titleField": AZURE_SEARCH_TITLE_COLUMN if AZURE_SEARCH_TITLE_COLUMN else None,
 ***REMOVED******REMOVED******REMOVED***"urlField": AZURE_SEARCH_URL_COLUMN if AZURE_SEARCH_URL_COLUMN else None,
 ***REMOVED******REMOVED******REMOVED***"filepathField": AZURE_SEARCH_FILENAME_COLUMN if AZURE_SEARCH_FILENAME_COLUMN else None
