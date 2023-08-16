@@ -66,7 +66,9 @@ export const Answer = ({
 ***REMOVED******REMOVED***</Stack.Item>
 ***REMOVED******REMOVED***<Stack horizontal className={styles.answerFooter}>
 ***REMOVED******REMOVED***{!!parsedAnswer.citations.length && (
-***REMOVED******REMOVED******REMOVED***<Stack.Item>
+***REMOVED******REMOVED******REMOVED***<Stack.Item
+***REMOVED******REMOVED******REMOVED***onKeyDown={e => e.key === "Enter" || e.key === " " ? toggleIsRefAccordionOpen() : null}
+***REMOVED******REMOVED******REMOVED***>
 ***REMOVED******REMOVED******REMOVED***<Stack style={{width: "100%"}} >
 ***REMOVED******REMOVED******REMOVED******REMOVED***<Stack horizontal horizontalAlign='start' verticalAlign='center'>
 ***REMOVED******REMOVED******REMOVED******REMOVED***<Text
@@ -100,6 +102,7 @@ export const Answer = ({
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***role="link" 
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***key={idx} 
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onClick={() => onCitationClicked(citation)} 
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onKeyDown={e => e.key === "Enter" || e.key === " " ? onCitationClicked(citation) : null}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***className={styles.citationContainer}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***aria-label={createCitationFilepath(citation, idx)}
 ***REMOVED******REMOVED******REMOVED******REMOVED***>

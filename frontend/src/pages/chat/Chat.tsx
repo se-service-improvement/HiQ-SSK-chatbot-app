@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { Stack } from "@fluentui/react";
+import { IconButton, Stack } from "@fluentui/react";
 import { BroomRegular, DismissRegular, SquareRegular, ShieldLockRegular, ErrorCircleRegular } from "@fluentui/react-icons";
 
 import ReactMarkdown from "react-markdown";
@@ -262,9 +262,9 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED***</div>
 ***REMOVED******REMOVED******REMOVED***{answers.length > 0 && isCitationPanelOpen && activeCitation && (
 ***REMOVED******REMOVED******REMOVED***<Stack.Item className={styles.citationPanel} tabIndex={0} role="tabpanel" aria-label="Citations Panel">
-***REMOVED******REMOVED******REMOVED***<Stack horizontal className={styles.citationPanelHeaderContainer} horizontalAlign="space-between" verticalAlign="center">
-***REMOVED******REMOVED******REMOVED******REMOVED***<span className={styles.citationPanelHeader}>Citations</span>
-***REMOVED******REMOVED******REMOVED******REMOVED***<DismissRegular className={styles.citationPanelDismiss} onClick={() => setIsCitationPanelOpen(false)}/>
+***REMOVED******REMOVED******REMOVED***<Stack aria-label="Citations Panel Header Container" horizontal className={styles.citationPanelHeaderContainer} horizontalAlign="space-between" verticalAlign="center">
+***REMOVED******REMOVED******REMOVED******REMOVED***<span aria-label="Citations" className={styles.citationPanelHeader}>Citations</span>
+***REMOVED******REMOVED******REMOVED******REMOVED***<IconButton iconProps={{ iconName: 'Cancel'}} aria-label="Close citations panel" onClick={() => setIsCitationPanelOpen(false)}/>
 ***REMOVED******REMOVED******REMOVED***</Stack>
 ***REMOVED******REMOVED******REMOVED***<h5 className={styles.citationPanelTitle} tabIndex={0}>{activeCitation[2]}</h5>
 ***REMOVED******REMOVED******REMOVED***<div tabIndex={0}> 
