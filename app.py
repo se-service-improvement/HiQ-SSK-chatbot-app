@@ -62,6 +62,11 @@ def should_use_data():
 ***REMOVED***return True
 ***REMOVED***return False
 
+
+def format_as_ndjson(obj: dict) -> str:
+***REMOVED***return json.dumps(obj, ensure_ascii=False) + "\n"
+
+
 def prepare_body_headers_with_data(request):
 ***REMOVED***request_messages = request.json["messages"]
 
@@ -129,7 +134,7 @@ def stream_with_data(body, headers, endpoint):
 ***REMOVED******REMOVED***if line:
 ***REMOVED******REMOVED******REMOVED***lineJson = json.loads(line.lstrip(b'data:').decode('utf-8'))
 ***REMOVED******REMOVED******REMOVED***if 'error' in lineJson:
-***REMOVED******REMOVED******REMOVED***yield json.dumps(lineJson).replace("\n", "\\n") + "\n"
+***REMOVED******REMOVED******REMOVED***yield format_as_ndjson(lineJson)
 ***REMOVED******REMOVED******REMOVED***response["id"] = lineJson["id"]
 ***REMOVED******REMOVED******REMOVED***response["model"] = lineJson["model"]
 ***REMOVED******REMOVED******REMOVED***response["created"] = lineJson["created"]
@@ -148,9 +153,9 @@ def stream_with_data(body, headers, endpoint):
 ***REMOVED******REMOVED******REMOVED***if deltaText != "[DONE]":
 ***REMOVED******REMOVED******REMOVED******REMOVED***response["choices"][0]["messages"][1]["content"] += deltaText
 
-***REMOVED******REMOVED******REMOVED***yield json.dumps(response).replace("\n", "\\n") + "\n"
+***REMOVED******REMOVED******REMOVED***yield format_as_ndjson(response)
 ***REMOVED***except Exception as e:
-***REMOVED***yield json.dumps({"error": str(e)}).replace("\n", "\\n") + "\n"
+***REMOVED***yield format_as_ndjson({"error": str(e)})
 
 
 def conversation_with_data(request):
@@ -162,12 +167,12 @@ def conversation_with_data(request):
 ***REMOVED***status_code = r.status_code
 ***REMOVED***r = r.json()
 
-***REMOVED***return Response(json.dumps(r).replace("\n", "\\n"), status=status_code)
+***REMOVED***return Response(format_as_ndjson(r), status=status_code)
 ***REMOVED***else:
 ***REMOVED***if request.method == "POST":
-***REMOVED******REMOVED***return Response(stream_with_data(body, headers, endpoint), mimetype='text/event-stream')
+***REMOVED******REMOVED***return Response(stream_with_data(body, headers, endpoint))
 ***REMOVED***else:
-***REMOVED******REMOVED***return Response(None, mimetype='text/event-stream')
+***REMOVED******REMOVED***return Response(None)
 
 def stream_without_data(response):
 ***REMOVED***responseText = ""
@@ -188,7 +193,7 @@ def stream_without_data(response):
 ***REMOVED******REMOVED***]
 ***REMOVED***]
 ***REMOVED***
-***REMOVED***yield json.dumps(response_obj).replace("\n", "\\n") + "\n"
+***REMOVED***yield format_as_ndjson(response_obj)
 
 
 def conversation_without_data(request):
@@ -238,9 +243,9 @@ def conversation_without_data(request):
 ***REMOVED***return jsonify(response_obj), 200
 ***REMOVED***else:
 ***REMOVED***if request.method == "POST":
-***REMOVED******REMOVED***return Response(stream_without_data(response), mimetype='text/event-stream')
+***REMOVED******REMOVED***return Response(stream_without_data(response))
 ***REMOVED***else:
-***REMOVED******REMOVED***return Response(None, mimetype='text/event-stream')
+***REMOVED******REMOVED***return Response(None)
 
 @app.route("/conversation", methods=["GET", "POST"])
 def conversation():
