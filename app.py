@@ -36,10 +36,14 @@ AZURE_SEARCH_CONTENT_COLUMNS = os.environ.get("AZURE_SEARCH_CONTENT_COLUMNS")
 AZURE_SEARCH_FILENAME_COLUMN = os.environ.get("AZURE_SEARCH_FILENAME_COLUMN")
 AZURE_SEARCH_TITLE_COLUMN = os.environ.get("AZURE_SEARCH_TITLE_COLUMN")
 AZURE_SEARCH_URL_COLUMN = os.environ.get("AZURE_SEARCH_URL_COLUMN")
+AZURE_SEARCH_VECTOR_COLUMNS = os.environ.get("AZURE_SEARCH_VECTOR_COLUMNS")
+AZURE_SEARCH_QUERY_TYPE = os.environ.get("AZURE_SEARCH_QUERY_TYPE")
+AZURE_SEARCH_PERMITTED_GROUPS_COLUMN = os.environ.get("AZURE_SEARCH_PERMITTED_GROUPS_COLUMN")
 
 # AOAI Integration Settings
 AZURE_OPENAI_RESOURCE = os.environ.get("AZURE_OPENAI_RESOURCE")
 AZURE_OPENAI_MODEL = os.environ.get("AZURE_OPENAI_MODEL")
+AZURE_OPENAI_ENDPOINT = os.environ.get("AZURE_OPENAI_ENDPOINT")
 AZURE_OPENAI_KEY = os.environ.get("AZURE_OPENAI_KEY")
 AZURE_OPENAI_TEMPERATURE = os.environ.get("AZURE_OPENAI_TEMPERATURE", 0)
 AZURE_OPENAI_TOP_P = os.environ.get("AZURE_OPENAI_TOP_P", 1.0)
@@ -49,6 +53,9 @@ AZURE_OPENAI_SYSTEM_MESSAGE = os.environ.get("AZURE_OPENAI_SYSTEM_MESSAGE", "You
 AZURE_OPENAI_PREVIEW_API_VERSION = os.environ.get("AZURE_OPENAI_PREVIEW_API_VERSION", "2023-06-01-preview")
 AZURE_OPENAI_STREAM = os.environ.get("AZURE_OPENAI_STREAM", "true")
 AZURE_OPENAI_MODEL_NAME = os.environ.get("AZURE_OPENAI_MODEL_NAME", "gpt-35-turbo") # Name of the model, e.g. 'gpt-35-turbo' or 'gpt-4'
+AZURE_OPENAI_EMBEDDING_ENDPOINT = os.environ.get("AZURE_OPENAI_EMBEDDING_ENDPOINT")
+AZURE_OPENAI_EMBEDDING_KEY = os.environ.get("AZURE_OPENAI_EMBEDDING_KEY")
+
 
 SHOULD_STREAM = True if AZURE_OPENAI_STREAM.lower() == "true" else False
 
@@ -66,9 +73,59 @@ def should_use_data():
 def format_as_ndjson(obj: dict) -> str:
 ***REMOVED***return json.dumps(obj, ensure_ascii=False) + "\n"
 
+def fetchUserGroups(userToken, nextLink=None):
+***REMOVED***# Recursively fetch group membership
+***REMOVED***if nextLink:
+***REMOVED***endpoint = nextLink
+***REMOVED***else:
+***REMOVED***endpoint = "https://graph.microsoft.com/v1.0/me/transitiveMemberOf?$select=id"
+***REMOVED***
+***REMOVED***headers = {
+***REMOVED***'Authorization': "bearer " + userToken
+***REMOVED***
+***REMOVED***try :
+***REMOVED***r = requests.get(endpoint, headers=headers)
+***REMOVED***if r.status_code != 200:
+***REMOVED******REMOVED***return []
+***REMOVED***
+***REMOVED***r = r.json()
+***REMOVED***if "@odata.nextLink" in r:
+***REMOVED******REMOVED***nextLinkData = fetchUserGroups(userToken, r["@odata.nextLink"])
+***REMOVED******REMOVED***r['value'].extend(nextLinkData)
+***REMOVED***
+***REMOVED***return r['value']
+***REMOVED***except Exception as e:
+***REMOVED***return []
+
+
+def generateFilterString(userToken):
+***REMOVED***# Get list of groups user is a member of
+***REMOVED***userGroups = fetchUserGroups(userToken)
+
+***REMOVED***# Construct filter string
+***REMOVED***if userGroups:
+***REMOVED***group_ids = ", ".join([obj['id'] for obj in userGroups])
+***REMOVED***return f"{AZURE_SEARCH_PERMITTED_GROUPS_COLUMN}/any(g:search.in(g, '{group_ids}'))"
+***REMOVED***
+***REMOVED***return None
+
 
 def prepare_body_headers_with_data(request):
 ***REMOVED***request_messages = request.json["messages"]
+
+***REMOVED***# Set query type
+***REMOVED***query_type = "simple"
+***REMOVED***if AZURE_SEARCH_QUERY_TYPE:
+***REMOVED***query_type = AZURE_SEARCH_QUERY_TYPE
+***REMOVED***elif AZURE_SEARCH_USE_SEMANTIC_SEARCH.lower() == "true" and AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG:
+***REMOVED***query_type = "semantic"
+
+***REMOVED***# Set filter
+***REMOVED***filter = None
+***REMOVED***userToken = None
+***REMOVED***if AZURE_SEARCH_PERMITTED_GROUPS_COLUMN:
+***REMOVED***userToken = request.headers.get('X-MS-TOKEN-AAD-ACCESS-TOKEN', "")
+***REMOVED***filter = generateFilterString(userToken)
 
 ***REMOVED***body = {
 ***REMOVED***"messages": request_messages,
@@ -88,13 +145,17 @@ def prepare_body_headers_with_data(request):
 ***REMOVED******REMOVED******REMOVED***"contentFields": AZURE_SEARCH_CONTENT_COLUMNS.split("|") if AZURE_SEARCH_CONTENT_COLUMNS else [],
 ***REMOVED******REMOVED******REMOVED***"titleField": AZURE_SEARCH_TITLE_COLUMN if AZURE_SEARCH_TITLE_COLUMN else None,
 ***REMOVED******REMOVED******REMOVED***"urlField": AZURE_SEARCH_URL_COLUMN if AZURE_SEARCH_URL_COLUMN else None,
-***REMOVED******REMOVED******REMOVED***"filepathField": AZURE_SEARCH_FILENAME_COLUMN if AZURE_SEARCH_FILENAME_COLUMN else None
+***REMOVED******REMOVED******REMOVED***"filepathField": AZURE_SEARCH_FILENAME_COLUMN if AZURE_SEARCH_FILENAME_COLUMN else None,
+***REMOVED******REMOVED******REMOVED***"vectorFields": AZURE_SEARCH_VECTOR_COLUMNS.split("|") if AZURE_SEARCH_VECTOR_COLUMNS else []
 ***REMOVED******REMOVED***,
 ***REMOVED******REMOVED******REMOVED***"inScope": True if AZURE_SEARCH_ENABLE_IN_DOMAIN.lower() == "true" else False,
 ***REMOVED******REMOVED******REMOVED***"topNDocuments": AZURE_SEARCH_TOP_K,
-***REMOVED******REMOVED******REMOVED***"queryType": "semantic" if AZURE_SEARCH_USE_SEMANTIC_SEARCH.lower() == "true" else "simple",
-***REMOVED******REMOVED******REMOVED***"semanticConfiguration": AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG if AZURE_SEARCH_USE_SEMANTIC_SEARCH.lower() == "true" and AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG else "",
-***REMOVED******REMOVED******REMOVED***"roleInformation": AZURE_OPENAI_SYSTEM_MESSAGE
+***REMOVED******REMOVED******REMOVED***"queryType": query_type,
+***REMOVED******REMOVED******REMOVED***"semanticConfiguration": AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG if AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG else "",
+***REMOVED******REMOVED******REMOVED***"roleInformation": AZURE_OPENAI_SYSTEM_MESSAGE,
+***REMOVED******REMOVED******REMOVED***"embeddingEndpoint": AZURE_OPENAI_EMBEDDING_ENDPOINT,
+***REMOVED******REMOVED******REMOVED***"embeddingKey": AZURE_OPENAI_EMBEDDING_KEY,
+***REMOVED******REMOVED******REMOVED***"filter": filter
 ***REMOVED******REMOVED***
 ***REMOVED***
 ***REMOVED***]
@@ -103,7 +164,7 @@ def prepare_body_headers_with_data(request):
 ***REMOVED***headers = {
 ***REMOVED***'Content-Type': 'application/json',
 ***REMOVED***'api-key': AZURE_OPENAI_KEY,
-***REMOVED***"x-ms-useragent": "GitHubSampleWebApp/PublicAPI/1.0.0"
+***REMOVED***"x-ms-useragent": "GitHubSampleWebApp/PublicAPI/2.0.0"
 ***REMOVED***
 
 ***REMOVED***return body, headers
@@ -152,7 +213,8 @@ def stream_with_data(body, headers, endpoint):
 
 def conversation_with_data(request):
 ***REMOVED***body, headers = prepare_body_headers_with_data(request)
-***REMOVED***endpoint = f"https://{AZURE_OPENAI_RESOURCE}.openai.azure.com/openai/deployments/{AZURE_OPENAI_MODEL}/extensions/chat/completions?api-version={AZURE_OPENAI_PREVIEW_API_VERSION}"
+***REMOVED***base_url = AZURE_OPENAI_ENDPOINT if AZURE_OPENAI_ENDPOINT else f"https://{AZURE_OPENAI_RESOURCE}.openai.azure.com/"
+***REMOVED***endpoint = f"{base_url}openai/deployments/{AZURE_OPENAI_MODEL}/extensions/chat/completions?api-version={AZURE_OPENAI_PREVIEW_API_VERSION}"
 ***REMOVED***
 ***REMOVED***if not SHOULD_STREAM:
 ***REMOVED***r = requests.post(endpoint, headers=headers, json=body)
@@ -190,7 +252,7 @@ def stream_without_data(response):
 
 def conversation_without_data(request):
 ***REMOVED***openai.api_type = "azure"
-***REMOVED***openai.api_base = f"https://{AZURE_OPENAI_RESOURCE}.openai.azure.com/"
+***REMOVED***openai.api_base = AZURE_OPENAI_ENDPOINT if AZURE_OPENAI_ENDPOINT else f"https://{AZURE_OPENAI_RESOURCE}.openai.azure.com/"
 ***REMOVED***openai.api_version = "2023-03-15-preview"
 ***REMOVED***openai.api_key = AZURE_OPENAI_KEY
 
