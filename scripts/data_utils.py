@@ -1,9 +1,11 @@
 """Data utilities for index preparation."""
 import ast
+from asyncio import sleep
 import html
 import json
 import os
 import re
+import requests
 from abc import ABC, abstractmethod
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
@@ -27,6 +29,8 @@ FILE_FORMAT_DICT = {
 ***REMOVED***"py": "python",
 ***REMOVED***"pdf": "pdf"
 ***REMOVED***
+
+RETRY_COUNT = 5
 
 SENTENCE_ENDINGS = [".", "!", "?"]
 WORDS_BREAKS = list(reversed([",", ";", ":", " ", "(", ")", "[", "]", "{", "}", "\t", "\n"]))
@@ -55,6 +59,7 @@ class Document(object):
 ***REMOVED***filepath: Optional[str] = None
 ***REMOVED***url: Optional[str] = None
 ***REMOVED***metadata: Optional[Dict] = None
+***REMOVED***contentVector: Optional[List[float]] = None
 
 def cleanup_content(content: str) -> str:
 ***REMOVED***"""Cleans up the given content using regexes
@@ -429,6 +434,28 @@ def merge_chunks_serially(chunked_content_list: List[str], num_tokens: int) -> G
 ***REMOVED***yield current_chunk, total_size
 
 
+def get_embedding(text):
+***REMOVED***endpoint = os.environ.get("EMBEDDING_MODEL_ENDPOINT")
+***REMOVED***key = os.environ.get("EMBEDDING_MODEL_KEY")
+***REMOVED***if endpoint is None or key is None:
+***REMOVED***raise Exception("EMBEDDING_MODEL_ENDPOINT and EMBEDDING_MODEL_KEY are required for embedding")
+***REMOVED***
+***REMOVED***headers = {
+***REMOVED***"Content-Type": "application/json",
+***REMOVED***"api-key": key
+***REMOVED***
+
+***REMOVED***body = {
+***REMOVED***"input": text
+***REMOVED***
+
+***REMOVED***response = requests.post(endpoint, headers=headers, json=body)
+***REMOVED***if response.status_code != 200:
+***REMOVED***raise Exception(f"Error getting embedding for text={text} with status_code={response.status_code} and response={response.text}")
+***REMOVED***response = response.json()
+***REMOVED***return response['data'][0]['embedding']
+
+
 def chunk_content_helper(
 ***REMOVED***content: str, file_format: str, file_name: Optional[str],
 ***REMOVED***token_overlap: int,
@@ -477,7 +504,8 @@ def chunk_content(
 ***REMOVED***token_overlap: int = 0,
 ***REMOVED***extensions_to_process = FILE_FORMAT_DICT.keys(),
 ***REMOVED***cracked_pdf = False,
-***REMOVED***use_layout = False
+***REMOVED***use_layout = False,
+***REMOVED***add_embeddings = False
 ) -> ChunkingResult:
 ***REMOVED***"""Chunks the given content. If ignore_errors is true, returns None
 ***REMOVED***in case of an error
@@ -515,11 +543,23 @@ def chunk_content(
 ***REMOVED***skipped_chunks = 0
 ***REMOVED***for chunk, chunk_size, doc in chunked_context:
 ***REMOVED******REMOVED***if chunk_size >= min_chunk_size:
+***REMOVED******REMOVED***if add_embeddings:
+***REMOVED******REMOVED******REMOVED***for _ in RETRY_COUNT:
+***REMOVED******REMOVED******REMOVED***try:
+***REMOVED******REMOVED******REMOVED******REMOVED***doc.contentVector = get_embedding(chunk)
+***REMOVED******REMOVED******REMOVED******REMOVED***break
+***REMOVED******REMOVED******REMOVED***except:
+***REMOVED******REMOVED******REMOVED******REMOVED***sleep(30)
+***REMOVED******REMOVED******REMOVED***if doc.contentVector is None:
+***REMOVED******REMOVED******REMOVED***raise Exception(f"Error getting embedding for chunk={chunk}")
+***REMOVED******REMOVED******REMOVED***
+
 ***REMOVED******REMOVED***chunks.append(
 ***REMOVED******REMOVED******REMOVED***Document(
 ***REMOVED******REMOVED******REMOVED***content=chunk,
 ***REMOVED******REMOVED******REMOVED***title=doc.title,
 ***REMOVED******REMOVED******REMOVED***url=url,
+***REMOVED******REMOVED******REMOVED***contentVector=doc.contentVector
 ***REMOVED******REMOVED******REMOVED***)
 ***REMOVED******REMOVED***)
 ***REMOVED******REMOVED***else:
@@ -552,7 +592,8 @@ def chunk_file(
 ***REMOVED***token_overlap: int = 0,
 ***REMOVED***extensions_to_process = FILE_FORMAT_DICT.keys(),
 ***REMOVED***form_recognizer_client = None,
-***REMOVED***use_layout = False
+***REMOVED***use_layout = False,
+***REMOVED***add_embeddings=False
 ) -> ChunkingResult:
 ***REMOVED***"""Chunks the given file.
 ***REMOVED***Args:
@@ -589,7 +630,8 @@ def chunk_file(
 ***REMOVED***token_overlap=max(0, token_overlap),
 ***REMOVED***extensions_to_process=extensions_to_process,
 ***REMOVED***cracked_pdf=cracked_pdf,
-***REMOVED***use_layout=use_layout
+***REMOVED***use_layout=use_layout,
+***REMOVED***add_embeddings=add_embeddings
 ***REMOVED***)
 
 
@@ -603,7 +645,8 @@ def process_file(
 ***REMOVED***token_overlap: int = 0,
 ***REMOVED***extensions_to_process: List[str] = FILE_FORMAT_DICT.keys(),
 ***REMOVED***form_recognizer_client = None,
-***REMOVED***use_layout = False
+***REMOVED***use_layout = False,
+***REMOVED***add_embeddings = False
 ***REMOVED***):
 
 ***REMOVED***if not form_recognizer_client:
@@ -626,7 +669,8 @@ def process_file(
 ***REMOVED******REMOVED***token_overlap=token_overlap,
 ***REMOVED******REMOVED***extensions_to_process=extensions_to_process,
 ***REMOVED******REMOVED***form_recognizer_client=form_recognizer_client,
-***REMOVED******REMOVED***use_layout=use_layout
+***REMOVED******REMOVED***use_layout=use_layout,
+***REMOVED******REMOVED***add_embeddings=add_embeddings
 ***REMOVED***)
 ***REMOVED***for chunk_idx, chunk_doc in enumerate(result.chunks):
 ***REMOVED******REMOVED***chunk_doc.filepath = rel_file_path
@@ -650,7 +694,8 @@ def chunk_directory(
 ***REMOVED***extensions_to_process: List[str] = list(FILE_FORMAT_DICT.keys()),
 ***REMOVED***form_recognizer_client = None,
 ***REMOVED***use_layout = False,
-***REMOVED***njobs=4
+***REMOVED***njobs=4,
+***REMOVED***add_embeddings = False
 ):
 ***REMOVED***"""
 ***REMOVED***Chunks the given directory recursively
@@ -666,6 +711,7 @@ def chunk_directory(
 ***REMOVED***extensions_to_process (List[str]): The list of extensions to process. 
 ***REMOVED***form_recognizer_client: Optional form recognizer client to use for pdf files.
 ***REMOVED***use_layout (bool): If true, uses Layout model for pdf files. Otherwise, uses Read.
+***REMOVED***add_embeddings (bool): If true, adds a vector embedding to each chunk using the embedding model endpoint and key.
 
 ***REMOVED***Returns:
 ***REMOVED***List[Document]: List of chunked documents.
@@ -690,7 +736,7 @@ def chunk_directory(
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   min_chunk_size=min_chunk_size, url_prefix=url_prefix,
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   token_overlap=token_overlap,
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   extensions_to_process=extensions_to_process,
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   form_recognizer_client=form_recognizer_client, use_layout=use_layout)
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   form_recognizer_client=form_recognizer_client, use_layout=use_layout, add_embeddings=add_embeddings)
 ***REMOVED******REMOVED***if is_error:
 ***REMOVED******REMOVED***num_files_with_errors += 1
 ***REMOVED******REMOVED***continue
@@ -705,7 +751,7 @@ def chunk_directory(
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   min_chunk_size=min_chunk_size, url_prefix=url_prefix,
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   token_overlap=token_overlap,
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   extensions_to_process=extensions_to_process,
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   form_recognizer_client=None, use_layout=use_layout)
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   form_recognizer_client=None, use_layout=use_layout, add_embeddings=add_embeddings)
 ***REMOVED***with ProcessPoolExecutor(max_workers=njobs) as executor:
 ***REMOVED******REMOVED***futures = list(tqdm(executor.map(process_file_partial, files_to_process), total=len(files_to_process)))
 ***REMOVED******REMOVED***for result, is_error in futures:
