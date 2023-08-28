@@ -6,6 +6,7 @@ import json
 import os
 import re
 import requests
+import openai
 from abc import ABC, abstractmethod
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
@@ -439,21 +440,22 @@ def get_embedding(text):
 ***REMOVED***key = os.environ.get("EMBEDDING_MODEL_KEY")
 ***REMOVED***if endpoint is None or key is None:
 ***REMOVED***raise Exception("EMBEDDING_MODEL_ENDPOINT and EMBEDDING_MODEL_KEY are required for embedding")
-***REMOVED***
-***REMOVED***headers = {
-***REMOVED***"Content-Type": "application/json",
-***REMOVED***"api-key": key
-***REMOVED***
 
-***REMOVED***body = {
-***REMOVED***"input": text
-***REMOVED***
+***REMOVED***try:
+***REMOVED***endpoint_parts = endpoint.split("/openai/deployments/")
+***REMOVED***base_url = endpoint_parts[0]
+***REMOVED***deployment_id = endpoint_parts[1].split("/embeddings")[0]
 
-***REMOVED***response = requests.post(endpoint, headers=headers, json=body)
-***REMOVED***if response.status_code != 200:
-***REMOVED***raise Exception(f"Error getting embedding for text={text} with status_code={response.status_code} and response={response.text}")
-***REMOVED***response = response.json()
-***REMOVED***return response['data'][0]['embedding']
+***REMOVED***openai.api_version = '2023-05-15'
+***REMOVED***openai.api_base = base_url
+***REMOVED***openai.api_type = 'azure'
+***REMOVED***openai.api_key = os.environ.get("EMBEDDING_MODEL_KEY")
+
+***REMOVED***embeddings = openai.Embedding.create(deployment_id=deployment_id, input=text)
+***REMOVED***return embeddings['data'][0]["embedding"]
+
+***REMOVED***except Exception as e:
+***REMOVED***raise Exception(f"Error getting embeddings with endpoint={endpoint} with error={e}")
 
 
 def chunk_content_helper(
@@ -544,7 +546,7 @@ def chunk_content(
 ***REMOVED***for chunk, chunk_size, doc in chunked_context:
 ***REMOVED******REMOVED***if chunk_size >= min_chunk_size:
 ***REMOVED******REMOVED***if add_embeddings:
-***REMOVED******REMOVED******REMOVED***for _ in RETRY_COUNT:
+***REMOVED******REMOVED******REMOVED***for _ in range(RETRY_COUNT):
 ***REMOVED******REMOVED******REMOVED***try:
 ***REMOVED******REMOVED******REMOVED******REMOVED***doc.contentVector = get_embedding(chunk)
 ***REMOVED******REMOVED******REMOVED******REMOVED***break
@@ -618,8 +620,16 @@ def chunk_file(
 ***REMOVED***content = extract_pdf_content(file_path, form_recognizer_client, use_layout=use_layout)
 ***REMOVED***cracked_pdf = True
 ***REMOVED***else:
-***REMOVED***with open(file_path, "r", encoding="utf8") as f:
+***REMOVED***try:
+***REMOVED******REMOVED***with open(file_path, "r", encoding="utf8") as f:
 ***REMOVED******REMOVED***content = f.read()
+***REMOVED***except UnicodeDecodeError:
+***REMOVED******REMOVED***from chardet import detect
+***REMOVED******REMOVED***with open(file_path, "rb") as f:
+***REMOVED******REMOVED***binary_content = f.read()
+***REMOVED******REMOVED***encoding = detect(binary_content).get('encoding', 'utf8')
+***REMOVED******REMOVED***content = binary_content.decode(encoding)
+***REMOVED***
 ***REMOVED***return chunk_content(
 ***REMOVED***content=content,
 ***REMOVED***file_name=file_name,
