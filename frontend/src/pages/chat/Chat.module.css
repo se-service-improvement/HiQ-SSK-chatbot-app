@@ -12,7 +12,7 @@
 ***REMOVED***margin-bottom: 20px;
 ***REMOVED***margin-left: 20px;
 ***REMOVED***margin-right: 20px;
-***REMOVED***gap: 20px;
+***REMOVED***gap: 5px;
 }
 
 .chatContainer {
@@ -153,15 +153,48 @@
 ***REMOVED***flex-direction: row;
 ***REMOVED***justify-content: center;
 ***REMOVED***align-items: center;
-***REMOVED***padding: 8px;
 ***REMOVED***position: absolute;
 ***REMOVED***width: 40px;
 ***REMOVED***height: 40px;
-***REMOVED***left: 12px;
+***REMOVED***left: 7px;
+***REMOVED***top: 13px;
+***REMOVED***color: #FFFFFF;
+***REMOVED***border: 1px solid #D1D1D1;
+***REMOVED***border-radius: 4px;
+***REMOVED***z-index: 1;
+}
+
+.clearChatBroomNoCosmos {
+***REMOVED***box-sizing: border-box;
+***REMOVED***display: flex;
+***REMOVED***flex-direction: row;
+***REMOVED***justify-content: center;
+***REMOVED***align-items: center;
+***REMOVED***position: absolute;
+***REMOVED***width: 40px;
+***REMOVED***height: 40px;
+***REMOVED***left: 7px;
 ***REMOVED***top: 66px;
 ***REMOVED***color: #FFFFFF;
 ***REMOVED***border: 1px solid #D1D1D1;
-***REMOVED***border-radius: 20px;
+***REMOVED***border-radius: 4px;
+***REMOVED***z-index: 1;
+}
+
+.newChatIcon {
+***REMOVED***box-sizing: border-box;
+***REMOVED***display: flex;
+***REMOVED***flex-direction: row;
+***REMOVED***justify-content: center;
+***REMOVED***align-items: center;
+***REMOVED***position: absolute;
+***REMOVED***width: 40px;
+***REMOVED***height: 40px;
+***REMOVED***left: 7px;
+***REMOVED***top: 66px;
+***REMOVED***color: #FFFFFF;
+***REMOVED***border: 1px solid #D1D1D1;
+***REMOVED***border-radius: 4px;
 ***REMOVED***z-index: 1;
 }
 

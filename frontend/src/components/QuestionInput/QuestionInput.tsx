@@ -5,13 +5,14 @@ import Send from "../../assets/Send.svg";
 import styles from "./QuestionInput.module.css";
 
 interface Props {
-***REMOVED***onSend: (question: string) => void;
+***REMOVED***onSend: (question: string, id?: string) => void;
 ***REMOVED***disabled: boolean;
 ***REMOVED***placeholder?: string;
 ***REMOVED***clearOnSend?: boolean;
+***REMOVED***conversationId?: string;
 }
 
-export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend }: Props) => {
+export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conversationId }: Props) => {
 ***REMOVED***const [question, setQuestion] = useState<string>("");
 
 ***REMOVED***const sendQuestion = () => {
@@ -19,7 +20,11 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend }: Pr
 ***REMOVED******REMOVED***return;
 ***REMOVED***
 
-***REMOVED***onSend(question);
+***REMOVED***if(conversationId){
+***REMOVED******REMOVED***onSend(question, conversationId);
+***REMOVED***else{
+***REMOVED******REMOVED***onSend(question);
+***REMOVED***
 
 ***REMOVED***if (clearOnSend) {
 ***REMOVED******REMOVED***setQuestion("");

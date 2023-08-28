@@ -21,10 +21,19 @@ export type ToolMessageContent = {
 }
 
 export type ChatMessage = {
+***REMOVED***id: string;
 ***REMOVED***role: string;
 ***REMOVED***content: string;
 ***REMOVED***end_turn?: boolean;
+***REMOVED***date: string;
 };
+
+export type Conversation = {
+***REMOVED***id: string;
+***REMOVED***title: string;
+***REMOVED***messages: ChatMessage[];
+***REMOVED***date: string;
+}
 
 export enum ChatCompletionType {
 ***REMOVED***ChatCompletion = "chat.completion",
@@ -41,6 +50,11 @@ export type ChatResponse = {
 ***REMOVED***created: number;
 ***REMOVED***object: ChatCompletionType;
 ***REMOVED***choices: ChatResponseChoice[];
+***REMOVED***history_metadata: {
+***REMOVED***conversation_id: string;
+***REMOVED***title: string;
+***REMOVED***date: string;
+***REMOVED***
 ***REMOVED***error?: any;
 }
 
@@ -56,3 +70,26 @@ export type UserInfo = {
 ***REMOVED***user_claims: any[];
 ***REMOVED***user_id: string;
 };
+
+export enum CosmosDBStatus {
+***REMOVED***NotConfigured = "CosmosDB is not configured",
+***REMOVED***NotWorking = "CosmosDB is not working",
+***REMOVED***Working = "CosmosDB is configured and working",
+}
+
+export type CosmosDBHealth = {
+***REMOVED***cosmosDB: boolean,
+***REMOVED***status: string
+}
+
+export enum ChatHistoryLoadingState {
+***REMOVED***Loading = "loading",
+***REMOVED***Success = "success",
+***REMOVED***Fail = "fail",
+***REMOVED***NotStarted = "notStarted"
+}
+
+export type ErrorMessage = {
+***REMOVED***title: string,
+***REMOVED***subtitle: string
+}

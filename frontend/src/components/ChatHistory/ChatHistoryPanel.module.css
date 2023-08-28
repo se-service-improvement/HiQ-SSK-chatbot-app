@@ -1,0 +1,67 @@
+.container {
+***REMOVED***max-height: calc(100vh - 100px);
+***REMOVED***width: 300px;
+***REMOVED***
+}
+
+.listContainer {
+***REMOVED***overflow: hidden auto;
+***REMOVED***max-height: calc(90vh - 105px);
+}
+
+.itemCell {
+***REMOVED***max-width: 270px;
+***REMOVED***min-height: 32px;
+***REMOVED***cursor: pointer;
+***REMOVED***padding-left: 15px;
+***REMOVED***padding-right: 5px;
+***REMOVED***padding-top: 5px;
+***REMOVED***padding-bottom: 5px;
+***REMOVED***box-sizing: border-box;
+***REMOVED***border-radius: 5px;
+***REMOVED***display: flex;
+}
+
+.itemCell:hover {
+***REMOVED***background: #E6E6E6;
+}
+
+.itemButton {
+***REMOVED***display: flex;
+***REMOVED***justify-content: center;
+***REMOVED***align-items: center;
+***REMOVED***width: 28px;
+***REMOVED***height: 28px;
+***REMOVED***border: 1px solid #d1d1d1;
+***REMOVED***border-radius: 5px;
+***REMOVED***background-color: white;
+***REMOVED***margin: auto 2.5px;
+***REMOVED***cursor: pointer;
+}
+
+.itemButton:hover {
+***REMOVED***background-color: #E6E6E6;
+}
+
+.chatGroup {
+***REMOVED***margin: auto 5px;
+***REMOVED***width: 100%;
+}
+
+.chatList {
+***REMOVED***width: 100%;
+}
+
+.chatMonth {
+***REMOVED***font-size: 14px;
+***REMOVED***font-weight: 600;
+***REMOVED***margin-bottom: 5px;
+***REMOVED***padding-left: 15px;
+}
+
+.chatTitle {
+***REMOVED***width: 80%;
+***REMOVED***overflow: hidden;
+***REMOVED***white-space: nowrap;
+***REMOVED***text-overflow: ellipsis;
+}

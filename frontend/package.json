@@ -10,6 +10,7 @@
   },
   "dependencies": {
 ***REMOVED***"@fluentui/react": "^8.105.3",
+***REMOVED***"@fluentui/react-hooks": "^8.6.29",
 ***REMOVED***"@fluentui/react-icons": "^2.0.195",
 ***REMOVED***"lodash": "^4.17.21",
 ***REMOVED***"lodash-es": "^4.17.21",
@@ -17,6 +18,7 @@
 ***REMOVED***"react-dom": "^18.2.0",
 ***REMOVED***"react-markdown": "^7.0.1",
 ***REMOVED***"react-router-dom": "^6.8.1",
+***REMOVED***"react-uuid": "^2.0.0",
 ***REMOVED***"rehype-raw": "^6.1.1",
 ***REMOVED***"remark-gfm": "^3.0.1",
 ***REMOVED***"remark-supersub": "^1.0.0"
