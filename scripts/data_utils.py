@@ -15,6 +15,7 @@ from typing import List, Dict, Optional, Generator, Tuple
 
 import markdown
 import tiktoken
+from azure.identity import DefaultAzureCredential
 from azure.ai.formrecognizer import DocumentAnalysisClient
 from azure.core.credentials import AzureKeyCredential
 from bs4 import BeautifulSoup
@@ -435,27 +436,22 @@ def merge_chunks_serially(chunked_content_list: List[str], num_tokens: int) -> G
 ***REMOVED***yield current_chunk, total_size
 
 
-def get_embedding(text):
-***REMOVED***endpoint = os.environ.get("EMBEDDING_MODEL_ENDPOINT")
-***REMOVED***key = os.environ.get("EMBEDDING_MODEL_KEY")
-***REMOVED***if endpoint is None or key is None:
-***REMOVED***raise Exception("EMBEDDING_MODEL_ENDPOINT and EMBEDDING_MODEL_KEY are required for embedding")
-
+def get_embedding(text, azure_credential, embedding_endpoint):
 ***REMOVED***try:
-***REMOVED***endpoint_parts = endpoint.split("/openai/deployments/")
+***REMOVED***endpoint_parts = embedding_endpoint.split("/openai/deployments/")
 ***REMOVED***base_url = endpoint_parts[0]
 ***REMOVED***deployment_id = endpoint_parts[1].split("/embeddings")[0]
 
 ***REMOVED***openai.api_version = '2023-05-15'
 ***REMOVED***openai.api_base = base_url
-***REMOVED***openai.api_type = 'azure'
-***REMOVED***openai.api_key = os.environ.get("EMBEDDING_MODEL_KEY")
+***REMOVED***openai.api_key = azure_credential.get_token("https://cognitiveservices.azure.com/.default").token
+***REMOVED***openai.api_type = "azure_ad"
 
 ***REMOVED***embeddings = openai.Embedding.create(deployment_id=deployment_id, input=text)
 ***REMOVED***return embeddings['data'][0]["embedding"]
 
 ***REMOVED***except Exception as e:
-***REMOVED***raise Exception(f"Error getting embeddings with endpoint={endpoint} with error={e}")
+***REMOVED***raise Exception(f"Error getting embeddings with endpoint={embedding_endpoint} with error={e}")
 
 
 def chunk_content_helper(
@@ -507,7 +503,9 @@ def chunk_content(
 ***REMOVED***extensions_to_process = FILE_FORMAT_DICT.keys(),
 ***REMOVED***cracked_pdf = False,
 ***REMOVED***use_layout = False,
-***REMOVED***add_embeddings = False
+***REMOVED***add_embeddings = False,
+***REMOVED***azure_credential = None,
+***REMOVED***embedding_endpoint = None
 ) -> ChunkingResult:
 ***REMOVED***"""Chunks the given content. If ignore_errors is true, returns None
 ***REMOVED***in case of an error
@@ -548,7 +546,7 @@ def chunk_content(
 ***REMOVED******REMOVED***if add_embeddings:
 ***REMOVED******REMOVED******REMOVED***for _ in range(RETRY_COUNT):
 ***REMOVED******REMOVED******REMOVED***try:
-***REMOVED******REMOVED******REMOVED******REMOVED***doc.contentVector = get_embedding(chunk)
+***REMOVED******REMOVED******REMOVED******REMOVED***doc.contentVector = get_embedding(chunk, azure_credential, embedding_endpoint)
 ***REMOVED******REMOVED******REMOVED******REMOVED***break
 ***REMOVED******REMOVED******REMOVED***except:
 ***REMOVED******REMOVED******REMOVED******REMOVED***sleep(30)
@@ -595,7 +593,9 @@ def chunk_file(
 ***REMOVED***extensions_to_process = FILE_FORMAT_DICT.keys(),
 ***REMOVED***form_recognizer_client = None,
 ***REMOVED***use_layout = False,
-***REMOVED***add_embeddings=False
+***REMOVED***add_embeddings=False,
+***REMOVED***azure_credential = None,
+***REMOVED***embedding_endpoint = None
 ) -> ChunkingResult:
 ***REMOVED***"""Chunks the given file.
 ***REMOVED***Args:
@@ -641,7 +641,9 @@ def chunk_file(
 ***REMOVED***extensions_to_process=extensions_to_process,
 ***REMOVED***cracked_pdf=cracked_pdf,
 ***REMOVED***use_layout=use_layout,
-***REMOVED***add_embeddings=add_embeddings
+***REMOVED***add_embeddings=add_embeddings,
+***REMOVED***azure_credential=azure_credential,
+***REMOVED***embedding_endpoint=embedding_endpoint
 ***REMOVED***)
 
 
@@ -656,7 +658,9 @@ def process_file(
 ***REMOVED***extensions_to_process: List[str] = FILE_FORMAT_DICT.keys(),
 ***REMOVED***form_recognizer_client = None,
 ***REMOVED***use_layout = False,
-***REMOVED***add_embeddings = False
+***REMOVED***add_embeddings = False,
+***REMOVED***azure_credential = None,
+***REMOVED***embedding_endpoint = None
 ***REMOVED***):
 
 ***REMOVED***if not form_recognizer_client:
@@ -680,7 +684,9 @@ def process_file(
 ***REMOVED******REMOVED***extensions_to_process=extensions_to_process,
 ***REMOVED******REMOVED***form_recognizer_client=form_recognizer_client,
 ***REMOVED******REMOVED***use_layout=use_layout,
-***REMOVED******REMOVED***add_embeddings=add_embeddings
+***REMOVED******REMOVED***add_embeddings=add_embeddings,
+***REMOVED******REMOVED***azure_credential=azure_credential,
+***REMOVED******REMOVED***embedding_endpoint=embedding_endpoint
 ***REMOVED***)
 ***REMOVED***for chunk_idx, chunk_doc in enumerate(result.chunks):
 ***REMOVED******REMOVED***chunk_doc.filepath = rel_file_path
@@ -705,7 +711,9 @@ def chunk_directory(
 ***REMOVED***form_recognizer_client = None,
 ***REMOVED***use_layout = False,
 ***REMOVED***njobs=4,
-***REMOVED***add_embeddings = False
+***REMOVED***add_embeddings = False,
+***REMOVED***azure_credential = None,
+***REMOVED***embedding_endpoint = None
 ):
 ***REMOVED***"""
 ***REMOVED***Chunks the given directory recursively
@@ -746,7 +754,8 @@ def chunk_directory(
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   min_chunk_size=min_chunk_size, url_prefix=url_prefix,
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   token_overlap=token_overlap,
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   extensions_to_process=extensions_to_process,
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   form_recognizer_client=form_recognizer_client, use_layout=use_layout, add_embeddings=add_embeddings)
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   form_recognizer_client=form_recognizer_client, use_layout=use_layout, add_embeddings=add_embeddings,
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   azure_credential=azure_credential, embedding_endpoint=embedding_endpoint)
 ***REMOVED******REMOVED***if is_error:
 ***REMOVED******REMOVED***num_files_with_errors += 1
 ***REMOVED******REMOVED***continue
@@ -761,7 +770,8 @@ def chunk_directory(
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   min_chunk_size=min_chunk_size, url_prefix=url_prefix,
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   token_overlap=token_overlap,
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   extensions_to_process=extensions_to_process,
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   form_recognizer_client=None, use_layout=use_layout, add_embeddings=add_embeddings)
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   form_recognizer_client=None, use_layout=use_layout, add_embeddings=add_embeddings,
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   azure_credential=azure_credential, embedding_endpoint=embedding_endpoint)
 ***REMOVED***with ProcessPoolExecutor(max_workers=njobs) as executor:
 ***REMOVED******REMOVED***futures = list(tqdm(executor.map(process_file_partial, files_to_process), total=len(files_to_process)))
 ***REMOVED******REMOVED***for result, is_error in futures:

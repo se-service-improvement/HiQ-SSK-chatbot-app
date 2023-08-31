@@ -8,11 +8,16 @@ from azure.core.credentials import AzureKeyCredential
 from azure.search.documents.indexes import SearchIndexClient
 from azure.search.documents.indexes.models import (
 ***REMOVED***SearchableField,
+***REMOVED***SearchField,
+***REMOVED***SearchFieldDataType,
 ***REMOVED***SemanticField,
 ***REMOVED***SemanticSettings,
 ***REMOVED***SemanticConfiguration,
 ***REMOVED***SearchIndex,
 ***REMOVED***PrioritizedFields,
+***REMOVED***VectorSearch,
+***REMOVED***VectorSearchAlgorithmConfiguration,
+***REMOVED***HnswParameters
 )
 from azure.search.documents import SearchClient
 from azure.ai.formrecognizer import DocumentAnalysisClient
@@ -37,6 +42,9 @@ def create_search_index(index_name, index_client):
 ***REMOVED******REMOVED***SearchableField(name="filepath", type="Edm.String"),
 ***REMOVED******REMOVED***SearchableField(name="url", type="Edm.String"),
 ***REMOVED******REMOVED***SearchableField(name="metadata", type="Edm.String"),
+***REMOVED******REMOVED***SearchField(name="contentVector", type=SearchFieldDataType.Collection(SearchFieldDataType.Single),
+***REMOVED******REMOVED******REMOVED******REMOVED***hidden=False, searchable=True, filterable=False, sortable=False, facetable=False,
+***REMOVED******REMOVED******REMOVED******REMOVED***vector_search_dimensions=1536, vector_search_configuration="default"),
 ***REMOVED******REMOVED***],
 ***REMOVED******REMOVED***semantic_settings=SemanticSettings(
 ***REMOVED******REMOVED***configurations=[
@@ -51,6 +59,15 @@ def create_search_index(index_name, index_client):
 ***REMOVED******REMOVED******REMOVED***)
 ***REMOVED******REMOVED***]
 ***REMOVED******REMOVED***),
+***REMOVED******REMOVED***vector_search=VectorSearch(
+***REMOVED******REMOVED***algorithm_configurations=[
+***REMOVED******REMOVED******REMOVED***VectorSearchAlgorithmConfiguration(
+***REMOVED******REMOVED******REMOVED***name="default",
+***REMOVED******REMOVED******REMOVED***kind="hnsw",
+***REMOVED******REMOVED******REMOVED***hnsw_parameters=HnswParameters(metric="cosine")
+***REMOVED******REMOVED******REMOVED***)
+***REMOVED******REMOVED***]
+***REMOVED******REMOVED***)
 ***REMOVED***)
 ***REMOVED***print(f"Creating {index_name} search index")
 ***REMOVED***index_client.create_index(index)
@@ -66,6 +83,8 @@ def upload_documents_to_index(docs, search_client, upload_batch_size=50):
 ***REMOVED***d = dataclasses.asdict(document)
 ***REMOVED***# add id to documents
 ***REMOVED***d.update({"@search.action": "upload", "id": str(id)})
+***REMOVED***if "contentVector" in d and d["contentVector"] is None:
+***REMOVED******REMOVED***del d["contentVector"]
 ***REMOVED***to_upload_dicts.append(d)
 ***REMOVED***id += 1
 
@@ -108,7 +127,7 @@ def validate_index(index_name, index_client):
 
 
 def create_and_populate_index(
-***REMOVED***index_name, index_client, search_client, form_recognizer_client
+***REMOVED***index_name, index_client, search_client, form_recognizer_client, azure_credential, embedding_endpoint
 ):
 ***REMOVED***# create or update search index with compatible schema
 ***REMOVED***create_search_index(index_name, index_client)
@@ -121,6 +140,9 @@ def create_and_populate_index(
 ***REMOVED***use_layout=True,
 ***REMOVED***ignore_errors=False,
 ***REMOVED***njobs=1,
+***REMOVED***add_embeddings=True,
+***REMOVED***azure_credential=azd_credential,
+***REMOVED***embedding_endpoint=embedding_endpoint
 ***REMOVED***)
 
 ***REMOVED***if len(result.chunks) == 0:
@@ -174,6 +196,11 @@ if __name__ == "__main__":
 ***REMOVED***required=False,
 ***REMOVED***help="Optional. Use this Azure Form Recognizer account key instead of the current user identity to login (use az login to set current user for Azure)",
 ***REMOVED***)
+***REMOVED***parser.add_argument(
+***REMOVED***"--embeddingendpoint",
+***REMOVED***required=False,
+***REMOVED***help="Optional. Use this OpenAI endpoint to generate embeddings for the documents",
+***REMOVED***)
 ***REMOVED***args = parser.parse_args()
 
 ***REMOVED***# Use the current user identity to connect to Azure services unless a key is explicitly set for any of them
@@ -204,6 +231,6 @@ if __name__ == "__main__":
 ***REMOVED***credential=formrecognizer_creds,
 ***REMOVED***)
 ***REMOVED***create_and_populate_index(
-***REMOVED***args.index, index_client, search_client, form_recognizer_client
+***REMOVED***args.index, index_client, search_client, form_recognizer_client, azd_credential, args.embeddingendpoint
 ***REMOVED***)
 ***REMOVED***print("Data preparation for index", args.index, "completed")
