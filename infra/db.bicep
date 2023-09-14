@@ -10,7 +10,7 @@ param containers array = [
   {
 ***REMOVED***name: collectionName
 ***REMOVED***id: collectionName
-***REMOVED***partitionKey: '/id'
+***REMOVED***partitionKey: '/userId'
   }
 ]
 
