@@ -47,6 +47,9 @@ export const Answer = ({
 ***REMOVED******REMOVED***citationFilename = `${citation.filepath} - Part ${parseInt(citation.chunk_id) + 1}`;
 ***REMOVED***
 ***REMOVED***
+***REMOVED***else if (citation.filepath && citation.reindex_id) {
+***REMOVED******REMOVED***citationFilename = `${citation.filepath} - Part ${citation.reindex_id}`;
+***REMOVED***
 ***REMOVED***else {
 ***REMOVED******REMOVED***citationFilename = `Citation ${index}`;
 ***REMOVED***
