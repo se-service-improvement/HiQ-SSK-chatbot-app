@@ -641,7 +641,7 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED***}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***className={appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured ? styles.clearChatBroom : styles.clearChatBroomNoCosmos}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***iconProps={{ iconName: 'Broom' }}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onClick={clearChat}
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onClick={appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured ? clearChat : newChat}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***disabled={disabledButton()}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***aria-label="clear chat button"
 ***REMOVED******REMOVED******REMOVED******REMOVED***/>
