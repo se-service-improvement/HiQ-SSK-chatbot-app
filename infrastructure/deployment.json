@@ -230,6 +230,20 @@
 ***REMOVED******REMOVED***"description": "Azure Search Permitted Groups Field"
 ***REMOVED***
 ***REMOVED***,
+***REMOVED***"AzureSearchStrictness": {
+***REMOVED******REMOVED***"type": "int",
+***REMOVED******REMOVED***"defaultValue": 3,
+***REMOVED******REMOVED***"allowedValues": [
+***REMOVED******REMOVED***1,
+***REMOVED******REMOVED***2,
+***REMOVED******REMOVED***3,
+***REMOVED******REMOVED***4,
+***REMOVED******REMOVED***5
+***REMOVED******REMOVED***],
+***REMOVED******REMOVED***"metadata": {
+***REMOVED******REMOVED***"description": "Azure Search Strictness"
+***REMOVED***
+***REMOVED***,
 ***REMOVED***"AzureOpenAIEmbeddingEndpoint": {
 ***REMOVED******REMOVED***"type": "string",
 ***REMOVED******REMOVED***"defaultValue": "",
@@ -397,6 +411,10 @@
 ***REMOVED******REMOVED******REMOVED***{
 ***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_SEARCH_PERMITTED_GROUPS_COLUMN",
 ***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureSearchPermittedGroupsField')]"
+***REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_SEARCH_STRICTNESS",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureSearchStrictness')]"
 ***REMOVED******REMOVED******REMOVED***,
 ***REMOVED******REMOVED******REMOVED***{
 ***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_OPENAI_EMBEDDING_ENDPOINT",
