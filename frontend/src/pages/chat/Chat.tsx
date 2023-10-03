@@ -160,7 +160,11 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED***obj.date = new Date().toISOString();
 ***REMOVED******REMOVED******REMOVED***)
 ***REMOVED******REMOVED******REMOVED******REMOVED***setShowLoadingMessage(false);
+***REMOVED******REMOVED******REMOVED******REMOVED***if(!conversationId){
+***REMOVED******REMOVED******REMOVED******REMOVED***setMessages([...messages, userMessage, ...result.choices[0].messages]);
+***REMOVED******REMOVED******REMOVED***else{
 ***REMOVED******REMOVED******REMOVED******REMOVED***setMessages([...messages, ...result.choices[0].messages]);
+***REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED******REMOVED******REMOVED***runningText = "";
 ***REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED******REMOVED***catch { }
