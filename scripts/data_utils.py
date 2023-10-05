@@ -70,30 +70,33 @@ class PdfTextSplitter(TextSplitter):
 ***REMOVED***self._length_function = length_function
 ***REMOVED***self._noise = 50 # tokens to accommodate differences in token calculation, we don't want the chunking-on-the-fly to inadvertently chunk anything due to token calc mismatch
 
-***REMOVED***def extract_caption(self, s, type):
+***REMOVED***def extract_caption(self, text):
 ***REMOVED***separator = self._separators[-1]
 ***REMOVED***for _s in self._separators:
 ***REMOVED******REMOVED***if _s == "":
 ***REMOVED******REMOVED***separator = _s
 ***REMOVED******REMOVED***break
-***REMOVED******REMOVED***if _s in s:
+***REMOVED******REMOVED***if _s in text:
 ***REMOVED******REMOVED***separator = _s
 ***REMOVED******REMOVED***break
+***REMOVED***
 ***REMOVED***# Now that we have the separator, split the text
 ***REMOVED***if separator:
-***REMOVED******REMOVED***lines = s.split(separator)
+***REMOVED******REMOVED***lines = text.split(separator)
 ***REMOVED***else:
-***REMOVED******REMOVED***lines = list(s)
-
+***REMOVED******REMOVED***lines = list(text)
+***REMOVED***
+***REMOVED***# remove empty lines
+***REMOVED***lines = [line for line in lines if line!='']
 ***REMOVED***caption = ""
-***REMOVED***if type == "prefix": #find the last heading and the last line before the table
-***REMOVED******REMOVED***if len(s.split(f"<{PDF_HEADERS['title']}>"))>1:
-***REMOVED******REMOVED***   caption +=  s.split(f"<{PDF_HEADERS['title']}>")[-1].split(f"</{PDF_HEADERS['title']}>")[0]
-***REMOVED******REMOVED***if len(s.split(f"<{PDF_HEADERS['sectionHeading']}>"))>1:
-***REMOVED******REMOVED***   caption +=  s.split(f"<{PDF_HEADERS['sectionHeading']}>")[-1].split(f"</{PDF_HEADERS['sectionHeading']}>")[0]
-***REMOVED******REMOVED***caption += "\n"+ lines[-1]
-***REMOVED***else: # find the first line after the table
-***REMOVED******REMOVED***caption += lines[0]
+***REMOVED***
+***REMOVED***if len(text.split(f"<{PDF_HEADERS['title']}>"))>1:
+***REMOVED******REMOVED***caption +=  text.split(f"<{PDF_HEADERS['title']}>")[-1].split(f"</{PDF_HEADERS['title']}>")[0]
+***REMOVED***if len(text.split(f"<{PDF_HEADERS['sectionHeading']}>"))>1:
+***REMOVED******REMOVED***caption +=  text.split(f"<{PDF_HEADERS['sectionHeading']}>")[-1].split(f"</{PDF_HEADERS['sectionHeading']}>")[0]
+***REMOVED***
+***REMOVED***caption += "\n"+ lines[-1].strip()
+
 ***REMOVED***return caption
 ***REMOVED***
 ***REMOVED***def split_text(self, text: str) -> List[str]:
@@ -102,18 +105,23 @@ class PdfTextSplitter(TextSplitter):
 ***REMOVED***splits = text.split(start_tag)
 ***REMOVED***
 ***REMOVED***final_chunks = self.chunk_rest(splits[0]) # the first split is before the first table tag so it is regular text
-
-***REMOVED***table_caption_prefix = self.extract_caption(splits[0], "prefix")
+***REMOVED***
+***REMOVED***table_caption_prefix = ""
+***REMOVED***if len(final_chunks)>0:
+***REMOVED******REMOVED***table_caption_prefix += self.extract_caption(final_chunks[-1]) # extracted from the last chunk before the table
 ***REMOVED***for part in splits[1:]:
 ***REMOVED******REMOVED***table, rest = part.split(end_tag)
-***REMOVED******REMOVED***table_caption_suffix = self.extract_caption(rest, "suffix")
 ***REMOVED******REMOVED***table = start_tag + table + end_tag 
-***REMOVED******REMOVED***minitables = self.chunk_table(table, "\n".join([table_caption_prefix, table_caption_suffix]))
+***REMOVED******REMOVED***minitables = self.chunk_table(table, table_caption_prefix)
 ***REMOVED******REMOVED***final_chunks.extend(minitables)
 
-***REMOVED******REMOVED***if rest!="":
-***REMOVED******REMOVED***final_chunks.extend(self.chunk_rest(rest))
-***REMOVED******REMOVED***table_caption_prefix = self.extract_caption(rest, "prefix")
+***REMOVED******REMOVED***if rest.strip()!="":
+***REMOVED******REMOVED***text_minichunks = self.chunk_rest(rest)
+***REMOVED******REMOVED***final_chunks.extend(text_minichunks)
+***REMOVED******REMOVED***table_caption_prefix = self.extract_caption(text_minichunks[-1])
+***REMOVED******REMOVED***else:
+***REMOVED******REMOVED***table_caption_prefix = ""
+***REMOVED******REMOVED***
 
 ***REMOVED***final_final_chunks = [chunk for chunk, chunk_size in merge_chunks_serially(final_chunks, self._chunk_size)]
 
@@ -160,7 +168,7 @@ class PdfTextSplitter(TextSplitter):
 ***REMOVED******REMOVED***headers += re.search("<th.*>.*</th>", table).group() # extract the header out. Opening tag may contain rowspan/colspan
 ***REMOVED******REMOVED***splits = table.split(self._table_tags["row_open"]) #split by row tag
 ***REMOVED******REMOVED***tables = []
-***REMOVED******REMOVED***current_table = caption
+***REMOVED******REMOVED***current_table = caption + "\n"
 ***REMOVED******REMOVED***for part in splits:
 ***REMOVED******REMOVED***if len(part)>0:
 ***REMOVED******REMOVED******REMOVED***if self._length_function(current_table + self._table_tags["row_open"] + part) < self._chunk_size: # if current table length is within permissible limit, keep adding rows
@@ -898,8 +906,7 @@ def chunk_directory(
 
 ***REMOVED***if njobs==1:
 ***REMOVED***print("Single process to chunk and parse the files. --njobs > 1 can help performance.")
-***REMOVED***# for file_path in tqdm(files_to_process):
-***REMOVED***for file_path in files_to_process:
+***REMOVED***for file_path in tqdm(files_to_process):
 ***REMOVED******REMOVED***total_files += 1
 ***REMOVED******REMOVED***result, is_error = process_file(file_path=file_path,directory_path=directory_path, ignore_errors=ignore_errors,
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   num_tokens=num_tokens,
