@@ -1,0 +1,21 @@
+name: conda_env
+dependencies:
+  - python=3.10.9
+  - pip
+  - pip:
+***REMOVED***- azureml-core
+***REMOVED***- azure-identity
+***REMOVED***- azure-keyvault-secrets
+***REMOVED***- azure-ai-formrecognizer
+***REMOVED***- markdown
+***REMOVED***- requests
+***REMOVED***- tqdm
+***REMOVED***- tiktoken
+***REMOVED***- langchain
+***REMOVED***- bs4
+***REMOVED***- urllib3
+***REMOVED***- openai
+***REMOVED***- azure-search-documents
+***REMOVED***- azure-storage-blob
+***REMOVED***- chardet
+

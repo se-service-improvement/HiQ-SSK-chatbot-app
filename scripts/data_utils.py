@@ -11,7 +11,7 @@ from abc import ABC, abstractmethod
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
 from functools import partial
-from typing import List, Dict, Optional, Generator, Tuple
+from typing import Callable, List, Dict, Optional, Generator, Tuple, Union
 
 import markdown
 import tiktoken
@@ -19,8 +19,10 @@ from azure.identity import DefaultAzureCredential
 from azure.ai.formrecognizer import DocumentAnalysisClient
 from azure.core.credentials import AzureKeyCredential
 from bs4 import BeautifulSoup
-from langchain.text_splitter import MarkdownTextSplitter, RecursiveCharacterTextSplitter, PythonCodeTextSplitter
+from langchain.text_splitter import TextSplitter, MarkdownTextSplitter, RecursiveCharacterTextSplitter, PythonCodeTextSplitter
 from tqdm import tqdm
+from typing import Any
+
 
 FILE_FORMAT_DICT = {
 ***REMOVED***"md": "markdown",
@@ -37,11 +39,166 @@ RETRY_COUNT = 5
 SENTENCE_ENDINGS = [".", "!", "?"]
 WORDS_BREAKS = list(reversed([",", ";", ":", " ", "(", ")", "[", "]", "{", "}", "\t", "\n"]))
 
+HTML_TABLE_TAGS = {"table_open": "<table>", "table_close": "</table>", "row_open":"<tr>"}
+
 PDF_HEADERS = {
 ***REMOVED***"title": "h1",
 ***REMOVED***"sectionHeading": "h2"
 }
 
+class TokenEstimator(object):
+***REMOVED***GPT2_TOKENIZER = tiktoken.get_encoding("gpt2")
+
+***REMOVED***def estimate_tokens(self, text: Union[str, List]) -> int:
+
+***REMOVED***return len(self.GPT2_TOKENIZER.encode(text, allowed_special="all"))
+
+***REMOVED***def construct_tokens_with_size(self, tokens: str, numofTokens: int) -> str:
+***REMOVED***newTokens = self.GPT2_TOKENIZER.decode(
+***REMOVED******REMOVED***self.GPT2_TOKENIZER.encode(tokens, allowed_special="all")[:numofTokens]
+***REMOVED***)
+***REMOVED***return newTokens
+
+TOKEN_ESTIMATOR = TokenEstimator()
+
+class PdfTextSplitter(TextSplitter):
+***REMOVED***def __init__(self, length_function: Callable[[str], int] =TOKEN_ESTIMATOR.estimate_tokens, separator: str = "\n\n", **kwargs: Any):
+***REMOVED***"""Create a new TextSplitter for htmls from extracted pdfs."""
+***REMOVED***super().__init__(**kwargs)
+***REMOVED***self._table_tags = HTML_TABLE_TAGS
+***REMOVED***self._separators = separator or ["\n\n", "\n", " ", ""]
+***REMOVED***self._length_function = length_function
+***REMOVED***self._noise = 50 # tokens to accommodate differences in token calculation, we don't want the chunking-on-the-fly to inadvertently chunk anything due to token calc mismatch
+
+***REMOVED***def extract_caption(self, text):
+***REMOVED***separator = self._separators[-1]
+***REMOVED***for _s in self._separators:
+***REMOVED******REMOVED***if _s == "":
+***REMOVED******REMOVED***separator = _s
+***REMOVED******REMOVED***break
+***REMOVED******REMOVED***if _s in text:
+***REMOVED******REMOVED***separator = _s
+***REMOVED******REMOVED***break
+***REMOVED***
+***REMOVED***# Now that we have the separator, split the text
+***REMOVED***if separator:
+***REMOVED******REMOVED***lines = text.split(separator)
+***REMOVED***else:
+***REMOVED******REMOVED***lines = list(text)
+***REMOVED***
+***REMOVED***# remove empty lines
+***REMOVED***lines = [line for line in lines if line!='']
+***REMOVED***caption = ""
+***REMOVED***
+***REMOVED***if len(text.split(f"<{PDF_HEADERS['title']}>"))>1:
+***REMOVED******REMOVED***caption +=  text.split(f"<{PDF_HEADERS['title']}>")[-1].split(f"</{PDF_HEADERS['title']}>")[0]
+***REMOVED***if len(text.split(f"<{PDF_HEADERS['sectionHeading']}>"))>1:
+***REMOVED******REMOVED***caption +=  text.split(f"<{PDF_HEADERS['sectionHeading']}>")[-1].split(f"</{PDF_HEADERS['sectionHeading']}>")[0]
+***REMOVED***
+***REMOVED***caption += "\n"+ lines[-1].strip()
+
+***REMOVED***return caption
+***REMOVED***
+***REMOVED***def split_text(self, text: str) -> List[str]:
+***REMOVED***start_tag = self._table_tags["table_open"]
+***REMOVED***end_tag = self._table_tags["table_close"]
+***REMOVED***splits = text.split(start_tag)
+***REMOVED***
+***REMOVED***final_chunks = self.chunk_rest(splits[0]) # the first split is before the first table tag so it is regular text
+***REMOVED***
+***REMOVED***table_caption_prefix = ""
+***REMOVED***if len(final_chunks)>0:
+***REMOVED******REMOVED***table_caption_prefix += self.extract_caption(final_chunks[-1]) # extracted from the last chunk before the table
+***REMOVED***for part in splits[1:]:
+***REMOVED******REMOVED***table, rest = part.split(end_tag)
+***REMOVED******REMOVED***table = start_tag + table + end_tag 
+***REMOVED******REMOVED***minitables = self.chunk_table(table, table_caption_prefix)
+***REMOVED******REMOVED***final_chunks.extend(minitables)
+
+***REMOVED******REMOVED***if rest.strip()!="":
+***REMOVED******REMOVED***text_minichunks = self.chunk_rest(rest)
+***REMOVED******REMOVED***final_chunks.extend(text_minichunks)
+***REMOVED******REMOVED***table_caption_prefix = self.extract_caption(text_minichunks[-1])
+***REMOVED******REMOVED***else:
+***REMOVED******REMOVED***table_caption_prefix = ""
+***REMOVED******REMOVED***
+
+***REMOVED***final_final_chunks = [chunk for chunk, chunk_size in merge_chunks_serially(final_chunks, self._chunk_size)]
+
+***REMOVED***return final_final_chunks
+
+
+
+***REMOVED***def chunk_rest(self, item):
+***REMOVED***separator = self._separators[-1]
+***REMOVED***for _s in self._separators:
+***REMOVED******REMOVED***if _s == "":
+***REMOVED******REMOVED***separator = _s
+***REMOVED******REMOVED***break
+***REMOVED******REMOVED***if _s in item:
+***REMOVED******REMOVED***separator = _s
+***REMOVED******REMOVED***break
+***REMOVED***chunks = []
+***REMOVED***if separator:
+***REMOVED******REMOVED***splits = item.split(separator)
+***REMOVED***else:
+***REMOVED******REMOVED***splits = list(item)
+***REMOVED***_good_splits = []
+***REMOVED***for s in splits:
+***REMOVED******REMOVED***if self._length_function(s) < self._chunk_size - self._noise:
+***REMOVED******REMOVED***_good_splits.append(s)
+***REMOVED******REMOVED***else:
+***REMOVED******REMOVED***if _good_splits:
+***REMOVED******REMOVED******REMOVED***merged_text = self._merge_splits(_good_splits, separator)
+***REMOVED******REMOVED******REMOVED***chunks.extend(merged_text)
+***REMOVED******REMOVED******REMOVED***_good_splits = []
+***REMOVED******REMOVED***other_info = self.chunk_rest(s)
+***REMOVED******REMOVED***chunks.extend(other_info)
+***REMOVED***if _good_splits:
+***REMOVED******REMOVED***merged_text = self._merge_splits(_good_splits, separator)
+***REMOVED******REMOVED***chunks.extend(merged_text)
+***REMOVED***return chunks
+***REMOVED***
+***REMOVED***def chunk_table(self, table, caption):
+***REMOVED***if self._length_function("\n".join([caption, table])) < self._chunk_size - self._noise:
+***REMOVED******REMOVED***return ["\n".join([caption, table])]
+***REMOVED***else:
+***REMOVED******REMOVED***headers = ""
+***REMOVED******REMOVED***if re.search("<th.*>.*</th>", table):
+***REMOVED******REMOVED***headers += re.search("<th.*>.*</th>", table).group() # extract the header out. Opening tag may contain rowspan/colspan
+***REMOVED******REMOVED***splits = table.split(self._table_tags["row_open"]) #split by row tag
+***REMOVED******REMOVED***tables = []
+***REMOVED******REMOVED***current_table = caption + "\n"
+***REMOVED******REMOVED***for part in splits:
+***REMOVED******REMOVED***if len(part)>0:
+***REMOVED******REMOVED******REMOVED***if self._length_function(current_table + self._table_tags["row_open"] + part) < self._chunk_size: # if current table length is within permissible limit, keep adding rows
+***REMOVED******REMOVED******REMOVED***if part not in [self._table_tags["table_open"], self._table_tags["table_close"]]: # need add the separator (row tag) when the part is not a table tag
+***REMOVED******REMOVED******REMOVED******REMOVED***current_table += self._table_tags["row_open"]
+***REMOVED******REMOVED******REMOVED***current_table += part
+***REMOVED******REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED***else:
+***REMOVED******REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED***# if current table size is beyond the permissible limit, complete this as a mini-table and add to final mini-tables list
+***REMOVED******REMOVED******REMOVED***current_table += self._table_tags["table_close"]
+***REMOVED******REMOVED******REMOVED***tables.append(current_table)
+
+***REMOVED******REMOVED******REMOVED***# start a new table
+***REMOVED******REMOVED******REMOVED***current_table = "\n".join([caption, self._table_tags["table_open"], headers])
+***REMOVED******REMOVED******REMOVED***if part not in [self._table_tags["table_open"], self._table_tags["table_close"]]:
+***REMOVED******REMOVED******REMOVED******REMOVED***current_table += self._table_tags["row_open"]
+***REMOVED******REMOVED******REMOVED***current_table += part
+
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***# TO DO: fix the case where the last mini table only contain tags
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***if not current_table.endswith(self._table_tags["table_close"]):
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***tables.append(current_table + self._table_tags["table_close"])
+***REMOVED******REMOVED***else:
+***REMOVED******REMOVED***tables.append(current_table)
+***REMOVED******REMOVED***return tables
+
+***REMOVED***
 @dataclass
 class Document(object):
 ***REMOVED***"""A data class for storing documents
@@ -268,20 +425,7 @@ class ParserFactory:
 
 ***REMOVED***return parser
 
-class TokenEstimator(object):
-***REMOVED***GPT2_TOKENIZER = tiktoken.get_encoding("gpt2")
-
-***REMOVED***def estimate_tokens(self, text: str) -> int:
-***REMOVED***return len(self.GPT2_TOKENIZER.encode(text))
-
-***REMOVED***def construct_tokens_with_size(self, tokens: str, numofTokens: int) -> str:
-***REMOVED***newTokens = self.GPT2_TOKENIZER.decode(
-***REMOVED******REMOVED***self.GPT2_TOKENIZER.encode(tokens)[:numofTokens]
-***REMOVED***)
-***REMOVED***return newTokens
-
 parser_factory = ParserFactory()
-TOKEN_ESTIMATOR = TokenEstimator()
 
 class UnsupportedFormatError(Exception):
 ***REMOVED***"""Exception raised when a format is not supported by a parser."""
@@ -436,22 +580,33 @@ def merge_chunks_serially(chunked_content_list: List[str], num_tokens: int) -> G
 ***REMOVED***yield current_chunk, total_size
 
 
-def get_embedding(text, azure_credential, embedding_endpoint):
+def get_embedding(text, embedding_model_endpoint=None, embedding_model_key=None, azure_credential=None):
+***REMOVED***endpoint = embedding_model_endpoint if embedding_model_endpoint else os.environ.get("EMBEDDING_MODEL_ENDPOINT")
+***REMOVED***key = embedding_model_key if embedding_model_key else os.environ.get("EMBEDDING_MODEL_KEY")
+***REMOVED***
+***REMOVED***if azure_credential is None and (endpoint is None or key is None):
+***REMOVED***raise Exception("EMBEDDING_MODEL_ENDPOINT and EMBEDDING_MODEL_KEY are required for embedding")
+
 ***REMOVED***try:
-***REMOVED***endpoint_parts = embedding_endpoint.split("/openai/deployments/")
+***REMOVED***endpoint_parts = endpoint.split("/openai/deployments/")
 ***REMOVED***base_url = endpoint_parts[0]
 ***REMOVED***deployment_id = endpoint_parts[1].split("/embeddings")[0]
 
 ***REMOVED***openai.api_version = '2023-05-15'
 ***REMOVED***openai.api_base = base_url
-***REMOVED***openai.api_key = azure_credential.get_token("https://cognitiveservices.azure.com/.default").token
-***REMOVED***openai.api_type = "azure_ad"
+
+***REMOVED***if azure_credential is not None:
+***REMOVED******REMOVED***openai.api_key = azure_credential.get_token("https://cognitiveservices.azure.com/.default").token
+***REMOVED******REMOVED***openai.api_type = "azure_ad"
+***REMOVED***else:
+***REMOVED******REMOVED***openai.api_type = 'azure'
+***REMOVED******REMOVED***openai.api_key = key
 
 ***REMOVED***embeddings = openai.Embedding.create(deployment_id=deployment_id, input=text)
 ***REMOVED***return embeddings['data'][0]["embedding"]
 
 ***REMOVED***except Exception as e:
-***REMOVED***raise Exception(f"Error getting embeddings with endpoint={embedding_endpoint} with error={e}")
+***REMOVED***raise Exception(f"Error getting embeddings with endpoint={endpoint} with error={e}")
 
 
 def chunk_content_helper(
@@ -462,9 +617,8 @@ def chunk_content_helper(
 ***REMOVED***if num_tokens is None:
 ***REMOVED***num_tokens = 1000000000
 
-***REMOVED***parser = parser_factory(file_format)
+***REMOVED***parser = parser_factory(file_format.split("_pdf")[0]) # to handle cracked pdf converted to html
 ***REMOVED***doc = parser.parse(content, file_name=file_name)
-
 ***REMOVED***# if the original doc after parsing is < num_tokens return as it is
 ***REMOVED***doc_content_size = TOKEN_ESTIMATOR.estimate_tokens(doc.content)
 ***REMOVED***if doc_content_size < num_tokens:
@@ -484,9 +638,12 @@ def chunk_content_helper(
 ***REMOVED******REMOVED***splitter = PythonCodeTextSplitter.from_tiktoken_encoder(
 ***REMOVED******REMOVED******REMOVED***chunk_size=num_tokens, chunk_overlap=token_overlap)
 ***REMOVED******REMOVED***else:
-***REMOVED******REMOVED***splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
-***REMOVED******REMOVED******REMOVED***separators=SENTENCE_ENDINGS + WORDS_BREAKS,
-***REMOVED******REMOVED******REMOVED***chunk_size=num_tokens, chunk_overlap=token_overlap)
+***REMOVED******REMOVED***if file_format == "html_pdf": # cracked pdf converted to html
+***REMOVED******REMOVED******REMOVED***splitter = PdfTextSplitter(separator=SENTENCE_ENDINGS + WORDS_BREAKS, chunk_size=num_tokens, chunk_overlap=token_overlap)
+***REMOVED******REMOVED***else:
+***REMOVED******REMOVED******REMOVED***splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
+***REMOVED******REMOVED******REMOVED******REMOVED***separators=SENTENCE_ENDINGS + WORDS_BREAKS,
+***REMOVED******REMOVED******REMOVED******REMOVED***chunk_size=num_tokens, chunk_overlap=token_overlap)
 ***REMOVED******REMOVED***chunked_content_list = splitter.split_text(doc.content)
 ***REMOVED******REMOVED***for chunked_content in chunked_content_list:
 ***REMOVED******REMOVED***chunk_size = TOKEN_ESTIMATOR.estimate_tokens(chunked_content)
@@ -525,7 +682,7 @@ def chunk_content(
 ***REMOVED***if file_name is None or (cracked_pdf and not use_layout):
 ***REMOVED******REMOVED***file_format = "text"
 ***REMOVED***elif cracked_pdf:
-***REMOVED******REMOVED***file_format = "html"
+***REMOVED******REMOVED***file_format = "html_pdf" # differentiate it from native html
 ***REMOVED***else:
 ***REMOVED******REMOVED***file_format = _get_file_format(file_name, extensions_to_process)
 ***REMOVED******REMOVED***if file_format is None:
@@ -546,7 +703,7 @@ def chunk_content(
 ***REMOVED******REMOVED***if add_embeddings:
 ***REMOVED******REMOVED******REMOVED***for _ in range(RETRY_COUNT):
 ***REMOVED******REMOVED******REMOVED***try:
-***REMOVED******REMOVED******REMOVED******REMOVED***doc.contentVector = get_embedding(chunk, azure_credential, embedding_endpoint)
+***REMOVED******REMOVED******REMOVED******REMOVED***doc.contentVector = get_embedding(chunk, azure_credential=azure_credential, embedding_model_endpoint=embedding_endpoint)
 ***REMOVED******REMOVED******REMOVED******REMOVED***break
 ***REMOVED******REMOVED******REMOVED***except:
 ***REMOVED******REMOVED******REMOVED******REMOVED***sleep(30)
@@ -692,12 +849,14 @@ def process_file(
 ***REMOVED******REMOVED***chunk_doc.filepath = rel_file_path
 ***REMOVED******REMOVED***chunk_doc.metadata = json.dumps({"chunk_id": str(chunk_idx)})
 ***REMOVED***except Exception as e:
+***REMOVED***print(e)
 ***REMOVED***if not ignore_errors:
 ***REMOVED******REMOVED***raise
 ***REMOVED***print(f"File ({file_path}) failed with ", e)
 ***REMOVED***is_error = True
 ***REMOVED***result =None
 ***REMOVED***return result, is_error
+
 
 
 def chunk_directory(

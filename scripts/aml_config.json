@@ -1,0 +1,12 @@
+{
+***REMOVED***"chunk_size": 1024,
+***REMOVED***"token_overlap": 0,
+***REMOVED***"keyvault_url": "https://<keyvault name>.vault.azure.net/",
+***REMOVED***"document_intelligence_secret_name": "<secret name>",
+***REMOVED***"document_intelligence_endpoint": "https://<resource name>.cognitiveservices.azure.com/",
+***REMOVED***"embedding_key_secret_name": "<secret name>",
+***REMOVED***"embedding_endpoint": "https://<resource name>.openai.azure.com/openai/deployments/<deployment name>/embeddings?api-version=2023-06-01-preview",
+***REMOVED***"index_name": "<index name>",
+***REMOVED***"search_service_name": "<resource name>",
+***REMOVED***"search_key_secret_name": "<secret name>"
+}

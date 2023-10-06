@@ -1,0 +1,52 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+
+display_name: data_preparation_pipeline
+experiment_name: data_prep
+description: Pipeline to crack, chunk, and embed data for RAG.
+
+settings:
+  default_compute: azureml:serverless
+
+identity:
+  type: user_identity
+
+inputs:
+  config_file: 
+***REMOVED***type: uri_file
+***REMOVED***path: aml_config.json # your config file name here
+  input_data_path:
+***REMOVED***type: uri_folder
+***REMOVED***# path: ../data # uncomment this to use local data
+***REMOVED***path: azureml://datastores/<datastore name>/paths/<path> # substitute your datastore name and path here
+***REMOVED***mode: ro_mount
+
+jobs:
+  chunk_documents:
+***REMOVED***type: command
+***REMOVED***component: ./chunk_documents.yml
+***REMOVED***inputs:
+***REMOVED***  config_file: ${{parent.inputs.config_file}}
+***REMOVED***  input_data_path: ${{parent.inputs.input_data_path}}
+***REMOVED***outputs:
+***REMOVED***  document_chunks_file_path:
+***REMOVED***type: uri_file
+***REMOVED***mode: upload
+
+  embed_documents:
+***REMOVED***type: command
+***REMOVED***component: ./embed_documents.yml
+***REMOVED***inputs:
+***REMOVED***  config_file: ${{parent.inputs.config_file}}
+***REMOVED***  document_chunks_file_path: ${{parent.jobs.chunk_documents.outputs.document_chunks_file_path}}
+***REMOVED***outputs:
+***REMOVED***  chunks_with_embeddings_file_path: 
+***REMOVED***type: uri_file
+***REMOVED***mode: upload
+
+  push_documents_acs:
+***REMOVED***type: command
+***REMOVED***component: ./push_documents_acs.yml
+***REMOVED***inputs:
+***REMOVED***  config_file: ${{parent.inputs.config_file}}
+***REMOVED***  chunks_with_embeddings_file_path: ${{parent.jobs.embed_documents.outputs.chunks_with_embeddings_file_path}}
