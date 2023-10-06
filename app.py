@@ -55,7 +55,7 @@ AZURE_OPENAI_TOP_P = os.environ.get("AZURE_OPENAI_TOP_P", 1.0)
 AZURE_OPENAI_MAX_TOKENS = os.environ.get("AZURE_OPENAI_MAX_TOKENS", 1000)
 AZURE_OPENAI_STOP_SEQUENCE = os.environ.get("AZURE_OPENAI_STOP_SEQUENCE")
 AZURE_OPENAI_SYSTEM_MESSAGE = os.environ.get("AZURE_OPENAI_SYSTEM_MESSAGE", "You are an AI assistant that helps people find information.")
-AZURE_OPENAI_PREVIEW_API_VERSION = os.environ.get("AZURE_OPENAI_PREVIEW_API_VERSION", "2023-06-01-preview")
+AZURE_OPENAI_PREVIEW_API_VERSION = os.environ.get("AZURE_OPENAI_PREVIEW_API_VERSION", "2023-08-01-preview")
 AZURE_OPENAI_STREAM = os.environ.get("AZURE_OPENAI_STREAM", "true")
 AZURE_OPENAI_MODEL_NAME = os.environ.get("AZURE_OPENAI_MODEL_NAME", "gpt-35-turbo-16k") # Name of the model, e.g. 'gpt-35-turbo-16k' or 'gpt-4'
 AZURE_OPENAI_EMBEDDING_ENDPOINT = os.environ.get("AZURE_OPENAI_EMBEDDING_ENDPOINT")
@@ -220,7 +220,13 @@ def stream_with_data(body, headers, endpoint, history_metadata={}):
 ***REMOVED***with s.post(endpoint, json=body, headers=headers, stream=True) as r:
 ***REMOVED******REMOVED***for line in r.iter_lines(chunk_size=10):
 ***REMOVED******REMOVED***if line:
-***REMOVED******REMOVED******REMOVED***lineJson = json.loads(line.lstrip(b'data:').decode('utf-8'))
+***REMOVED******REMOVED******REMOVED***try:
+***REMOVED******REMOVED******REMOVED***rawResponse = json.loads(line.lstrip(b'data:').decode('utf-8'))
+***REMOVED******REMOVED******REMOVED***except json.decoder.JSONDecodeError:
+***REMOVED******REMOVED******REMOVED***continue
+
+***REMOVED******REMOVED******REMOVED***lineJson = formatApiResponseStreaming(rawResponse)
+
 ***REMOVED******REMOVED******REMOVED***if 'error' in lineJson:
 ***REMOVED******REMOVED******REMOVED***yield format_as_ndjson(lineJson)
 ***REMOVED******REMOVED******REMOVED***response["id"] = lineJson["id"]
@@ -229,6 +235,7 @@ def stream_with_data(body, headers, endpoint, history_metadata={}):
 ***REMOVED******REMOVED******REMOVED***response["object"] = lineJson["object"]
 
 ***REMOVED******REMOVED******REMOVED***role = lineJson["choices"][0]["messages"][0]["delta"].get("role")
+
 ***REMOVED******REMOVED******REMOVED***if role == "tool":
 ***REMOVED******REMOVED******REMOVED***response["choices"][0]["messages"].append(lineJson["choices"][0]["messages"][0]["delta"])
 ***REMOVED******REMOVED******REMOVED***elif role == "assistant": 
@@ -243,8 +250,78 @@ def stream_with_data(body, headers, endpoint, history_metadata={}):
 
 ***REMOVED******REMOVED******REMOVED***yield format_as_ndjson(response)
 ***REMOVED***except Exception as e:
-***REMOVED***yield format_as_ndjson({"error": str(e)})
+***REMOVED***yield format_as_ndjson({"error" + str(e)})
 
+def formatApiResponseNoStreaming(rawResponse):
+***REMOVED***if 'error' in rawResponse:
+***REMOVED***return {"error": rawResponse["error"]}
+***REMOVED***response = {
+***REMOVED***"id": rawResponse["id"],
+***REMOVED***"model": rawResponse["model"],
+***REMOVED***"created": rawResponse["created"],
+***REMOVED***"object": rawResponse["object"],
+***REMOVED***"choices": [{
+***REMOVED******REMOVED***"messages": []
+***REMOVED***],
+***REMOVED***
+***REMOVED***toolMessage = {
+***REMOVED***"role": "tool",
+***REMOVED***"content": rawResponse["choices"][0]["message"]["context"]["messages"][0]["content"]
+***REMOVED***
+***REMOVED***assistantMessage = {
+***REMOVED***"role": "assistant",
+***REMOVED***"content": rawResponse["choices"][0]["message"]["content"]
+***REMOVED***
+***REMOVED***response["choices"][0]["messages"].append(toolMessage)
+***REMOVED***response["choices"][0]["messages"].append(assistantMessage)
+
+***REMOVED***return response
+
+def formatApiResponseStreaming(rawResponse):
+***REMOVED***if 'error' in rawResponse:
+***REMOVED***return {"error": rawResponse["error"]}
+***REMOVED***response = {
+***REMOVED***"id": rawResponse["id"],
+***REMOVED***"model": rawResponse["model"],
+***REMOVED***"created": rawResponse["created"],
+***REMOVED***"object": rawResponse["object"],
+***REMOVED***"choices": [{
+***REMOVED******REMOVED***"messages": []
+***REMOVED***],
+***REMOVED***
+
+***REMOVED***if rawResponse["choices"][0]["delta"].get("context"):
+***REMOVED***messageObj = {
+***REMOVED******REMOVED***"delta": {
+***REMOVED******REMOVED***"role": "tool",
+***REMOVED******REMOVED***"content": rawResponse["choices"][0]["delta"]["context"]["messages"][0]["content"]
+***REMOVED***
+***REMOVED***
+***REMOVED***response["choices"][0]["messages"].append(messageObj)
+***REMOVED***elif rawResponse["choices"][0]["delta"].get("role"):
+***REMOVED***messageObj = {
+***REMOVED******REMOVED***"delta": {
+***REMOVED******REMOVED***"role": "assistant",
+***REMOVED***
+***REMOVED***
+***REMOVED***response["choices"][0]["messages"].append(messageObj)
+***REMOVED***else:
+***REMOVED***if rawResponse["choices"][0]["end_turn"]:
+***REMOVED******REMOVED***messageObj = {
+***REMOVED******REMOVED***"delta": {
+***REMOVED******REMOVED******REMOVED***"content": "[DONE]",
+***REMOVED******REMOVED***
+***REMOVED***
+***REMOVED******REMOVED***response["choices"][0]["messages"].append(messageObj)
+***REMOVED***else:
+***REMOVED******REMOVED***messageObj = {
+***REMOVED******REMOVED***"delta": {
+***REMOVED******REMOVED******REMOVED***"content": rawResponse["choices"][0]["delta"]["content"],
+***REMOVED******REMOVED***
+***REMOVED***
+***REMOVED******REMOVED***response["choices"][0]["messages"].append(messageObj)
+
+***REMOVED***return response
 
 def conversation_with_data(request_body):
 ***REMOVED***body, headers = prepare_body_headers_with_data(request)
@@ -256,9 +333,11 @@ def conversation_with_data(request_body):
 ***REMOVED***r = requests.post(endpoint, headers=headers, json=body)
 ***REMOVED***status_code = r.status_code
 ***REMOVED***r = r.json()
-***REMOVED***r['history_metadata'] = history_metadata
+***REMOVED***result = formatApiResponseNoStreaming(r)
+***REMOVED***result['history_metadata'] = history_metadata
 
-***REMOVED***return Response(format_as_ndjson(r), status=status_code)
+
+***REMOVED***return Response(format_as_ndjson(result), status=status_code)
 ***REMOVED***else:
 ***REMOVED***return Response(stream_with_data(body, headers, endpoint, history_metadata), mimetype='text/event-stream')
 
@@ -266,7 +345,10 @@ def conversation_with_data(request_body):
 def stream_without_data(response, history_metadata={}):
 ***REMOVED***responseText = ""
 ***REMOVED***for line in response:
-***REMOVED***deltaText = line["choices"][0]["delta"].get('content')
+***REMOVED***if line["choices"]:
+***REMOVED******REMOVED***deltaText = line["choices"][0]["delta"].get('content')
+***REMOVED***else:
+***REMOVED******REMOVED***deltaText = ""
 ***REMOVED***if deltaText and deltaText != "[DONE]":
 ***REMOVED******REMOVED***responseText += deltaText
 
@@ -289,7 +371,7 @@ def stream_without_data(response, history_metadata={}):
 def conversation_without_data(request_body):
 ***REMOVED***openai.api_type = "azure"
 ***REMOVED***openai.api_base = AZURE_OPENAI_ENDPOINT if AZURE_OPENAI_ENDPOINT else f"https://{AZURE_OPENAI_RESOURCE}.openai.azure.com/"
-***REMOVED***openai.api_version = "2023-03-15-preview"
+***REMOVED***openai.api_version = "2023-08-01-preview"
 ***REMOVED***openai.api_key = AZURE_OPENAI_KEY
 
 ***REMOVED***request_messages = request_body["messages"]
