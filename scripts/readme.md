@@ -11,7 +11,7 @@ Follow the instructions in this section to prepare your data locally. This is ea
 ```
 [
 ***REMOVED***{
-***REMOVED***"data_path": "<path to data>",
+***REMOVED***"data_path": "<local path or blob URL>",
 ***REMOVED***"location": "<azure region, e.g. 'westus2'>", 
 ***REMOVED***"subscription_id": "<subscription id>",
 ***REMOVED***"resource_group": "<resource group name>",
@@ -26,12 +26,91 @@ Follow the instructions in this section to prepare your data locally. This is ea
 ]
 ```
 
+Note: `data_path` can be a path to files located locally on your machine, or an Azure Blob URL, e.g. of the format `"https://<storage account name>.blob.core.windows.net/<container name>/<path>/"`. If a blob URL is used, the data will first be downloaded from Blob Storage to a temporary directory on your machine before data preparation proceeds.
+
 ## Create Indexes and Ingest Data
 Disclaimer: Make sure there are no duplicate pages in your data. That could impact the quality of the responses you get in a negative way.
 
 - Run the data preparation script, passing in your config file. You can set njobs for parallel parsing of your files.
 
 ***REMOVED*** `python data_preparation.py --config config.json --njobs=4`
+
+## Optional: Use URL prefix
+Each document can be associated with a URL that is stored with each document chunk in the Azure Cognitive Search index in the `url` field. If your documents were downloaded from the web, you can specify a URL prefix to use to construct the document URLs when ingesting your data. Your config file should have an additional `url_prefix` parameter like so:
+
+```
+[
+***REMOVED***{
+***REMOVED***"data_path": "<local path or blob URL>",
+***REMOVED***"url_prefix": "https://<source website URL>.com/"
+***REMOVED***"location": "<azure region, e.g. 'westus2'>", 
+***REMOVED***"subscription_id": "<subscription id>",
+***REMOVED***"resource_group": "<resource group name>",
+***REMOVED***"search_service_name": "<search service name to use or create>",
+***REMOVED***"index_name": "<index name to use or create>",
+***REMOVED***"chunk_size": 1024, // set to null to disable chunking before ingestion
+***REMOVED***"token_overlap": 128 // number of tokens to overlap between chunks
+***REMOVED***"semantic_config_name": "default",
+***REMOVED***"language": "en" // setting to set language of your documents. Change if your documents are not in English. Look in data_preparation.py for SUPPORTED_LANGUAGE_CODES,
+***REMOVED***"vector_config_name": "default" // used if adding vectors to index
+***REMOVED***
+]
+```
+
+For each document, the URL stored with chunks from that document will be `url_prefix` concatenated with the relative path of the document in `data_path`. For example, if my `data_path` is `mydata` containing the following structure:
+```
+└───mydata
+***REMOVED***│   overview.html
+***REMOVED***│
+***REMOVED***└───examples
+***REMOVED******REMOVED***example1.html
+***REMOVED******REMOVED***example2.html
+```
+And `url_prefix` is `"https://my-wiki.com/"`, the resulting URLs will be:
+|File| URL|
+|---|---|
+|overview.html | `"https://my-wiki.com/overview.html"`|
+|example1.html | `"https://my-wiki.com/examples/example1.html"`|
+|example2.html | `"https://my-wiki.com/examples/example2.html"`|
+
+These URLs can then be used in the citation display in the web app. See the [README](../README.md#changing-citation-display) for more detail.
+
+If you have documents from multiple source websites, you can specify multiple paths and prefixes following the example in `config_multiple_url.json`. 
+```
+[
+***REMOVED***{
+***REMOVED***"data_paths": [
+***REMOVED******REMOVED***{
+***REMOVED******REMOVED***"path": "data/source1",
+***REMOVED******REMOVED***"url_prefix": "https://<URL for source 1>.com/"
+***REMOVED***,
+***REMOVED******REMOVED***{
+***REMOVED******REMOVED***"path": "data/source2",
+***REMOVED******REMOVED***"url_prefix": "https://<URL for source 2>.com/"
+***REMOVED***
+***REMOVED***],
+***REMOVED***"subscription_id": "<subscription id>",
+***REMOVED***"resource_group": "<resource group name>",
+***REMOVED***"search_service_name": "<search service name to use or create>",
+***REMOVED***"index_name": "<index name to use or create>",
+***REMOVED***"chunk_size": 1024,
+***REMOVED***"token_overlap": 128,
+***REMOVED***"semantic_config_name": "default",
+***REMOVED***"language": "<Language to support for example use 'en' for English. Checked supported languages here under lucene - https://learn.microsoft.com/en-us/azure/search/index-add-language-analyzers"
+***REMOVED***
+]
+```
+
+The ingestion script will loop through each path in `data_paths` and construct the document URLs following the same pattern as described above, using the specific URL prefix for each data path.
+
+You can modify the URL construction logic in `process_file()` in [data_utils.py](./data_utils.py):
+```
+url_path = None
+rel_file_path = os.path.relpath(file_path, directory_path)
+if url_prefix:
+***REMOVED***url_path = url_prefix + rel_file_path
+***REMOVED***url_path = convert_escaped_to_posix(url_path)
+```
 
 ## Optional: Add vector embeddings
 Azure Cognitive Search supports vector search in public preview. See [the docs](https://learn.microsoft.com/en-us/azure/search/vector-search-overview) for more information.
