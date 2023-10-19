@@ -1,0 +1,22 @@
+[
+***REMOVED***{
+***REMOVED***"data_paths": [
+***REMOVED******REMOVED***{
+***REMOVED******REMOVED***"path": "data/source1",
+***REMOVED******REMOVED***"url_prefix": "https://<URL for source 1>.com/"
+***REMOVED***,
+***REMOVED******REMOVED***{
+***REMOVED******REMOVED***"path": "data/source2",
+***REMOVED******REMOVED***"url_prefix": "https://<URL for source 2>.com/"
+***REMOVED***
+***REMOVED***],
+***REMOVED***"subscription_id": "<subscription id>",
+***REMOVED***"resource_group": "<resource group name>",
+***REMOVED***"search_service_name": "<search service name to use or create>",
+***REMOVED***"index_name": "<index name to use or create>",
+***REMOVED***"chunk_size": 1024,
+***REMOVED***"token_overlap": 128,
+***REMOVED***"semantic_config_name": "default",
+***REMOVED***"language": "<Language to support for example use 'en' for English. Checked supported languages here under lucene - https://learn.microsoft.com/en-us/azure/search/index-add-language-analyzers"
+***REMOVED***
+]

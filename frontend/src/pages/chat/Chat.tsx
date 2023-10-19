@@ -43,7 +43,7 @@ const Chat = () => {
 ***REMOVED***const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null);
 ***REMOVED***const [isLoading, setIsLoading] = useState<boolean>(false);
 ***REMOVED***const [showLoadingMessage, setShowLoadingMessage] = useState<boolean>(false);
-***REMOVED***const [activeCitation, setActiveCitation] = useState<[content: string, id: string, title: string, filepath: string, url: string, metadata: string]>();
+***REMOVED***const [activeCitation, setActiveCitation] = useState<Citation>();
 ***REMOVED***const [isCitationPanelOpen, setIsCitationPanelOpen] = useState<boolean>(false);
 ***REMOVED***const abortFuncs = useRef([] as AbortController[]);
 ***REMOVED***const [showAuthMessage, setShowAuthMessage] = useState<boolean>(true);
@@ -502,8 +502,14 @@ const Chat = () => {
 ***REMOVED***, [showLoadingMessage, processMessages]);
 
 ***REMOVED***const onShowCitation = (citation: Citation) => {
-***REMOVED***setActiveCitation([citation.content, citation.id, citation.title ?? "", citation.filepath ?? "", "", ""]);
+***REMOVED***setActiveCitation(citation);
 ***REMOVED***setIsCitationPanelOpen(true);
+***REMOVED***;
+
+***REMOVED***const onViewSource = (citation: Citation) => {
+***REMOVED***if (citation.url && !citation.url.includes("blob.core")) {
+***REMOVED******REMOVED***window.open(citation.url, "_blank");
+***REMOVED***
 ***REMOVED***;
 
 ***REMOVED***const parseCitationFromMessage = (message: ChatMessage) => {
@@ -668,23 +674,23 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED***/>
 ***REMOVED******REMOVED******REMOVED***</Stack>
 ***REMOVED******REMOVED******REMOVED***</div>
-***REMOVED******REMOVED******REMOVED***{messages && messages.length > 0 && isCitationPanelOpen && activeCitation && (
+***REMOVED******REMOVED******REMOVED***{/* Citation Panel */}
+***REMOVED******REMOVED******REMOVED***{messages && messages.length > 0 && isCitationPanelOpen && activeCitation && ( 
 ***REMOVED******REMOVED******REMOVED***<Stack.Item className={styles.citationPanel} tabIndex={0} role="tabpanel" aria-label="Citations Panel">
 ***REMOVED******REMOVED******REMOVED***<Stack aria-label="Citations Panel Header Container" horizontal className={styles.citationPanelHeaderContainer} horizontalAlign="space-between" verticalAlign="center">
 ***REMOVED******REMOVED******REMOVED******REMOVED***<span aria-label="Citations" className={styles.citationPanelHeader}>Citations</span>
 ***REMOVED******REMOVED******REMOVED******REMOVED***<IconButton iconProps={{ iconName: 'Cancel'}} aria-label="Close citations panel" onClick={() => setIsCitationPanelOpen(false)}/>
 ***REMOVED******REMOVED******REMOVED***</Stack>
-***REMOVED******REMOVED******REMOVED***<h5 className={styles.citationPanelTitle} tabIndex={0}>{activeCitation[2]}</h5>
+***REMOVED******REMOVED******REMOVED***<h5 className={styles.citationPanelTitle} tabIndex={0} title={activeCitation.url && !activeCitation.url.includes("blob.core") ? activeCitation.url : activeCitation.title ?? ""} onClick={() => onViewSource(activeCitation)}>{activeCitation.title}</h5>
 ***REMOVED******REMOVED******REMOVED***<div tabIndex={0}> 
 ***REMOVED******REMOVED******REMOVED***<ReactMarkdown 
 ***REMOVED******REMOVED******REMOVED******REMOVED***linkTarget="_blank"
 ***REMOVED******REMOVED******REMOVED******REMOVED***className={styles.citationPanelContent}
-***REMOVED******REMOVED******REMOVED******REMOVED***children={activeCitation[0]} 
+***REMOVED******REMOVED******REMOVED******REMOVED***children={activeCitation.content} 
 ***REMOVED******REMOVED******REMOVED******REMOVED***remarkPlugins={[remarkGfm]} 
 ***REMOVED******REMOVED******REMOVED******REMOVED***rehypePlugins={[rehypeRaw]}
 ***REMOVED******REMOVED******REMOVED***/>
 ***REMOVED******REMOVED******REMOVED***</div>
-***REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED******REMOVED***</Stack.Item>
 ***REMOVED******REMOVED***)}
 ***REMOVED******REMOVED***{(appStateContext?.state.isChatHistoryOpen && appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured) && <ChatHistoryPanel/>}

@@ -214,10 +214,12 @@ def stream_with_data(body, headers, endpoint, history_metadata={}):
 ***REMOVED***"choices": [{
 ***REMOVED******REMOVED***"messages": []
 ***REMOVED***],
+***REMOVED***"apim-request-id": "",
 ***REMOVED***'history_metadata': history_metadata
 ***REMOVED***
 ***REMOVED***try:
 ***REMOVED***with s.post(endpoint, json=body, headers=headers, stream=True) as r:
+***REMOVED******REMOVED***apimRequestId = r.headers.get('apim-request-id')
 ***REMOVED******REMOVED***for line in r.iter_lines(chunk_size=10):
 ***REMOVED******REMOVED***if line:
 ***REMOVED******REMOVED******REMOVED***try:
@@ -233,6 +235,7 @@ def stream_with_data(body, headers, endpoint, history_metadata={}):
 ***REMOVED******REMOVED******REMOVED***response["model"] = lineJson["model"]
 ***REMOVED******REMOVED******REMOVED***response["created"] = lineJson["created"]
 ***REMOVED******REMOVED******REMOVED***response["object"] = lineJson["object"]
+***REMOVED******REMOVED******REMOVED***response["apim-request-id"] = apimRequestId
 
 ***REMOVED******REMOVED******REMOVED***role = lineJson["choices"][0]["messages"][0]["delta"].get("role")
 

@@ -13,7 +13,7 @@ from azure.identity import AzureCliCredential
 from azure.search.documents import SearchClient
 from tqdm import tqdm
 
-from data_utils import chunk_directory
+from data_utils import chunk_directory, chunk_blob_container
 
 SUPPORTED_LANGUAGE_CODES = {
 ***REMOVED***"ar": "Arabic",
@@ -229,7 +229,7 @@ def create_or_update_search_index(
 ***REMOVED******REMOVED***"searchable": True,
 ***REMOVED******REMOVED***"retrievable": True,
 ***REMOVED******REMOVED***"dimensions": 1536,
-***REMOVED******REMOVED***"vectorSearchConfiguration": "default"
+***REMOVED******REMOVED***"vectorSearchConfiguration": vector_config_name
 ***REMOVED***)
 
 ***REMOVED***body["vectorSearch"] = {
@@ -365,17 +365,35 @@ def create_index(config, credential, form_recognizer_client=None, embedding_mode
 ***REMOVED***if not create_or_update_search_index(service_name, subscription_id, resource_group, index_name, config["semantic_config_name"], credential, language, vector_config_name=config.get("vector_config_name", None)):
 ***REMOVED***raise Exception(f"Failed to create or update index {index_name}")
 ***REMOVED***
+***REMOVED***data_configs = []
+***REMOVED***if "data_path" in config:
+***REMOVED***data_configs.append({
+***REMOVED******REMOVED***"path": config["data_path"],
+***REMOVED******REMOVED***"url_prefix": config.get("url_prefix", None),
+***REMOVED***)
+***REMOVED***if "data_paths" in config:
+***REMOVED***data_configs.extend(config["data_paths"])
+
+***REMOVED***for data_config in data_configs:
 ***REMOVED***# chunk directory
-***REMOVED***print("Chunking directory...")
+***REMOVED***print(f"Chunking path {data_config['path']}...")
 ***REMOVED***add_embeddings = False
 ***REMOVED***if config.get("vector_config_name") and embedding_model_endpoint:
-***REMOVED***add_embeddings = True
-***REMOVED***result = chunk_directory(config["data_path"], num_tokens=config["chunk_size"], token_overlap=config.get("token_overlap",0),
-***REMOVED******REMOVED******REMOVED******REMOVED*** azure_credential=credential, form_recognizer_client=form_recognizer_client, use_layout=use_layout, njobs=njobs,
-***REMOVED******REMOVED******REMOVED******REMOVED*** add_embeddings=add_embeddings, embedding_endpoint=embedding_model_endpoint)
+***REMOVED******REMOVED***add_embeddings = True
+
+***REMOVED***if "blob.core" in data_config["path"]:
+***REMOVED******REMOVED***result = chunk_blob_container(data_config["path"], credential=credential, num_tokens=config["chunk_size"], token_overlap=config.get("token_overlap",0),
+***REMOVED******REMOVED******REMOVED******REMOVED***azure_credential=credential, form_recognizer_client=form_recognizer_client, use_layout=use_layout, njobs=njobs,
+***REMOVED******REMOVED******REMOVED******REMOVED***add_embeddings=add_embeddings, embedding_endpoint=embedding_model_endpoint, url_prefix=data_config["url_prefix"])
+***REMOVED***elif os.path.exists(data_config["path"]):
+***REMOVED******REMOVED***result = chunk_directory(data_config["path"], num_tokens=config["chunk_size"], token_overlap=config.get("token_overlap",0),
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***azure_credential=credential, form_recognizer_client=form_recognizer_client, use_layout=use_layout, njobs=njobs,
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***add_embeddings=add_embeddings, embedding_endpoint=embedding_model_endpoint, url_prefix=data_config["url_prefix"])
+***REMOVED***else:
+***REMOVED******REMOVED***raise Exception(f"Path {data_config['path']} does not exist and is not a blob URL. Please check the path and try again.")
 
 ***REMOVED***if len(result.chunks) == 0:
-***REMOVED***raise Exception("No chunks found. Please check the data path and chunk size.")
+***REMOVED******REMOVED***raise Exception("No chunks found. Please check the data path and chunk size.")
 
 ***REMOVED***print(f"Processed {result.total_files} files")
 ***REMOVED***print(f"Unsupported formats: {result.num_unsupported_format_files} files")
