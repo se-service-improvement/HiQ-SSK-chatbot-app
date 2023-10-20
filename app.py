@@ -222,12 +222,14 @@ def stream_with_data(body, headers, endpoint, history_metadata={}):
 ***REMOVED******REMOVED***apimRequestId = r.headers.get('apim-request-id')
 ***REMOVED******REMOVED***for line in r.iter_lines(chunk_size=10):
 ***REMOVED******REMOVED***if line:
+***REMOVED******REMOVED******REMOVED***if AZURE_OPENAI_PREVIEW_API_VERSION == '2023-06-01-preview':
+***REMOVED******REMOVED******REMOVED***lineJson = json.loads(line.lstrip(b'data:').decode('utf-8'))
+***REMOVED******REMOVED******REMOVED***else:
 ***REMOVED******REMOVED******REMOVED***try:
-***REMOVED******REMOVED******REMOVED***rawResponse = json.loads(line.lstrip(b'data:').decode('utf-8'))
+***REMOVED******REMOVED******REMOVED******REMOVED***rawResponse = json.loads(line.lstrip(b'data:').decode('utf-8'))
+***REMOVED******REMOVED******REMOVED******REMOVED***lineJson = formatApiResponseStreaming(rawResponse)
 ***REMOVED******REMOVED******REMOVED***except json.decoder.JSONDecodeError:
-***REMOVED******REMOVED******REMOVED***continue
-
-***REMOVED******REMOVED******REMOVED***lineJson = formatApiResponseStreaming(rawResponse)
+***REMOVED******REMOVED******REMOVED******REMOVED***continue
 
 ***REMOVED******REMOVED******REMOVED***if 'error' in lineJson:
 ***REMOVED******REMOVED******REMOVED***yield format_as_ndjson(lineJson)
@@ -336,11 +338,15 @@ def conversation_with_data(request_body):
 ***REMOVED***r = requests.post(endpoint, headers=headers, json=body)
 ***REMOVED***status_code = r.status_code
 ***REMOVED***r = r.json()
-***REMOVED***result = formatApiResponseNoStreaming(r)
-***REMOVED***result['history_metadata'] = history_metadata
+***REMOVED***if AZURE_OPENAI_PREVIEW_API_VERSION == "2023-06-01-preview":
+***REMOVED******REMOVED***r['history_metadata'] = history_metadata
+***REMOVED******REMOVED***return Response(format_as_ndjson(r), status=status_code)
+***REMOVED***else:
+***REMOVED******REMOVED***result = formatApiResponseNoStreaming(r)
+***REMOVED******REMOVED***result['history_metadata'] = history_metadata
+***REMOVED******REMOVED***return Response(format_as_ndjson(result), status=status_code)
 
 
-***REMOVED***return Response(format_as_ndjson(result), status=status_code)
 ***REMOVED***else:
 ***REMOVED***return Response(stream_with_data(body, headers, endpoint, history_metadata), mimetype='text/event-stream')
 
