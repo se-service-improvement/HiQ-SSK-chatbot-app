@@ -244,18 +244,11 @@
 ***REMOVED******REMOVED***"description": "Azure Search Strictness"
 ***REMOVED***
 ***REMOVED***,
-***REMOVED***"AzureOpenAIEmbeddingEndpoint": {
+***REMOVED***"AzureOpenAIEmbeddingName": {
 ***REMOVED******REMOVED***"type": "string",
 ***REMOVED******REMOVED***"defaultValue": "",
 ***REMOVED******REMOVED***"metadata": {
-***REMOVED******REMOVED***"description": "Azure OpenAI Embedding Endpoint"
-***REMOVED***
-***REMOVED***,
-***REMOVED***"AzureOpenAIEmbeddingKey": {
-***REMOVED******REMOVED***"type": "securestring",
-***REMOVED******REMOVED***"defaultValue": "",
-***REMOVED******REMOVED***"metadata": {
-***REMOVED******REMOVED***"description": "Azure OpenAI Embedding Key"
+***REMOVED******REMOVED***"description": "Azure OpenAI Embedding Deployment Name"
 ***REMOVED***
 ***REMOVED***,
 ***REMOVED***"WebAppEnableChatHistory": {
@@ -417,12 +410,8 @@
 ***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureSearchStrictness')]"
 ***REMOVED******REMOVED******REMOVED***,
 ***REMOVED******REMOVED******REMOVED***{
-***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_OPENAI_EMBEDDING_ENDPOINT",
-***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureOpenAIEmbeddingEndpoint')]"
-***REMOVED******REMOVED******REMOVED***,
-***REMOVED******REMOVED******REMOVED***{
-***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_OPENAI_EMBEDDING_KEY",
-***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureOpenAIEmbeddingKey')]"
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "AZURE_OPENAI_EMBEDDING_NAME",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('AzureOpenAIEmbeddingName')]"
 ***REMOVED******REMOVED******REMOVED***,
 ***REMOVED******REMOVED******REMOVED***{
 ***REMOVED******REMOVED******REMOVED******REMOVED***"name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
