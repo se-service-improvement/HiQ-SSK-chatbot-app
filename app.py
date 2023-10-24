@@ -187,15 +187,20 @@ def prepare_body_headers_with_data(request):
 ***REMOVED******REMOVED******REMOVED***"queryType": query_type,
 ***REMOVED******REMOVED******REMOVED***"semanticConfiguration": AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG if AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG else "",
 ***REMOVED******REMOVED******REMOVED***"roleInformation": AZURE_OPENAI_SYSTEM_MESSAGE,
-***REMOVED******REMOVED******REMOVED***"embeddingDeploymentName": AZURE_OPENAI_EMBEDDING_NAME,
-***REMOVED******REMOVED******REMOVED***"embeddingEndpoint": AZURE_OPENAI_EMBEDDING_ENDPOINT if len(AZURE_OPENAI_EMBEDDING_NAME) == 0 else "",
-***REMOVED******REMOVED******REMOVED***"embeddingKey": AZURE_OPENAI_EMBEDDING_KEY if len(AZURE_OPENAI_EMBEDDING_NAME) == 0 else "",
 ***REMOVED******REMOVED******REMOVED***"filter": filter,
 ***REMOVED******REMOVED******REMOVED***"strictness": int(AZURE_SEARCH_STRICTNESS)
 ***REMOVED******REMOVED***
 ***REMOVED***
 ***REMOVED***]
 ***REMOVED***
+
+***REMOVED***if "vector" in query_type.lower():
+***REMOVED***if AZURE_OPENAI_EMBEDDING_NAME:
+***REMOVED******REMOVED***body["dataSources"][0]["parameters"]["embeddingDeploymentName"] = AZURE_OPENAI_EMBEDDING_NAME
+***REMOVED***else:
+***REMOVED******REMOVED***body["dataSources"][0]["parameters"]["embeddingEndpoint"] = AZURE_OPENAI_EMBEDDING_ENDPOINT
+***REMOVED******REMOVED***body["dataSources"][0]["parameters"]["embeddingKey"] = AZURE_OPENAI_EMBEDDING_KEY
+
 
 ***REMOVED***headers = {
 ***REMOVED***'Content-Type': 'application/json',
