@@ -6,6 +6,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from "rehype-raw";
 import uuid from 'react-uuid';
+import { isEmpty } from "lodash-es";
 
 import styles from "./Chat.module.css";
 import Azure from "../../assets/Azure.svg";
@@ -67,6 +68,8 @@ const Chat = () => {
 ***REMOVED***styles: { main: { maxWidth: 450 } },
 ***REMOVED***
 
+***REMOVED***const [ASSISTANT, TOOL, ERROR] = ["assistant", "tool", "error"]
+
 ***REMOVED***useEffect(() => {
 ***REMOVED***if(appStateContext?.state.isCosmosDBAvailable?.status === CosmosDBStatus.NotWorking && appStateContext.state.chatHistoryLoadingState === ChatHistoryLoadingState.Fail && hideErrorDialog){
 ***REMOVED******REMOVED***let subtitle = `${appStateContext.state.isCosmosDBAvailable.status}. Please contact the site administrator.`
@@ -92,6 +95,30 @@ const Chat = () => {
 ***REMOVED***
 ***REMOVED***else {
 ***REMOVED******REMOVED***setShowAuthMessage(false);
+***REMOVED***
+***REMOVED***
+
+***REMOVED***let assistantMessage = {} as ChatMessage
+***REMOVED***let toolMessage = {} as ChatMessage
+***REMOVED***let assistantContent = ""
+
+***REMOVED***const processResultMessage = (resultMessage: ChatMessage, userMessage: ChatMessage, conversationId?: string) => {
+***REMOVED***if (resultMessage.role === ASSISTANT) {
+***REMOVED******REMOVED***assistantContent += resultMessage.content
+***REMOVED******REMOVED***assistantMessage = resultMessage
+***REMOVED******REMOVED***assistantMessage.content = assistantContent
+***REMOVED***
+
+***REMOVED***if (resultMessage.role === TOOL) toolMessage = resultMessage
+
+***REMOVED***if (!conversationId) {
+***REMOVED******REMOVED***isEmpty(toolMessage) ?
+***REMOVED******REMOVED***setMessages([...messages, userMessage, assistantMessage]) :
+***REMOVED******REMOVED***setMessages([...messages, userMessage, toolMessage, assistantMessage]);
+***REMOVED***
+***REMOVED******REMOVED***isEmpty(toolMessage) ?
+***REMOVED******REMOVED***setMessages([...messages, assistantMessage]) :
+***REMOVED******REMOVED***setMessages([...messages, toolMessage, assistantMessage]);
 ***REMOVED***
 ***REMOVED***
 
@@ -133,8 +160,7 @@ const Chat = () => {
 ***REMOVED***setMessages(conversation.messages)
 ***REMOVED***
 ***REMOVED***const request: ConversationRequest = {
-***REMOVED******REMOVED***messages: [...conversation.messages.filter((answer) => answer.role !== "error")]
-***REMOVED******REMOVED***// messages: [...conversation.messages.filter((answer) => answer.role === "error")]
+***REMOVED******REMOVED***messages: [...conversation.messages.filter((answer) => answer.role !== ERROR)]
 ***REMOVED***;
 
 ***REMOVED***let result = {} as ChatResponse;
@@ -160,19 +186,17 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED***obj.date = new Date().toISOString();
 ***REMOVED******REMOVED******REMOVED***)
 ***REMOVED******REMOVED******REMOVED******REMOVED***setShowLoadingMessage(false);
-***REMOVED******REMOVED******REMOVED******REMOVED***if(!conversationId){
-***REMOVED******REMOVED******REMOVED******REMOVED***setMessages([...messages, userMessage, ...result.choices[0].messages]);
-***REMOVED******REMOVED******REMOVED***else{
-***REMOVED******REMOVED******REMOVED******REMOVED***setMessages([...messages, ...result.choices[0].messages]);
-***REMOVED******REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED******REMOVED***result.choices[0].messages.forEach((resultObj) => {
+***REMOVED******REMOVED******REMOVED******REMOVED***processResultMessage(resultObj, userMessage, conversationId);
+***REMOVED******REMOVED******REMOVED***)
 ***REMOVED******REMOVED******REMOVED******REMOVED***runningText = "";
 ***REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED******REMOVED***catch { }
 ***REMOVED******REMOVED***);
 ***REMOVED******REMOVED***
-***REMOVED******REMOVED***conversation.messages.push(...result.choices[0].messages)
+***REMOVED******REMOVED***conversation.messages.push(toolMessage, assistantMessage)
 ***REMOVED******REMOVED***appStateContext?.dispatch({ type: 'UPDATE_CURRENT_CHAT', payload: conversation });
-***REMOVED******REMOVED***setMessages([...messages, ...result.choices[0].messages]);
+***REMOVED******REMOVED***setMessages([...messages, toolMessage, assistantMessage]);
 ***REMOVED***
 ***REMOVED******REMOVED***
 ***REMOVED*** catch ( e )  {
@@ -186,7 +210,7 @@ const Chat = () => {
 ***REMOVED******REMOVED***
 ***REMOVED******REMOVED***let errorChatMsg: ChatMessage = {
 ***REMOVED******REMOVED******REMOVED***id: uuid(),
-***REMOVED******REMOVED******REMOVED***role: "error",
+***REMOVED******REMOVED******REMOVED***role: ERROR,
 ***REMOVED******REMOVED******REMOVED***content: errorMessage,
 ***REMOVED******REMOVED******REMOVED***date: new Date().toISOString()
 ***REMOVED******REMOVED***
@@ -233,12 +257,12 @@ const Chat = () => {
 ***REMOVED***else{
 ***REMOVED******REMOVED***conversation.messages.push(userMessage);
 ***REMOVED******REMOVED***request = {
-***REMOVED******REMOVED******REMOVED***messages: [...conversation.messages.filter((answer) => answer.role !== "error")]
+***REMOVED******REMOVED******REMOVED***messages: [...conversation.messages.filter((answer) => answer.role !== ERROR)]
 ***REMOVED******REMOVED***;
 ***REMOVED***
 ***REMOVED***else{
 ***REMOVED******REMOVED***request = {
-***REMOVED******REMOVED***messages: [userMessage].filter((answer) => answer.role !== "error")
+***REMOVED******REMOVED***messages: [userMessage].filter((answer) => answer.role !== ERROR)
 ***REMOVED***;
 ***REMOVED******REMOVED***setMessages(request.messages)
 ***REMOVED***
@@ -248,7 +272,7 @@ const Chat = () => {
 ***REMOVED******REMOVED***if(!response?.ok){
 ***REMOVED******REMOVED***let errorChatMsg: ChatMessage = {
 ***REMOVED******REMOVED******REMOVED***id: uuid(),
-***REMOVED******REMOVED******REMOVED***role: "error",
+***REMOVED******REMOVED******REMOVED***role: ERROR,
 ***REMOVED******REMOVED******REMOVED***content: "There was an error generating a response. Chat history can't be saved at this time. If the problem persists, please contact the site administrator.",
 ***REMOVED******REMOVED******REMOVED***date: new Date().toISOString()
 ***REMOVED******REMOVED***
@@ -294,11 +318,9 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED***obj.date = new Date().toISOString();
 ***REMOVED******REMOVED******REMOVED***)
 ***REMOVED******REMOVED******REMOVED******REMOVED***setShowLoadingMessage(false);
-***REMOVED******REMOVED******REMOVED******REMOVED***if(!conversationId){
-***REMOVED******REMOVED******REMOVED******REMOVED***setMessages([...messages, userMessage, ...result.choices[0].messages]);
-***REMOVED******REMOVED******REMOVED***else{
-***REMOVED******REMOVED******REMOVED******REMOVED***setMessages([...messages, ...result.choices[0].messages]);
-***REMOVED******REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED******REMOVED***result.choices[0].messages.forEach((resultObj) => {
+***REMOVED******REMOVED******REMOVED******REMOVED***processResultMessage(resultObj, userMessage, conversationId);
+***REMOVED******REMOVED******REMOVED***)
 ***REMOVED******REMOVED******REMOVED******REMOVED***runningText = "";
 ***REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED******REMOVED***catch { }
@@ -315,7 +337,7 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED***abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
 ***REMOVED******REMOVED******REMOVED***return;
 ***REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED***resultConversation.messages.push(...result.choices[0].messages);
+***REMOVED******REMOVED******REMOVED***resultConversation.messages.push(toolMessage, assistantMessage)
 ***REMOVED******REMOVED***else{
 ***REMOVED******REMOVED******REMOVED***resultConversation = {
 ***REMOVED******REMOVED******REMOVED***id: result.history_metadata.conversation_id,
@@ -323,7 +345,7 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED***messages: [userMessage],
 ***REMOVED******REMOVED******REMOVED***date: result.history_metadata.date
 ***REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED***resultConversation.messages.push(...result.choices[0].messages);
+***REMOVED******REMOVED******REMOVED***resultConversation.messages.push(toolMessage, assistantMessage)
 ***REMOVED******REMOVED***
 ***REMOVED******REMOVED***if(!resultConversation){
 ***REMOVED******REMOVED******REMOVED***setIsLoading(false);
@@ -332,7 +354,7 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED***return;
 ***REMOVED******REMOVED***
 ***REMOVED******REMOVED***appStateContext?.dispatch({ type: 'UPDATE_CURRENT_CHAT', payload: resultConversation });
-***REMOVED******REMOVED***setMessages([...messages, ...result.choices[0].messages]);
+***REMOVED******REMOVED***setMessages([...messages, toolMessage, assistantMessage]);
 ***REMOVED***
 ***REMOVED******REMOVED***
 ***REMOVED*** catch ( e )  {
@@ -346,7 +368,7 @@ const Chat = () => {
 ***REMOVED******REMOVED***
 ***REMOVED******REMOVED***let errorChatMsg: ChatMessage = {
 ***REMOVED******REMOVED******REMOVED***id: uuid(),
-***REMOVED******REMOVED******REMOVED***role: "error",
+***REMOVED******REMOVED******REMOVED***role: ERROR,
 ***REMOVED******REMOVED******REMOVED***content: errorMessage,
 ***REMOVED******REMOVED******REMOVED***date: new Date().toISOString()
 ***REMOVED******REMOVED***
@@ -436,7 +458,6 @@ const Chat = () => {
 
 ***REMOVED***useEffect(() => {
 ***REMOVED***if (appStateContext?.state.currentChat) {
-
 ***REMOVED******REMOVED***setMessages(appStateContext.state.currentChat.messages)
 ***REMOVED***else{
 ***REMOVED******REMOVED***setMessages([])
@@ -461,7 +482,7 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED***let errorMessage = "An error occurred. Answers can't be saved at this time. If the problem persists, please contact the site administrator.";
 ***REMOVED******REMOVED******REMOVED******REMOVED***let errorChatMsg: ChatMessage = {
 ***REMOVED******REMOVED******REMOVED******REMOVED***id: uuid(),
-***REMOVED******REMOVED******REMOVED******REMOVED***role: "error",
+***REMOVED******REMOVED******REMOVED******REMOVED***role: ERROR,
 ***REMOVED******REMOVED******REMOVED******REMOVED***content: errorMessage,
 ***REMOVED******REMOVED******REMOVED******REMOVED***date: new Date().toISOString()
 ***REMOVED******REMOVED******REMOVED***
@@ -574,7 +595,7 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onCitationClicked={c => onShowCitation(c)}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***/>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***</div> : answer.role === "error" ? <div className={styles.chatMessageError}>
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***</div> : answer.role === ERROR ? <div className={styles.chatMessageError}>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<Stack horizontal className={styles.chatMessageErrorContent}>
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<ErrorCircleRegular className={styles.errorIcon} style={{color: "rgba(182, 52, 67, 1)"}} />
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<span>Error</span>

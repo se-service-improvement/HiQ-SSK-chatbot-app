@@ -213,21 +213,20 @@ def prepare_body_headers_with_data(request):
 
 def stream_with_data(body, headers, endpoint, history_metadata={}):
 ***REMOVED***s = requests.Session()
-***REMOVED***response = {
-***REMOVED***"id": "",
-***REMOVED***"model": "",
-***REMOVED***"created": 0,
-***REMOVED***"object": "",
-***REMOVED***"choices": [{
-***REMOVED******REMOVED***"messages": []
-***REMOVED***],
-***REMOVED***"apim-request-id": "",
-***REMOVED***'history_metadata': history_metadata
-***REMOVED***
 ***REMOVED***try:
 ***REMOVED***with s.post(endpoint, json=body, headers=headers, stream=True) as r:
-***REMOVED******REMOVED***apimRequestId = r.headers.get('apim-request-id')
 ***REMOVED******REMOVED***for line in r.iter_lines(chunk_size=10):
+***REMOVED******REMOVED***response = {
+***REMOVED******REMOVED******REMOVED***"id": "",
+***REMOVED******REMOVED******REMOVED***"model": "",
+***REMOVED******REMOVED******REMOVED***"created": 0,
+***REMOVED******REMOVED******REMOVED***"object": "",
+***REMOVED******REMOVED******REMOVED***"choices": [{
+***REMOVED******REMOVED******REMOVED***"messages": []
+***REMOVED******REMOVED***],
+***REMOVED******REMOVED******REMOVED***"apim-request-id": "",
+***REMOVED******REMOVED******REMOVED***'history_metadata': history_metadata
+***REMOVED******REMOVED***
 ***REMOVED******REMOVED***if line:
 ***REMOVED******REMOVED******REMOVED***if AZURE_OPENAI_PREVIEW_API_VERSION == '2023-06-01-preview':
 ***REMOVED******REMOVED******REMOVED***lineJson = json.loads(line.lstrip(b'data:').decode('utf-8'))
@@ -244,23 +243,27 @@ def stream_with_data(body, headers, endpoint, history_metadata={}):
 ***REMOVED******REMOVED******REMOVED***response["model"] = lineJson["model"]
 ***REMOVED******REMOVED******REMOVED***response["created"] = lineJson["created"]
 ***REMOVED******REMOVED******REMOVED***response["object"] = lineJson["object"]
-***REMOVED******REMOVED******REMOVED***response["apim-request-id"] = apimRequestId
+***REMOVED******REMOVED******REMOVED***response["apim-request-id"] = r.headers.get('apim-request-id')
 
 ***REMOVED******REMOVED******REMOVED***role = lineJson["choices"][0]["messages"][0]["delta"].get("role")
 
 ***REMOVED******REMOVED******REMOVED***if role == "tool":
 ***REMOVED******REMOVED******REMOVED***response["choices"][0]["messages"].append(lineJson["choices"][0]["messages"][0]["delta"])
+***REMOVED******REMOVED******REMOVED***yield format_as_ndjson(response)
 ***REMOVED******REMOVED******REMOVED***elif role == "assistant": 
 ***REMOVED******REMOVED******REMOVED***response["choices"][0]["messages"].append({
 ***REMOVED******REMOVED******REMOVED******REMOVED***"role": "assistant",
 ***REMOVED******REMOVED******REMOVED******REMOVED***"content": ""
 ***REMOVED******REMOVED******REMOVED***)
+***REMOVED******REMOVED******REMOVED***yield format_as_ndjson(response)
 ***REMOVED******REMOVED******REMOVED***else:
 ***REMOVED******REMOVED******REMOVED***deltaText = lineJson["choices"][0]["messages"][0]["delta"]["content"]
 ***REMOVED******REMOVED******REMOVED***if deltaText != "[DONE]":
-***REMOVED******REMOVED******REMOVED******REMOVED***response["choices"][0]["messages"][1]["content"] += deltaText
-
-***REMOVED******REMOVED******REMOVED***yield format_as_ndjson(response)
+***REMOVED******REMOVED******REMOVED******REMOVED***response["choices"][0]["messages"].append({
+***REMOVED******REMOVED******REMOVED******REMOVED***"role": "assistant",
+***REMOVED******REMOVED******REMOVED******REMOVED***"content": deltaText
+***REMOVED******REMOVED******REMOVED***)
+***REMOVED******REMOVED******REMOVED******REMOVED***yield format_as_ndjson(response)
 ***REMOVED***except Exception as e:
 ***REMOVED***yield format_as_ndjson({"error" + str(e)})
 
@@ -364,7 +367,7 @@ def stream_without_data(response, history_metadata={}):
 ***REMOVED***else:
 ***REMOVED******REMOVED***deltaText = ""
 ***REMOVED***if deltaText and deltaText != "[DONE]":
-***REMOVED******REMOVED***responseText += deltaText
+***REMOVED******REMOVED***responseText = deltaText
 
 ***REMOVED***response_obj = {
 ***REMOVED******REMOVED***"id": line["id"],
