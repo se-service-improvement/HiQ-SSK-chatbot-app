@@ -400,7 +400,8 @@ def conversation_without_data(request_body):
 ***REMOVED***]
 
 ***REMOVED***for message in request_messages:
-***REMOVED***messages.append({
+***REMOVED***if message:
+***REMOVED******REMOVED***messages.append({
 ***REMOVED******REMOVED***"role": message["role"] ,
 ***REMOVED******REMOVED***"content": message["content"]
 ***REMOVED***)
