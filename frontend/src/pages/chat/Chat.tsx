@@ -87,7 +87,11 @@ const Chat = () => {
 ***REMOVED******REMOVED***setErrorMsg(null)
 ***REMOVED***, 500);
 ***REMOVED***
-***REMOVED***
+
+***REMOVED***useEffect(() => {
+***REMOVED***   setIsLoading(appStateContext?.state.chatHistoryLoadingState === ChatHistoryLoadingState.Loading)
+***REMOVED***, [appStateContext?.state.chatHistoryLoadingState])
+
 ***REMOVED***const getUserInfoList = async () => {
 ***REMOVED***const userInfoList = await getUserInfo();
 ***REMOVED***if (userInfoList.length === 0 && window.location.hostname !== "127.0.0.1") {
