@@ -27,6 +27,11 @@ def favicon():
 def assets(path):
 ***REMOVED***return send_from_directory("static/assets", path)
 
+# On Your Data Settings
+DATASOURCE_TYPE = os.environ.get("DATASOURCE_TYPE", "AzureCognitiveSearch")
+SEARCH_TOP_K = os.environ.get("SEARCH_TOP_K", 5)
+SEARCH_STRICTNESS = os.environ.get("SEARCH_STRICTNESS", 3)
+SEARCH_ENABLE_IN_DOMAIN = os.environ.get("SEARCH_ENABLE_IN_DOMAIN", "true")
 
 # ACS Integration Settings
 AZURE_SEARCH_SERVICE = os.environ.get("AZURE_SEARCH_SERVICE")
@@ -34,8 +39,8 @@ AZURE_SEARCH_INDEX = os.environ.get("AZURE_SEARCH_INDEX")
 AZURE_SEARCH_KEY = os.environ.get("AZURE_SEARCH_KEY")
 AZURE_SEARCH_USE_SEMANTIC_SEARCH = os.environ.get("AZURE_SEARCH_USE_SEMANTIC_SEARCH", "false")
 AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG = os.environ.get("AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG", "default")
-AZURE_SEARCH_TOP_K = os.environ.get("AZURE_SEARCH_TOP_K", 5)
-AZURE_SEARCH_ENABLE_IN_DOMAIN = os.environ.get("AZURE_SEARCH_ENABLE_IN_DOMAIN", "true")
+AZURE_SEARCH_TOP_K = os.environ.get("AZURE_SEARCH_TOP_K", SEARCH_TOP_K)
+AZURE_SEARCH_ENABLE_IN_DOMAIN = os.environ.get("AZURE_SEARCH_ENABLE_IN_DOMAIN", SEARCH_ENABLE_IN_DOMAIN)
 AZURE_SEARCH_CONTENT_COLUMNS = os.environ.get("AZURE_SEARCH_CONTENT_COLUMNS")
 AZURE_SEARCH_FILENAME_COLUMN = os.environ.get("AZURE_SEARCH_FILENAME_COLUMN")
 AZURE_SEARCH_TITLE_COLUMN = os.environ.get("AZURE_SEARCH_TITLE_COLUMN")
@@ -43,7 +48,7 @@ AZURE_SEARCH_URL_COLUMN = os.environ.get("AZURE_SEARCH_URL_COLUMN")
 AZURE_SEARCH_VECTOR_COLUMNS = os.environ.get("AZURE_SEARCH_VECTOR_COLUMNS")
 AZURE_SEARCH_QUERY_TYPE = os.environ.get("AZURE_SEARCH_QUERY_TYPE")
 AZURE_SEARCH_PERMITTED_GROUPS_COLUMN = os.environ.get("AZURE_SEARCH_PERMITTED_GROUPS_COLUMN")
-AZURE_SEARCH_STRICTNESS = os.environ.get("AZURE_SEARCH_STRICTNESS", 3)
+AZURE_SEARCH_STRICTNESS = os.environ.get("AZURE_SEARCH_STRICTNESS", SEARCH_STRICTNESS)
 
 # AOAI Integration Settings
 AZURE_OPENAI_RESOURCE = os.environ.get("AZURE_OPENAI_RESOURCE")
@@ -62,16 +67,30 @@ AZURE_OPENAI_EMBEDDING_ENDPOINT = os.environ.get("AZURE_OPENAI_EMBEDDING_ENDPOIN
 AZURE_OPENAI_EMBEDDING_KEY = os.environ.get("AZURE_OPENAI_EMBEDDING_KEY")
 AZURE_OPENAI_EMBEDDING_NAME = os.environ.get("AZURE_OPENAI_EMBEDDING_NAME", "")
 
+# CosmosDB Mongo vcore vector db Settings
+AZURE_COSMOSDB_MONGO_VCORE_CONNECTION_STRING = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_CONNECTION_STRING")  #This has to be secure string
+AZURE_COSMOSDB_MONGO_VCORE_DATABASE = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_DATABASE")
+AZURE_COSMOSDB_MONGO_VCORE_CONTAINER = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_CONTAINER")
+AZURE_COSMOSDB_MONGO_VCORE_INDEX = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_INDEX")
+AZURE_COSMOSDB_MONGO_VCORE_TOP_K = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_TOP_K", AZURE_SEARCH_TOP_K)
+AZURE_COSMOSDB_MONGO_VCORE_STRICTNESS = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_STRICTNESS", AZURE_SEARCH_STRICTNESS)  
+AZURE_COSMOSDB_MONGO_VCORE_ENABLE_IN_DOMAIN = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_ENABLE_IN_DOMAIN", AZURE_SEARCH_ENABLE_IN_DOMAIN)
+AZURE_COSMOSDB_MONGO_VCORE_CONTENT_COLUMNS = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_CONTENT_COLUMNS", "")
+AZURE_COSMOSDB_MONGO_VCORE_FILENAME_COLUMN = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_FILENAME_COLUMN")
+AZURE_COSMOSDB_MONGO_VCORE_TITLE_COLUMN = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_TITLE_COLUMN")
+AZURE_COSMOSDB_MONGO_VCORE_URL_COLUMN = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_URL_COLUMN")
+AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS")
+
 
 SHOULD_STREAM = True if AZURE_OPENAI_STREAM.lower() == "true" else False
 
-# CosmosDB Integration Settings
+# Chat History CosmosDB Integration Settings
 AZURE_COSMOSDB_DATABASE = os.environ.get("AZURE_COSMOSDB_DATABASE")
 AZURE_COSMOSDB_ACCOUNT = os.environ.get("AZURE_COSMOSDB_ACCOUNT")
 AZURE_COSMOSDB_CONVERSATIONS_CONTAINER = os.environ.get("AZURE_COSMOSDB_CONVERSATIONS_CONTAINER")
 AZURE_COSMOSDB_ACCOUNT_KEY = os.environ.get("AZURE_COSMOSDB_ACCOUNT_KEY")
 
-# Initialize a CosmosDB client with AAD auth and containers
+# Initialize a CosmosDB client with AAD auth and containers for Chat History
 cosmos_conversation_client = None
 if AZURE_COSMOSDB_DATABASE and AZURE_COSMOSDB_ACCOUNT and AZURE_COSMOSDB_CONVERSATIONS_CONTAINER:
 ***REMOVED***try :
@@ -101,6 +120,10 @@ def is_chat_model():
 def should_use_data():
 ***REMOVED***if AZURE_SEARCH_SERVICE and AZURE_SEARCH_INDEX and AZURE_SEARCH_KEY:
 ***REMOVED***return True
+***REMOVED***
+***REMOVED***if AZURE_COSMOSDB_MONGO_VCORE_DATABASE and AZURE_COSMOSDB_MONGO_VCORE_CONTAINER and AZURE_COSMOSDB_MONGO_VCORE_INDEX and AZURE_COSMOSDB_MONGO_VCORE_CONNECTION_STRING:
+***REMOVED***return True
+***REMOVED***
 ***REMOVED***return False
 
 
@@ -147,20 +170,6 @@ def generateFilterString(userToken):
 def prepare_body_headers_with_data(request):
 ***REMOVED***request_messages = request.json["messages"]
 
-***REMOVED***# Set query type
-***REMOVED***query_type = "simple"
-***REMOVED***if AZURE_SEARCH_QUERY_TYPE:
-***REMOVED***query_type = AZURE_SEARCH_QUERY_TYPE
-***REMOVED***elif AZURE_SEARCH_USE_SEMANTIC_SEARCH.lower() == "true" and AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG:
-***REMOVED***query_type = "semantic"
-
-***REMOVED***# Set filter
-***REMOVED***filter = None
-***REMOVED***userToken = None
-***REMOVED***if AZURE_SEARCH_PERMITTED_GROUPS_COLUMN:
-***REMOVED***userToken = request.headers.get('X-MS-TOKEN-AAD-ACCESS-TOKEN', "")
-***REMOVED***filter = generateFilterString(userToken)
-
 ***REMOVED***body = {
 ***REMOVED***"messages": request_messages,
 ***REMOVED***"temperature": float(AZURE_OPENAI_TEMPERATURE),
@@ -168,7 +177,25 @@ def prepare_body_headers_with_data(request):
 ***REMOVED***"top_p": float(AZURE_OPENAI_TOP_P),
 ***REMOVED***"stop": AZURE_OPENAI_STOP_SEQUENCE.split("|") if AZURE_OPENAI_STOP_SEQUENCE else None,
 ***REMOVED***"stream": SHOULD_STREAM,
-***REMOVED***"dataSources": [
+***REMOVED***"dataSources": []
+***REMOVED***
+
+***REMOVED***if DATASOURCE_TYPE == "AzureCognitiveSearch":
+***REMOVED***# Set query type
+***REMOVED***query_type = "simple"
+***REMOVED***if AZURE_SEARCH_QUERY_TYPE:
+***REMOVED******REMOVED***query_type = AZURE_SEARCH_QUERY_TYPE
+***REMOVED***elif AZURE_SEARCH_USE_SEMANTIC_SEARCH.lower() == "true" and AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG:
+***REMOVED******REMOVED***query_type = "semantic"
+
+***REMOVED***# Set filter
+***REMOVED***filter = None
+***REMOVED***userToken = None
+***REMOVED***if AZURE_SEARCH_PERMITTED_GROUPS_COLUMN:
+***REMOVED******REMOVED***userToken = request.headers.get('X-MS-TOKEN-AAD-ACCESS-TOKEN', "")
+***REMOVED******REMOVED***filter = generateFilterString(userToken)
+
+***REMOVED***body["dataSources"].append(
 ***REMOVED******REMOVED***{
 ***REMOVED******REMOVED***"type": "AzureCognitiveSearch",
 ***REMOVED******REMOVED***"parameters": {
@@ -190,9 +217,35 @@ def prepare_body_headers_with_data(request):
 ***REMOVED******REMOVED******REMOVED***"filter": filter,
 ***REMOVED******REMOVED******REMOVED***"strictness": int(AZURE_SEARCH_STRICTNESS)
 ***REMOVED******REMOVED***
-***REMOVED***
-***REMOVED***]
-***REMOVED***
+***REMOVED***)
+***REMOVED***elif DATASOURCE_TYPE == "AzureCosmosDB":
+***REMOVED***# Set query type
+***REMOVED***query_type = "vector"
+
+***REMOVED***body["dataSources"].append(
+***REMOVED******REMOVED***{
+***REMOVED******REMOVED***"type": "AzureCosmosDB",
+***REMOVED******REMOVED***"parameters": {
+***REMOVED******REMOVED******REMOVED***"connectionString": AZURE_COSMOSDB_MONGO_VCORE_CONNECTION_STRING,
+***REMOVED******REMOVED******REMOVED***"indexName": AZURE_COSMOSDB_MONGO_VCORE_INDEX,
+***REMOVED******REMOVED******REMOVED***"databaseName": AZURE_COSMOSDB_MONGO_VCORE_DATABASE,
+***REMOVED******REMOVED******REMOVED***"containerName": AZURE_COSMOSDB_MONGO_VCORE_CONTAINER,***REMOVED******REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED***"fieldsMapping": {
+***REMOVED******REMOVED******REMOVED***"contentFields": AZURE_COSMOSDB_MONGO_VCORE_CONTENT_COLUMNS.split("|") if AZURE_COSMOSDB_MONGO_VCORE_CONTENT_COLUMNS else [],
+***REMOVED******REMOVED******REMOVED***"titleField": AZURE_COSMOSDB_MONGO_VCORE_TITLE_COLUMN if AZURE_COSMOSDB_MONGO_VCORE_TITLE_COLUMN else None,
+***REMOVED******REMOVED******REMOVED***"urlField": AZURE_COSMOSDB_MONGO_VCORE_URL_COLUMN if AZURE_COSMOSDB_MONGO_VCORE_URL_COLUMN else None,
+***REMOVED******REMOVED******REMOVED***"filepathField": AZURE_COSMOSDB_MONGO_VCORE_FILENAME_COLUMN if AZURE_COSMOSDB_MONGO_VCORE_FILENAME_COLUMN else None,
+***REMOVED******REMOVED******REMOVED***"vectorFields": AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS.split("|") if AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS else []
+***REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***"inScope": True if AZURE_COSMOSDB_MONGO_VCORE_ENABLE_IN_DOMAIN.lower() == "true" else False,
+***REMOVED******REMOVED******REMOVED***"topNDocuments": AZURE_COSMOSDB_MONGO_VCORE_TOP_K,
+***REMOVED******REMOVED******REMOVED***"strictness": int(AZURE_COSMOSDB_MONGO_VCORE_STRICTNESS),
+***REMOVED******REMOVED******REMOVED***"queryType": query_type,
+***REMOVED******REMOVED******REMOVED***"roleInformation": AZURE_OPENAI_SYSTEM_MESSAGE
+***REMOVED******REMOVED***
+***REMOVED***)
+***REMOVED***else:
+***REMOVED***raise Exception(f"DATASOURCE_TYPE is not configured or unknown: {DATASOURCE_TYPE}")
 
 ***REMOVED***if "vector" in query_type.lower():
 ***REMOVED***if AZURE_OPENAI_EMBEDDING_NAME:
@@ -205,7 +258,7 @@ def prepare_body_headers_with_data(request):
 ***REMOVED***headers = {
 ***REMOVED***'Content-Type': 'application/json',
 ***REMOVED***'api-key': AZURE_OPENAI_KEY,
-***REMOVED***"x-ms-useragent": "GitHubSampleWebApp/PublicAPI/2.0.0"
+***REMOVED***"x-ms-useragent": "GitHubSampleWebApp/PublicAPI/3.0.0"
 ***REMOVED***
 
 ***REMOVED***return body, headers
