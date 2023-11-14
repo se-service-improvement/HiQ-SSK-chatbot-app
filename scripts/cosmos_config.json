@@ -1,0 +1,16 @@
+[
+***REMOVED***{
+***REMOVED***"data_path": "<path to data>",
+***REMOVED***"location": "<azure region, e.g. 'westus2'>",
+***REMOVED***"subscription_id": "<subscription id>",
+***REMOVED***"resource_group": "<resource group name>",
+***REMOVED***"connection_string": "<Cosmos Mongo vcore database connection string>",
+***REMOVED***"account_name": "<Cosmos Mongo vcore database connection string>",
+***REMOVED***"database_name": "<Cosmos Mongo vcore database name>",
+***REMOVED***"collection_name": "<Cosmos Mongo vcore database collection name>",
+***REMOVED***"index_name": "<Cosmos Mongo vcore vector index>",
+***REMOVED***"vector_field": "<Cosmos Mongo vcore vector field>",
+***REMOVED***"chunk_size": 1024,
+***REMOVED***"token_overlap": 128
+***REMOVED***
+]
