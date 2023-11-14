@@ -3,6 +3,7 @@ import os
 import logging
 import requests
 import openai
+import copy
 from azure.identity import DefaultAzureCredential
 from flask import Flask, Response, request, jsonify, send_from_directory
 from dotenv import load_dotenv
@@ -26,6 +27,12 @@ def favicon():
 @app.route("/assets/<path:path>")
 def assets(path):
 ***REMOVED***return send_from_directory("static/assets", path)
+
+# Debug settings
+DEBUG = os.environ.get("DEBUG", "false")
+DEBUG_LOGGING = DEBUG.lower() == "true"
+if DEBUG_LOGGING:
+***REMOVED***logging.basicConfig(level=logging.DEBUG)
 
 # On Your Data Settings
 DATASOURCE_TYPE = os.environ.get("DATASOURCE_TYPE", "AzureCognitiveSearch")
@@ -119,9 +126,13 @@ def is_chat_model():
 
 def should_use_data():
 ***REMOVED***if AZURE_SEARCH_SERVICE and AZURE_SEARCH_INDEX and AZURE_SEARCH_KEY:
+***REMOVED***if DEBUG_LOGGING:
+***REMOVED******REMOVED***logging.debug("Using Azure Cognitive Search")
 ***REMOVED***return True
 ***REMOVED***
 ***REMOVED***if AZURE_COSMOSDB_MONGO_VCORE_DATABASE and AZURE_COSMOSDB_MONGO_VCORE_CONTAINER and AZURE_COSMOSDB_MONGO_VCORE_INDEX and AZURE_COSMOSDB_MONGO_VCORE_CONNECTION_STRING:
+***REMOVED***if DEBUG_LOGGING:
+***REMOVED******REMOVED***logging.debug("Using Azure CosmosDB Mongo vcore")
 ***REMOVED***return True
 ***REMOVED***
 ***REMOVED***return False
@@ -143,6 +154,8 @@ def fetchUserGroups(userToken, nextLink=None):
 ***REMOVED***try :
 ***REMOVED***r = requests.get(endpoint, headers=headers)
 ***REMOVED***if r.status_code != 200:
+***REMOVED******REMOVED***if DEBUG_LOGGING:
+***REMOVED******REMOVED***logging.error(f"Error fetching user groups: {r.status_code} {r.text}")
 ***REMOVED******REMOVED***return []
 ***REMOVED***
 ***REMOVED***r = r.json()
@@ -152,6 +165,7 @@ def fetchUserGroups(userToken, nextLink=None):
 ***REMOVED***
 ***REMOVED***return r['value']
 ***REMOVED***except Exception as e:
+***REMOVED***logging.error(f"Exception in fetchUserGroups: {e}")
 ***REMOVED***return []
 
 
@@ -160,11 +174,12 @@ def generateFilterString(userToken):
 ***REMOVED***userGroups = fetchUserGroups(userToken)
 
 ***REMOVED***# Construct filter string
-***REMOVED***if userGroups:
+***REMOVED***if not userGroups:
+***REMOVED***logging.debug("No user groups found")
+
 ***REMOVED***group_ids = ", ".join([obj['id'] for obj in userGroups])
 ***REMOVED***return f"{AZURE_SEARCH_PERMITTED_GROUPS_COLUMN}/any(g:search.in(g, '{group_ids}'))"
-***REMOVED***
-***REMOVED***return None
+
 
 
 def prepare_body_headers_with_data(request):
@@ -193,7 +208,12 @@ def prepare_body_headers_with_data(request):
 ***REMOVED***userToken = None
 ***REMOVED***if AZURE_SEARCH_PERMITTED_GROUPS_COLUMN:
 ***REMOVED******REMOVED***userToken = request.headers.get('X-MS-TOKEN-AAD-ACCESS-TOKEN', "")
+***REMOVED******REMOVED***if DEBUG_LOGGING:
+***REMOVED******REMOVED***logging.debug(f"USER TOKEN is {'present' if userToken else 'not present'}")
+
 ***REMOVED******REMOVED***filter = generateFilterString(userToken)
+***REMOVED******REMOVED***if DEBUG_LOGGING:
+***REMOVED******REMOVED***logging.debug(f"FILTER: {filter}")
 
 ***REMOVED***body["dataSources"].append(
 ***REMOVED******REMOVED***{
@@ -254,6 +274,16 @@ def prepare_body_headers_with_data(request):
 ***REMOVED******REMOVED***body["dataSources"][0]["parameters"]["embeddingEndpoint"] = AZURE_OPENAI_EMBEDDING_ENDPOINT
 ***REMOVED******REMOVED***body["dataSources"][0]["parameters"]["embeddingKey"] = AZURE_OPENAI_EMBEDDING_KEY
 
+***REMOVED***if DEBUG_LOGGING:
+***REMOVED***body_clean = copy.deepcopy(body)
+***REMOVED***if body_clean["dataSources"][0]["parameters"].get("key"):
+***REMOVED******REMOVED***body_clean["dataSources"][0]["parameters"]["key"] = "*****"
+***REMOVED***if body_clean["dataSources"][0]["parameters"].get("connectionString"):
+***REMOVED******REMOVED***body_clean["dataSources"][0]["parameters"]["connectionString"] = "*****"
+***REMOVED***if body_clean["dataSources"][0]["parameters"].get("embeddingKey"):
+***REMOVED******REMOVED***body_clean["dataSources"][0]["parameters"]["embeddingKey"] = "*****"
+***REMOVED******REMOVED***
+***REMOVED***logging.debug(f"REQUEST BODY: {json.dumps(body_clean, indent=4)}")
 
 ***REMOVED***headers = {
 ***REMOVED***'Content-Type': 'application/json',
@@ -304,6 +334,8 @@ def stream_with_data(body, headers, endpoint, history_metadata={}):
 ***REMOVED******REMOVED******REMOVED***response["choices"][0]["messages"].append(lineJson["choices"][0]["messages"][0]["delta"])
 ***REMOVED******REMOVED******REMOVED***yield format_as_ndjson(response)
 ***REMOVED******REMOVED******REMOVED***elif role == "assistant": 
+***REMOVED******REMOVED******REMOVED***if response['apim-request-id'] and DEBUG_LOGGING: 
+***REMOVED******REMOVED******REMOVED******REMOVED***logging.debug(f"RESPONSE apim-request-id: {response['apim-request-id']}")
 ***REMOVED******REMOVED******REMOVED***response["choices"][0]["messages"].append({
 ***REMOVED******REMOVED******REMOVED******REMOVED***"role": "assistant",
 ***REMOVED******REMOVED******REMOVED******REMOVED***"content": ""
