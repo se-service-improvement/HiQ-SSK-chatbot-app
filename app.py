@@ -606,7 +606,7 @@ def update_conversation():
 ***REMOVED***## then write it to the conversation history in cosmos
 ***REMOVED***messages = request.json["messages"]
 ***REMOVED***if len(messages) > 0 and messages[-1]['role'] == "assistant":
-***REMOVED******REMOVED***if len(messages) > 1 and messages[-2] != {} and messages[-2]['role'] == "tool":
+***REMOVED******REMOVED***if len(messages) > 1 and messages[-2].get('role', None) == "tool":
 ***REMOVED******REMOVED***# write the tool message first
 ***REMOVED******REMOVED***cosmos_conversation_client.create_message(
 ***REMOVED******REMOVED******REMOVED***conversation_id=conversation_id,

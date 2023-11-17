@@ -341,6 +341,8 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED***abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
 ***REMOVED******REMOVED******REMOVED***return;
 ***REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED***isEmpty(toolMessage) ?
+***REMOVED******REMOVED******REMOVED***resultConversation.messages.push(assistantMessage) :
 ***REMOVED******REMOVED******REMOVED***resultConversation.messages.push(toolMessage, assistantMessage)
 ***REMOVED******REMOVED***else{
 ***REMOVED******REMOVED******REMOVED***resultConversation = {
@@ -349,6 +351,8 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED***messages: [userMessage],
 ***REMOVED******REMOVED******REMOVED***date: result.history_metadata.date
 ***REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED***isEmpty(toolMessage) ?
+***REMOVED******REMOVED******REMOVED***resultConversation.messages.push(assistantMessage) :
 ***REMOVED******REMOVED******REMOVED***resultConversation.messages.push(toolMessage, assistantMessage)
 ***REMOVED******REMOVED***
 ***REMOVED******REMOVED***if(!resultConversation){
@@ -358,7 +362,9 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED***return;
 ***REMOVED******REMOVED***
 ***REMOVED******REMOVED***appStateContext?.dispatch({ type: 'UPDATE_CURRENT_CHAT', payload: resultConversation });
-***REMOVED******REMOVED***setMessages([...messages, toolMessage, assistantMessage]);
+***REMOVED******REMOVED***isEmpty(toolMessage) ?
+***REMOVED******REMOVED******REMOVED***setMessages([...messages, assistantMessage]) :
+***REMOVED******REMOVED******REMOVED***setMessages([...messages, toolMessage, assistantMessage]);***REMOVED*** 
 ***REMOVED***
 ***REMOVED******REMOVED***
 ***REMOVED*** catch ( e )  {
