@@ -19,7 +19,7 @@ export function parseAnswer(answer: AskResponse): ParsedAnswer {
 ***REMOVED***// Replacing the links/citations with number
 ***REMOVED***let citationIndex = link.slice(lengthDocN, link.length - 1);
 ***REMOVED***let citation = cloneDeep(answer.citations[Number(citationIndex) - 1]) as Citation;
-***REMOVED***if (!filteredCitations.find((c) => c.id === citationIndex)) {
+***REMOVED***if (!filteredCitations.find((c) => c.id === citationIndex) && citation) {
 ***REMOVED***  answerText = answerText.replaceAll(link, ` ^${++citationReindex}^ `);
 ***REMOVED***  citation.id = citationIndex; // original doc index to de-dupe
 ***REMOVED***  citation.reindex_id = citationReindex.toString(); // reindex from 1 for display
