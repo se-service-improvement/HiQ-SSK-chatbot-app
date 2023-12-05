@@ -709,11 +709,12 @@ def delete_conversation():
 
 @app.route("/history/list", methods=["GET"])
 def list_conversations():
+***REMOVED***offset = request.args.get("offset", 0)
 ***REMOVED***authenticated_user = get_authenticated_user_details(request_headers=request.headers)
 ***REMOVED***user_id = authenticated_user['user_principal_id']
 
 ***REMOVED***## get the conversations from cosmos
-***REMOVED***conversations = cosmos_conversation_client.get_conversations(user_id)
+***REMOVED***conversations = cosmos_conversation_client.get_conversations(user_id, offset=offset, limit=25)
 ***REMOVED***if not isinstance(conversations, list):
 ***REMOVED***return jsonify({"error": f"No conversations for {user_id} were found"}), 404
 
@@ -779,7 +780,7 @@ def delete_all_conversations():
 
 ***REMOVED***# get conversations for user
 ***REMOVED***try:
-***REMOVED***conversations = cosmos_conversation_client.get_conversations(user_id)
+***REMOVED***conversations = cosmos_conversation_client.get_conversations(user_id, offset=0, limit=None)
 ***REMOVED***if not conversations:
 ***REMOVED******REMOVED***return jsonify({"error": f"No conversations for {user_id} were found"}), 404
 ***REMOVED***

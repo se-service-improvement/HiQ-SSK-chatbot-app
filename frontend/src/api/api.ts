@@ -35,8 +35,8 @@ export const fetchChatHistoryInit = (): Conversation[] | null => {
 ***REMOVED***return chatHistorySampleData;
 }
 
-export const historyList = async (): Promise<Conversation[] | null> => {
-***REMOVED***const response = await fetch("/history/list", {
+export const historyList = async (offset=0): Promise<Conversation[] | null> => {
+***REMOVED***const response = await fetch(`/history/list?offset=${offset}`, {
 ***REMOVED***method: "GET",
 ***REMOVED***).then(async (res) => {
 ***REMOVED***const payload = await res.json();

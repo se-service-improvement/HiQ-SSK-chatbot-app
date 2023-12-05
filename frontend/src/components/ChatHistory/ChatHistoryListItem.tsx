@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { DefaultButton, Dialog, DialogFooter, DialogType, Text, IconButton, List, PrimaryButton, Separator, Stack, TextField, ITextField } from '@fluentui/react';
+import { DefaultButton, Dialog, DialogFooter, DialogType, Text, IconButton, List, PrimaryButton, Separator, Stack, TextField, ITextField, Spinner, SpinnerSize } from '@fluentui/react';
 
 import { AppStateContext } from '../../state/AppProvider';
 import { GroupedChatHistory } from './ChatHistoryList';
@@ -7,8 +7,8 @@ import { GroupedChatHistory } from './ChatHistoryList';
 import styles from "./ChatHistoryPanel.module.css"
 import { useBoolean } from '@fluentui/react-hooks';
 import { Conversation } from '../../api/models';
-import { historyDelete, historyRename } from '../../api';
-import { useEffect, useRef, useState } from 'react';
+import { historyDelete, historyRename, historyList } from '../../api';
+import { useEffect, useRef, useState, useContext } from 'react';
 
 interface ChatHistoryListItemCellProps {
   item?: Conversation;
@@ -244,8 +244,14 @@ export const ChatHistoryListItemCell: React.FC<ChatHistoryListItemCellProps> = (
 };
 
 export const ChatHistoryListItemGroups: React.FC<ChatHistoryListItemGroupsProps> = ({ groupedChatHistory }) => {
-  const [ , setSelectedItem] = React.useState<Conversation | null>(null);
- 
+***REMOVED***const appStateContext = useContext(AppStateContext);
+***REMOVED***const observerTarget = useRef(null);
+***REMOVED***const [ , setSelectedItem] = React.useState<Conversation | null>(null);
+***REMOVED***const [offset, setOffset] = useState<number>(25);
+***REMOVED***const [observerCounter, setObserverCounter] = useState(0);
+***REMOVED***const [showSpinner, setShowSpinner] = useState(false);
+***REMOVED***const firstRender = useRef(true);
+
   const handleSelectHistory = (item?: Conversation) => {
 ***REMOVED***if(item){
 ***REMOVED***setSelectedItem(item)
@@ -258,12 +264,54 @@ export const ChatHistoryListItemGroups: React.FC<ChatHistoryListItemGroupsProps>
 ***REMOVED***);
   };
 
+***REMOVED***useEffect(() => {
+***REMOVED***if (firstRender.current) {
+***REMOVED******REMOVED***firstRender.current = false;
+***REMOVED******REMOVED***return;
+***REMOVED***
+***REMOVED***handleFetchHistory();
+***REMOVED***setOffset((offset) => offset += 25);
+***REMOVED***, [observerCounter]);
+
+***REMOVED***const handleFetchHistory = async () => {
+***REMOVED***const currentChatHistory = appStateContext?.state.chatHistory;
+***REMOVED***setShowSpinner(true);
+
+***REMOVED***await historyList(offset).then((response) => {
+***REMOVED******REMOVED***const concatenatedChatHistory = currentChatHistory && response && currentChatHistory.concat(...response)
+***REMOVED******REMOVED***if (response) {
+***REMOVED******REMOVED***appStateContext?.dispatch({ type: 'FETCH_CHAT_HISTORY', payload: concatenatedChatHistory || response });
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***appStateContext?.dispatch({ type: 'FETCH_CHAT_HISTORY', payload: null });
+***REMOVED***
+***REMOVED******REMOVED***setShowSpinner(false);
+***REMOVED******REMOVED***return response
+***REMOVED***)
+***REMOVED***
+
+***REMOVED***useEffect(() => {
+***REMOVED***const observer = new IntersectionObserver(
+***REMOVED******REMOVED***entries => {
+***REMOVED******REMOVED***if (entries[0].isIntersecting) 
+***REMOVED******REMOVED******REMOVED***setObserverCounter((observerCounter) => observerCounter += 1);
+***REMOVED***,
+***REMOVED******REMOVED***{ threshold: 1 }
+***REMOVED***);
+
+***REMOVED***if (observerTarget.current) observer.observe(observerTarget.current);
+
+***REMOVED***return () => {
+***REMOVED******REMOVED***if (observerTarget.current) observer.unobserve(observerTarget.current);
+***REMOVED***;
+***REMOVED***, [observerTarget]);
+
   return (
-***REMOVED***<div className={styles.listContainer}>
+***REMOVED***<div className={styles.listContainer} data-is-scrollable>
 ***REMOVED***  {groupedChatHistory.map((group) => (
 ***REMOVED***group.entries.length > 0 && <Stack horizontalAlign="start" verticalAlign="center" key={group.month} className={styles.chatGroup} aria-label={`chat history group: ${group.month}`}>
 ***REMOVED***  <Stack aria-label={group.month} className={styles.chatMonth}>{formatMonth(group.month)}</Stack>
 ***REMOVED***  <List aria-label={`chat history list`} items={group.entries} onRenderCell={onRenderCell} className={styles.chatList}/>
+***REMOVED***  <div ref={observerTarget} />
 ***REMOVED***  <Separator styles={{
 ***REMOVED******REMOVED***root: {
 ***REMOVED******REMOVED***width: '100%',
@@ -275,6 +323,7 @@ export const ChatHistoryListItemGroups: React.FC<ChatHistoryListItemGroupsProps>
   ***REMOVED***}/>
 ***REMOVED***</Stack>
 ***REMOVED***  ))}
+***REMOVED***  {showSpinner && <div className={styles.spinnerContainer}><Spinner size={SpinnerSize.small} aria-label="loading more chat history" className={styles.spinner}/></div>}
 ***REMOVED***</div>
   );
 };

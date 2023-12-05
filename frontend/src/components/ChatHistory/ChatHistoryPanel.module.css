@@ -48,6 +48,13 @@
 ***REMOVED***width: 100%;
 }
 
+.spinnerContainer {
+***REMOVED***display: flex;
+***REMOVED***justify-content: center;
+***REMOVED***align-items: center;
+***REMOVED***height: 50px;
+}
+
 .chatList {
 ***REMOVED***width: 100%;
 }

@@ -51,10 +51,10 @@ type AppStateProviderProps = {
 
 ***REMOVED***useEffect(() => {
 ***REMOVED***// Check for cosmosdb config and fetch initial data here
-***REMOVED***const fetchChatHistory = async (): Promise<Conversation[] | null> => {
-***REMOVED******REMOVED***const result = await historyList().then((response) => {
+***REMOVED***const fetchChatHistory = async (offset=0): Promise<Conversation[] | null> => {
+***REMOVED******REMOVED***const result = await historyList(offset).then((response) => {
 ***REMOVED******REMOVED***if(response){
-***REMOVED******REMOVED******REMOVED***dispatch({ type: 'FETCH_CHAT_HISTORY', payload: response });
+***REMOVED******REMOVED******REMOVED***dispatch({ type: 'FETCH_CHAT_HISTORY', payload: response});
 ***REMOVED******REMOVED***else{
 ***REMOVED******REMOVED******REMOVED***dispatch({ type: 'FETCH_CHAT_HISTORY', payload: null });
 ***REMOVED******REMOVED***
