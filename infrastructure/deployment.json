@@ -260,18 +260,21 @@
 ***REMOVED***,
 ***REMOVED***"ElasticsearchEndpoint": {
 ***REMOVED******REMOVED***"type": "string",
+***REMOVED******REMOVED***"defaultValue": "",
 ***REMOVED******REMOVED***"metadata": {
 ***REMOVED******REMOVED***"description": "Endpoint to use to connect to an Elasticsearch cluster"
 ***REMOVED***
 ***REMOVED***,
 ***REMOVED***"ElasticsearchEncodedApiKey": {
 ***REMOVED******REMOVED***"type": "securestring",
+***REMOVED******REMOVED***"defaultValue": "",
 ***REMOVED******REMOVED***"metadata": {
 ***REMOVED******REMOVED***"description": "Encoded API key credentials to use to connect to an Elasticsearch cluster"
 ***REMOVED***
 ***REMOVED***,
 ***REMOVED***"ElasticsearchIndex": {
 ***REMOVED******REMOVED***"type": "string",
+***REMOVED******REMOVED***"defaultValue": "",
 ***REMOVED******REMOVED***"metadata": {
 ***REMOVED******REMOVED***"description": "Elasticsearch index to use for retrieving grounding data"
 ***REMOVED***
@@ -285,30 +288,35 @@
 ***REMOVED***,
 ***REMOVED***"ElasticsearchContentColumns": {
 ***REMOVED******REMOVED***"type": "string",
+***REMOVED******REMOVED***"defaultValue": "",
 ***REMOVED******REMOVED***"metadata": {
 ***REMOVED******REMOVED***"description": "Elasticsearch index content columns"
 ***REMOVED***
 ***REMOVED***,
 ***REMOVED***"ElasticsearchFilenameColumn": {
 ***REMOVED******REMOVED***"type": "string",
+***REMOVED******REMOVED***"defaultValue": "",
 ***REMOVED******REMOVED***"metadata": {
 ***REMOVED******REMOVED***"description": "Elasticsearch index filename column"
 ***REMOVED***
 ***REMOVED***,
 ***REMOVED***"ElasticsearchTitleColumn": {
 ***REMOVED******REMOVED***"type": "string",
+***REMOVED******REMOVED***"defaultValue": "",
 ***REMOVED******REMOVED***"metadata": {
 ***REMOVED******REMOVED***"description": "Elasticsearch index title column"
 ***REMOVED***
 ***REMOVED***,
 ***REMOVED***"ElasticsearchUrlColumn": {
 ***REMOVED******REMOVED***"type": "string",
+***REMOVED******REMOVED***"defaultValue": "",
 ***REMOVED******REMOVED***"metadata": {
 ***REMOVED******REMOVED***"description": "Elasticsearch index url column"
 ***REMOVED***
 ***REMOVED***,
 ***REMOVED***"ElasticsearchVectorColumns": {
 ***REMOVED******REMOVED***"type": "string",
+***REMOVED******REMOVED***"defaultValue": "",
 ***REMOVED******REMOVED***"metadata": {
 ***REMOVED******REMOVED***"description": "Elasticsearch index vector columns"
 ***REMOVED***
@@ -343,6 +351,7 @@
 ***REMOVED***,
 ***REMOVED***"ElasticsearchEmbeddingModelId": {
 ***REMOVED******REMOVED***"type": "string",
+***REMOVED******REMOVED***"defaultValue": "",
 ***REMOVED******REMOVED***"metadata": {
 ***REMOVED******REMOVED***"description": "The model ID for a model deployed on Elasticsearch to use for generating embeddings for queries."
 ***REMOVED***
@@ -520,51 +529,55 @@
 ***REMOVED******REMOVED******REMOVED***,
 ***REMOVED******REMOVED******REMOVED***{
 ***REMOVED******REMOVED******REMOVED******REMOVED***"name": "ELASTICSEARCH_ENDPOINT",
-***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[variables('ElasticsearchEndpoint')]"
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('ElasticsearchEndpoint')]"
 ***REMOVED******REMOVED******REMOVED***,
 ***REMOVED******REMOVED******REMOVED***{
 ***REMOVED******REMOVED******REMOVED******REMOVED***"name": "ELASTICSEARCH_ENCODED_API_KEY",
-***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[variables('ElasticsearchEncodedApiKey')]"
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('ElasticsearchEncodedApiKey')]"
 ***REMOVED******REMOVED******REMOVED***,
 ***REMOVED******REMOVED******REMOVED***{
 ***REMOVED******REMOVED******REMOVED******REMOVED***"name": "ELASTICSEARCH_INDEX",
-***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[variables('ElasticsearchIndex')]"
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('ElasticsearchIndex')]"
 ***REMOVED******REMOVED******REMOVED***,
 ***REMOVED******REMOVED******REMOVED***{
 ***REMOVED******REMOVED******REMOVED******REMOVED***"name": "ELASTICSEARCH_QUERY_TYPE",
-***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[variables('ElasticsearchQueryType')]"
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('ElasticsearchQueryType')]"
 ***REMOVED******REMOVED******REMOVED***,
 ***REMOVED******REMOVED******REMOVED***{
 ***REMOVED******REMOVED******REMOVED******REMOVED***"name": "ELASTICSEARCH_TOP_K",
-***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[variables('ElasticsearchTopK')]"
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('ElasticsearchTopK')]"
 ***REMOVED******REMOVED******REMOVED***,
 ***REMOVED******REMOVED******REMOVED***{
 ***REMOVED******REMOVED******REMOVED******REMOVED***"name": "ELASTICSEARCH_ENABLE_IN_DOMAIN",
-***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[variables('ElasticsearchEnableInDomain')]"
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('ElasticsearchEnableInDomain')]"
 ***REMOVED******REMOVED******REMOVED***,
 ***REMOVED******REMOVED******REMOVED***{
 ***REMOVED******REMOVED******REMOVED******REMOVED***"name": "ELASTICSEARCH_CONTENT_COLUMNS",
-***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[variables('ElasticsearchContentColumns')]"
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('ElasticsearchContentColumns')]"
 ***REMOVED******REMOVED******REMOVED***,
 ***REMOVED******REMOVED******REMOVED***{
 ***REMOVED******REMOVED******REMOVED******REMOVED***"name": "ELASTICSEARCH_FILENAME_COLUMN",
-***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[variables('ElasticsearchFilenameColumn')]"
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('ElasticsearchFilenameColumn')]"
 ***REMOVED******REMOVED******REMOVED***,
 ***REMOVED******REMOVED******REMOVED***{
 ***REMOVED******REMOVED******REMOVED******REMOVED***"name": "ELASTICSEARCH_TITLE_COLUMN",
-***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[variables('ElasticsearchTitleColumn')]"
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('ElasticsearchTitleColumn')]"
 ***REMOVED******REMOVED******REMOVED***,
 ***REMOVED******REMOVED******REMOVED***{
 ***REMOVED******REMOVED******REMOVED******REMOVED***"name": "ELASTICSEARCH_URL_COLUMN",
-***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[variables('ElasticsearchUrlColumn')]"
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('ElasticsearchUrlColumn')]"
 ***REMOVED******REMOVED******REMOVED***,
 ***REMOVED******REMOVED******REMOVED***{
 ***REMOVED******REMOVED******REMOVED******REMOVED***"name": "ELASTICSEARCH_VECTOR_COLUMNS",
-***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[variables('ElasticsearchVectorColumns')]"
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('ElasticsearchVectorColumns')]"
 ***REMOVED******REMOVED******REMOVED***,
 ***REMOVED******REMOVED******REMOVED***{
 ***REMOVED******REMOVED******REMOVED******REMOVED***"name": "ELASTICSEARCH_STRICTNESS",
-***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[variables('ElasticsearchStrictness')]"
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('ElasticsearchStrictness')]"
+***REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "ELASTICSEARCH_EMBEDDING_MODEL_ID",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('ElasticsearchEmbeddingModelId')]"
 ***REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED******REMOVED***],
 ***REMOVED******REMOVED******REMOVED***"linuxFxVersion": "[variables('WebAppImageName')]"
