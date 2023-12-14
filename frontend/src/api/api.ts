@@ -297,3 +297,15 @@ export const historyEnsure = async (): Promise<CosmosDBHealth> => {
 ***REMOVED***return response;
 }
 
+export const frontendSettings = async (): Promise<Response | null> => {
+***REMOVED***const response = await fetch("/frontend_settings", {
+***REMOVED***method: "GET",
+***REMOVED***).then((res) => {
+***REMOVED***return res.json()
+***REMOVED***).catch((err) => {
+***REMOVED***console.error("There was an issue fetching your data.");
+***REMOVED***return null
+***REMOVED***)
+
+***REMOVED***return response
+}

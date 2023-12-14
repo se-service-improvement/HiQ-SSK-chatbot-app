@@ -1,7 +1,6 @@
 import React, { createContext, useReducer, ReactNode, useEffect } from 'react';
 import { appStateReducer } from './AppReducer';
-import { ChatHistoryLoadingState, CosmosDBHealth, historyList, historyEnsure, CosmosDBStatus } from '../api';
-import { Conversation } from '../api';
+import { Conversation, ChatHistoryLoadingState, CosmosDBHealth, historyList, historyEnsure, CosmosDBStatus, frontendSettings, FrontendSettings } from '../api';
   
 export interface AppState {
 ***REMOVED***isChatHistoryOpen: boolean;
@@ -10,6 +9,7 @@ export interface AppState {
 ***REMOVED***chatHistory: Conversation[] | null;
 ***REMOVED***filteredChatHistory: Conversation[] | null;
 ***REMOVED***currentChat: Conversation | null;
+***REMOVED***frontendSettings: FrontendSettings | null;
 }
 
 export type Action =
@@ -24,6 +24,7 @@ export type Action =
 ***REMOVED***| { type: 'DELETE_CHAT_HISTORY'}  // API Call
 ***REMOVED***| { type: 'DELETE_CURRENT_CHAT_MESSAGES', payload: string }  // API Call
 ***REMOVED***| { type: 'FETCH_CHAT_HISTORY', payload: Conversation[] | null }  // API Call
+***REMOVED***| { type: 'FETCH_FRONTEND_SETTINGS', payload: FrontendSettings | null }  // API Call
 
 const initialState: AppState = {
 ***REMOVED***isChatHistoryOpen: false,
@@ -34,7 +35,8 @@ const initialState: AppState = {
 ***REMOVED***isCosmosDBAvailable: {
 ***REMOVED***cosmosDB: false,
 ***REMOVED***status: CosmosDBStatus.NotConfigured,
-***REMOVED***
+***REMOVED***,
+***REMOVED***frontendSettings: null,
 };
 
 export const AppStateContext = createContext<{
@@ -98,6 +100,18 @@ type AppStateProviderProps = {
 ***REMOVED***)
 ***REMOVED***
 ***REMOVED***getHistoryEnsure();
+***REMOVED***, []);
+
+***REMOVED***useEffect(() => {
+***REMOVED***const getFrontendSettings = async () => {
+***REMOVED******REMOVED***frontendSettings().then((response) => {
+***REMOVED******REMOVED***dispatch({ type: 'FETCH_FRONTEND_SETTINGS', payload: response as FrontendSettings });
+***REMOVED***)
+***REMOVED******REMOVED***.catch((err) => {
+***REMOVED******REMOVED***console.error("There was an issue fetching your data.");
+***REMOVED***)
+***REMOVED***
+***REMOVED***getFrontendSettings();
 ***REMOVED***, []);
   
 ***REMOVED***return (

@@ -93,3 +93,7 @@ export type ErrorMessage = {
 ***REMOVED***title: string,
 ***REMOVED***subtitle: string
 }
+
+export type FrontendSettings = {
+***REMOVED***auth_enabled?: string | null;
+}
