@@ -34,7 +34,9 @@ FILE_FORMAT_DICT = {
 ***REMOVED***"shtml": "html",
 ***REMOVED***"htm": "html",
 ***REMOVED***"py": "python",
-***REMOVED***"pdf": "pdf"
+***REMOVED***"pdf": "pdf",
+***REMOVED***"docx": "docx",
+***REMOVED***"pptx": "pptx"
 ***REMOVED***
 
 RETRY_COUNT = 5
@@ -800,7 +802,7 @@ def chunk_file(
 ***REMOVED******REMOVED***raise UnsupportedFormatError(f"{file_name} is not supported")
 
 ***REMOVED***cracked_pdf = False
-***REMOVED***if file_format == "pdf":
+***REMOVED***if file_format in ["pdf", "docx", "pptx"]:
 ***REMOVED***if form_recognizer_client is None:
 ***REMOVED******REMOVED***raise UnsupportedFormatError("form_recognizer_client is required for pdf files")
 ***REMOVED***content = extract_pdf_content(file_path, form_recognizer_client, use_layout=use_layout)
