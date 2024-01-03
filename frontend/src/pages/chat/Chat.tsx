@@ -659,12 +659,15 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***icon: { 
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***color: '#FFFFFF',
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***iconDisabled: {
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***color: "#BDBDBD !important"
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***,
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***root: {
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***color: '#FFFFFF',
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***background: "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #0F6CBD 33.63%, #2D87C3 70.31%, #8DDDD8 100%)"
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***,
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***rootDisabled: {
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***background: "#BDBDBD"
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***background: "#F0F0F0"
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED******REMOVED******REMOVED***}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***className={styles.newChatIcon}
@@ -679,11 +682,16 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***icon: { 
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***color: '#FFFFFF',
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***iconDisabled: {
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***color: "#BDBDBD !important" ,
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***,
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***root: {
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***color: '#FFFFFF',
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***background: disabledButton() ? "#BDBDBD" : "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #0F6CBD 33.63%, #2D87C3 70.31%, #8DDDD8 100%)",
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***cursor: disabledButton() ? "" : "pointer"
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***background: "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #0F6CBD 33.63%, #2D87C3 70.31%, #8DDDD8 100%)",
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***rootDisabled: {
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***background: "#F0F0F0"
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED******REMOVED******REMOVED***}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***className={appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured ? styles.clearChatBroom : styles.clearChatBroomNoCosmos}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***iconProps={{ iconName: 'Broom' }}
