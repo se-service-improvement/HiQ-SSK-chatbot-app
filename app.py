@@ -162,6 +162,12 @@ def should_use_data():
 def format_as_ndjson(obj: dict) -> str:
 ***REMOVED***return json.dumps(obj, ensure_ascii=False) + "\n"
 
+def parse_multi_columns(columns: str) -> list:
+***REMOVED***if "|" in columns:
+***REMOVED***return columns.split("|")
+***REMOVED***else:
+***REMOVED***return columns.split(",")
+
 def fetchUserGroups(userToken, nextLink=None):
 ***REMOVED***# Recursively fetch group membership
 ***REMOVED***if nextLink:
@@ -244,11 +250,11 @@ def prepare_body_headers_with_data(request):
 ***REMOVED******REMOVED******REMOVED***"key": AZURE_SEARCH_KEY,
 ***REMOVED******REMOVED******REMOVED***"indexName": AZURE_SEARCH_INDEX,
 ***REMOVED******REMOVED******REMOVED***"fieldsMapping": {
-***REMOVED******REMOVED******REMOVED***"contentFields": AZURE_SEARCH_CONTENT_COLUMNS.split("|") if AZURE_SEARCH_CONTENT_COLUMNS else [],
+***REMOVED******REMOVED******REMOVED***"contentFields": parse_multi_columns(AZURE_SEARCH_CONTENT_COLUMNS) if AZURE_SEARCH_CONTENT_COLUMNS else [],
 ***REMOVED******REMOVED******REMOVED***"titleField": AZURE_SEARCH_TITLE_COLUMN if AZURE_SEARCH_TITLE_COLUMN else None,
 ***REMOVED******REMOVED******REMOVED***"urlField": AZURE_SEARCH_URL_COLUMN if AZURE_SEARCH_URL_COLUMN else None,
 ***REMOVED******REMOVED******REMOVED***"filepathField": AZURE_SEARCH_FILENAME_COLUMN if AZURE_SEARCH_FILENAME_COLUMN else None,
-***REMOVED******REMOVED******REMOVED***"vectorFields": AZURE_SEARCH_VECTOR_COLUMNS.split("|") if AZURE_SEARCH_VECTOR_COLUMNS else []
+***REMOVED******REMOVED******REMOVED***"vectorFields": parse_multi_columns(AZURE_SEARCH_VECTOR_COLUMNS) if AZURE_SEARCH_VECTOR_COLUMNS else []
 ***REMOVED******REMOVED***,
 ***REMOVED******REMOVED******REMOVED***"inScope": True if AZURE_SEARCH_ENABLE_IN_DOMAIN.lower() == "true" else False,
 ***REMOVED******REMOVED******REMOVED***"topNDocuments": AZURE_SEARCH_TOP_K,
@@ -272,11 +278,11 @@ def prepare_body_headers_with_data(request):
 ***REMOVED******REMOVED******REMOVED***"databaseName": AZURE_COSMOSDB_MONGO_VCORE_DATABASE,
 ***REMOVED******REMOVED******REMOVED***"containerName": AZURE_COSMOSDB_MONGO_VCORE_CONTAINER,***REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED******REMOVED***"fieldsMapping": {
-***REMOVED******REMOVED******REMOVED***"contentFields": AZURE_COSMOSDB_MONGO_VCORE_CONTENT_COLUMNS.split("|") if AZURE_COSMOSDB_MONGO_VCORE_CONTENT_COLUMNS else [],
+***REMOVED******REMOVED******REMOVED***"contentFields": parse_multi_columns(AZURE_COSMOSDB_MONGO_VCORE_CONTENT_COLUMNS) if AZURE_COSMOSDB_MONGO_VCORE_CONTENT_COLUMNS else [],
 ***REMOVED******REMOVED******REMOVED***"titleField": AZURE_COSMOSDB_MONGO_VCORE_TITLE_COLUMN if AZURE_COSMOSDB_MONGO_VCORE_TITLE_COLUMN else None,
 ***REMOVED******REMOVED******REMOVED***"urlField": AZURE_COSMOSDB_MONGO_VCORE_URL_COLUMN if AZURE_COSMOSDB_MONGO_VCORE_URL_COLUMN else None,
 ***REMOVED******REMOVED******REMOVED***"filepathField": AZURE_COSMOSDB_MONGO_VCORE_FILENAME_COLUMN if AZURE_COSMOSDB_MONGO_VCORE_FILENAME_COLUMN else None,
-***REMOVED******REMOVED******REMOVED***"vectorFields": AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS.split("|") if AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS else []
+***REMOVED******REMOVED******REMOVED***"vectorFields": parse_multi_columns(AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS) if AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS else []
 ***REMOVED******REMOVED***,
 ***REMOVED******REMOVED******REMOVED***"inScope": True if AZURE_COSMOSDB_MONGO_VCORE_ENABLE_IN_DOMAIN.lower() == "true" else False,
 ***REMOVED******REMOVED******REMOVED***"topNDocuments": AZURE_COSMOSDB_MONGO_VCORE_TOP_K,
@@ -304,11 +310,11 @@ def prepare_body_headers_with_data(request):
 ***REMOVED******REMOVED******REMOVED******REMOVED***"encodedApiKey": ELASTICSEARCH_ENCODED_API_KEY,
 ***REMOVED******REMOVED******REMOVED******REMOVED***"indexName": ELASTICSEARCH_INDEX,
 ***REMOVED******REMOVED******REMOVED******REMOVED***"fieldsMapping": {
-***REMOVED******REMOVED******REMOVED******REMOVED***"contentFields": ELASTICSEARCH_CONTENT_COLUMNS.split("|") if ELASTICSEARCH_CONTENT_COLUMNS else [],
+***REMOVED******REMOVED******REMOVED******REMOVED***"contentFields": parse_multi_columns(ELASTICSEARCH_CONTENT_COLUMNS) if ELASTICSEARCH_CONTENT_COLUMNS else [],
 ***REMOVED******REMOVED******REMOVED******REMOVED***"titleField": ELASTICSEARCH_TITLE_COLUMN if ELASTICSEARCH_TITLE_COLUMN else None,
 ***REMOVED******REMOVED******REMOVED******REMOVED***"urlField": ELASTICSEARCH_URL_COLUMN if ELASTICSEARCH_URL_COLUMN else None,
 ***REMOVED******REMOVED******REMOVED******REMOVED***"filepathField": ELASTICSEARCH_FILENAME_COLUMN if ELASTICSEARCH_FILENAME_COLUMN else None,
-***REMOVED******REMOVED******REMOVED******REMOVED***"vectorFields": ELASTICSEARCH_VECTOR_COLUMNS.split("|") if ELASTICSEARCH_VECTOR_COLUMNS else []
+***REMOVED******REMOVED******REMOVED******REMOVED***"vectorFields": parse_multi_columns(ELASTICSEARCH_VECTOR_COLUMNS) if ELASTICSEARCH_VECTOR_COLUMNS else []
 ***REMOVED******REMOVED******REMOVED***,
 ***REMOVED******REMOVED******REMOVED******REMOVED***"inScope": True if ELASTICSEARCH_ENABLE_IN_DOMAIN.lower() == "true" else False,
 ***REMOVED******REMOVED******REMOVED******REMOVED***"topNDocuments": int(ELASTICSEARCH_TOP_K),
