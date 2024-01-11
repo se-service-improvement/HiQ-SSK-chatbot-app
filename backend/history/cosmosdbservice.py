@@ -7,7 +7,7 @@ from azure.cosmos import CosmosClient, PartitionKey
   
 class CosmosConversationClient():
 ***REMOVED***
-***REMOVED***def __init__(self, cosmosdb_endpoint: str, credential: any, database_name: str, container_name: str):
+***REMOVED***def __init__(self, cosmosdb_endpoint: str, credential: any, database_name: str, container_name: str, enable_message_feedback: bool = False):
 ***REMOVED***self.cosmosdb_endpoint = cosmosdb_endpoint
 ***REMOVED***self.credential = credential
 ***REMOVED***self.database_name = database_name
@@ -15,6 +15,7 @@ class CosmosConversationClient():
 ***REMOVED***self.cosmosdb_client = CosmosClient(self.cosmosdb_endpoint, credential=credential)
 ***REMOVED***self.database_client = self.cosmosdb_client.get_database_client(database_name)
 ***REMOVED***self.container_client = self.database_client.get_container_client(container_name)
+***REMOVED***self.enable_message_feedback = enable_message_feedback
 
 ***REMOVED***def ensure(self):
 ***REMOVED***try:
@@ -111,9 +112,9 @@ class CosmosConversationClient():
 ***REMOVED***else:
 ***REMOVED******REMOVED***return conversation[0]
  
-***REMOVED***def create_message(self, conversation_id, user_id, input_message: dict):
+***REMOVED***def create_message(self, uuid, conversation_id, user_id, input_message: dict):
 ***REMOVED***message = {
-***REMOVED******REMOVED***'id': str(uuid.uuid4()),
+***REMOVED******REMOVED***'id': uuid,
 ***REMOVED******REMOVED***'type': 'message',
 ***REMOVED******REMOVED***'userId' : user_id,
 ***REMOVED******REMOVED***'createdAt': datetime.utcnow().isoformat(),
@@ -122,6 +123,9 @@ class CosmosConversationClient():
 ***REMOVED******REMOVED***'role': input_message['role'],
 ***REMOVED******REMOVED***'content': input_message['content']
 ***REMOVED***
+
+***REMOVED***if self.enable_message_feedback:
+***REMOVED******REMOVED***message['feedback'] = ''
 ***REMOVED***
 ***REMOVED***resp = self.container_client.upsert_item(message)  
 ***REMOVED***if resp:
@@ -133,7 +137,14 @@ class CosmosConversationClient():
 ***REMOVED***else:
 ***REMOVED******REMOVED***return False
 ***REMOVED***
-
+***REMOVED***def update_message_feedback(self, user_id, message_id, feedback):
+***REMOVED***message = self.container_client.read_item(item=message_id, partition_key=user_id)
+***REMOVED***if message:
+***REMOVED******REMOVED***message['feedback'] = feedback
+***REMOVED******REMOVED***resp = self.container_client.upsert_item(message)
+***REMOVED******REMOVED***return resp
+***REMOVED***else:
+***REMOVED******REMOVED***return False
 
 ***REMOVED***def get_messages(self, user_id, conversation_id):
 ***REMOVED***parameters = [

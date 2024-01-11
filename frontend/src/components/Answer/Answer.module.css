@@ -26,6 +26,10 @@
 ***REMOVED***overflow-x: auto;
 }
 
+.answerHeader {
+***REMOVED***position: relative;
+}
+
 .answerFooter {
 ***REMOVED***display: flex;
 ***REMOVED***flex-flow: row nowrap;

@@ -94,6 +94,7 @@ export const historyRead = async (convId: string): Promise<ChatMessage[]> => {
 ***REMOVED******REMOVED******REMOVED***role: msg.role,
 ***REMOVED******REMOVED******REMOVED***date: msg.createdAt,
 ***REMOVED******REMOVED******REMOVED***content: msg.content,
+***REMOVED******REMOVED******REMOVED***feedback: msg.feedback ?? undefined
 ***REMOVED******REMOVED***
 ***REMOVED******REMOVED***messages.push(message)
 ***REMOVED***);
@@ -308,4 +309,29 @@ export const frontendSettings = async (): Promise<Response | null> => {
 ***REMOVED***)
 
 ***REMOVED***return response
+}
+export const historyMessageFeedback = async (messageId: string, feedback: string): Promise<Response> => {
+***REMOVED***const response = await fetch("/history/message_feedback", {
+***REMOVED***method: "POST",
+***REMOVED***body: JSON.stringify({
+***REMOVED******REMOVED***message_id: messageId,
+***REMOVED******REMOVED***message_feedback: feedback
+***REMOVED***),
+***REMOVED***headers: {
+***REMOVED******REMOVED***"Content-Type": "application/json"
+***REMOVED***,
+***REMOVED***)
+***REMOVED***.then((res) => {
+***REMOVED***return res
+***REMOVED***)
+***REMOVED***.catch((err) => {
+***REMOVED***console.error("There was an issue logging feedback.");
+***REMOVED***let errRes: Response = {
+***REMOVED******REMOVED***...new Response,
+***REMOVED******REMOVED***ok: false,
+***REMOVED******REMOVED***status: 500,
+***REMOVED***
+***REMOVED***return errRes;
+***REMOVED***)
+***REMOVED***return response;
 }

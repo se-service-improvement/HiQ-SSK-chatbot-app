@@ -4,6 +4,7 @@ import logging
 import requests
 import openai
 import copy
+import uuid
 from azure.identity import DefaultAzureCredential
 from base64 import b64encode
 from flask import Flask, Response, request, jsonify, send_from_directory
@@ -97,6 +98,7 @@ AZURE_COSMOSDB_DATABASE = os.environ.get("AZURE_COSMOSDB_DATABASE")
 AZURE_COSMOSDB_ACCOUNT = os.environ.get("AZURE_COSMOSDB_ACCOUNT")
 AZURE_COSMOSDB_CONVERSATIONS_CONTAINER = os.environ.get("AZURE_COSMOSDB_CONVERSATIONS_CONTAINER")
 AZURE_COSMOSDB_ACCOUNT_KEY = os.environ.get("AZURE_COSMOSDB_ACCOUNT_KEY")
+AZURE_COSMOSDB_ENABLE_FEEDBACK = os.environ.get("AZURE_COSMOSDB_ENABLE_FEEDBACK", "false").lower() == "true"
 
 # Elasticsearch Integration Settings
 ELASTICSEARCH_ENDPOINT = os.environ.get("ELASTICSEARCH_ENDPOINT")
@@ -114,9 +116,13 @@ ELASTICSEARCH_STRICTNESS = os.environ.get("ELASTICSEARCH_STRICTNESS", SEARCH_STR
 ELASTICSEARCH_EMBEDDING_MODEL_ID = os.environ.get("ELASTICSEARCH_EMBEDDING_MODEL_ID")
 
 # Frontend Settings via Environment Variables
-AUTH_ENABLED = os.environ.get("AUTH_ENABLED", "true").lower()
-frontend_settings = { "auth_enabled": AUTH_ENABLED }
+AUTH_ENABLED = os.environ.get("AUTH_ENABLED", "true").lower() == "true"
+frontend_settings = { 
+***REMOVED***"auth_enabled": AUTH_ENABLED, 
+***REMOVED***"feedback_enabled": AZURE_COSMOSDB_ENABLE_FEEDBACK and AZURE_COSMOSDB_DATABASE not in [None, ""],
+}
 
+message_uuid = ""
 
 # Initialize a CosmosDB client with AAD auth and containers for Chat History
 cosmos_conversation_client = None
@@ -133,7 +139,8 @@ if AZURE_COSMOSDB_DATABASE and AZURE_COSMOSDB_ACCOUNT and AZURE_COSMOSDB_CONVERS
 ***REMOVED******REMOVED***cosmosdb_endpoint=cosmos_endpoint, 
 ***REMOVED******REMOVED***credential=credential, 
 ***REMOVED******REMOVED***database_name=AZURE_COSMOSDB_DATABASE,
-***REMOVED******REMOVED***container_name=AZURE_COSMOSDB_CONVERSATIONS_CONTAINER
+***REMOVED******REMOVED***container_name=AZURE_COSMOSDB_CONVERSATIONS_CONTAINER,
+***REMOVED******REMOVED***enable_message_feedback = AZURE_COSMOSDB_ENABLE_FEEDBACK
 ***REMOVED***)
 ***REMOVED***except Exception as e:
 ***REMOVED***logging.exception("Exception in CosmosDB initialization", e)
@@ -257,7 +264,7 @@ def prepare_body_headers_with_data(request):
 ***REMOVED******REMOVED******REMOVED***"vectorFields": parse_multi_columns(AZURE_SEARCH_VECTOR_COLUMNS) if AZURE_SEARCH_VECTOR_COLUMNS else []
 ***REMOVED******REMOVED***,
 ***REMOVED******REMOVED******REMOVED***"inScope": True if AZURE_SEARCH_ENABLE_IN_DOMAIN.lower() == "true" else False,
-***REMOVED******REMOVED******REMOVED***"topNDocuments": AZURE_SEARCH_TOP_K,
+***REMOVED******REMOVED******REMOVED***"topNDocuments": int(AZURE_SEARCH_TOP_K),
 ***REMOVED******REMOVED******REMOVED***"queryType": query_type,
 ***REMOVED******REMOVED******REMOVED***"semanticConfiguration": AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG if AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG else "",
 ***REMOVED******REMOVED******REMOVED***"roleInformation": AZURE_OPENAI_SYSTEM_MESSAGE,
@@ -285,7 +292,7 @@ def prepare_body_headers_with_data(request):
 ***REMOVED******REMOVED******REMOVED***"vectorFields": parse_multi_columns(AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS) if AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS else []
 ***REMOVED******REMOVED***,
 ***REMOVED******REMOVED******REMOVED***"inScope": True if AZURE_COSMOSDB_MONGO_VCORE_ENABLE_IN_DOMAIN.lower() == "true" else False,
-***REMOVED******REMOVED******REMOVED***"topNDocuments": AZURE_COSMOSDB_MONGO_VCORE_TOP_K,
+***REMOVED******REMOVED******REMOVED***"topNDocuments": int(AZURE_COSMOSDB_MONGO_VCORE_TOP_K),
 ***REMOVED******REMOVED******REMOVED***"strictness": int(AZURE_COSMOSDB_MONGO_VCORE_STRICTNESS),
 ***REMOVED******REMOVED******REMOVED***"queryType": query_type,
 ***REMOVED******REMOVED******REMOVED***"roleInformation": AZURE_OPENAI_SYSTEM_MESSAGE
@@ -387,7 +394,7 @@ def stream_with_data(body, headers, endpoint, history_metadata={}):
 
 ***REMOVED******REMOVED******REMOVED***if 'error' in lineJson:
 ***REMOVED******REMOVED******REMOVED***yield format_as_ndjson(lineJson)
-***REMOVED******REMOVED******REMOVED***response["id"] = lineJson["id"]
+***REMOVED******REMOVED******REMOVED***response["id"] = message_uuid
 ***REMOVED******REMOVED******REMOVED***response["model"] = lineJson["model"]
 ***REMOVED******REMOVED******REMOVED***response["created"] = lineJson["created"]
 ***REMOVED******REMOVED******REMOVED***response["object"] = lineJson["object"]
@@ -520,7 +527,7 @@ def stream_without_data(response, history_metadata={}):
 ***REMOVED******REMOVED***responseText = deltaText
 
 ***REMOVED***response_obj = {
-***REMOVED******REMOVED***"id": line["id"],
+***REMOVED******REMOVED***"id": message_uuid,
 ***REMOVED******REMOVED***"model": line["model"],
 ***REMOVED******REMOVED***"created": line["created"],
 ***REMOVED******REMOVED***"object": line["object"],
@@ -570,7 +577,7 @@ def conversation_without_data(request_body):
 
 ***REMOVED***if not SHOULD_STREAM:
 ***REMOVED***response_obj = {
-***REMOVED******REMOVED***"id": response,
+***REMOVED******REMOVED***"id": message_uuid,
 ***REMOVED******REMOVED***"model": response.model,
 ***REMOVED******REMOVED***"created": response.created,
 ***REMOVED******REMOVED***"object": response.object,
@@ -607,6 +614,8 @@ def conversation_internal(request_body):
 ## Conversation History API ## 
 @app.route("/history/generate", methods=["POST"])
 def add_conversation():
+***REMOVED***global message_uuid
+***REMOVED***message_uuid = str(uuid.uuid4())
 ***REMOVED***authenticated_user = get_authenticated_user_details(request_headers=request.headers)
 ***REMOVED***user_id = authenticated_user['user_principal_id']
 
@@ -632,6 +641,7 @@ def add_conversation():
 ***REMOVED***messages = request.json["messages"]
 ***REMOVED***if len(messages) > 0 and messages[-1]['role'] == "user":
 ***REMOVED******REMOVED***cosmos_conversation_client.create_message(
+***REMOVED******REMOVED***uuid=str(uuid.uuid4()),
 ***REMOVED******REMOVED***conversation_id=conversation_id,
 ***REMOVED******REMOVED***user_id=user_id,
 ***REMOVED******REMOVED***input_message=messages[-1]
@@ -674,12 +684,14 @@ def update_conversation():
 ***REMOVED******REMOVED***if len(messages) > 1 and messages[-2].get('role', None) == "tool":
 ***REMOVED******REMOVED***# write the tool message first
 ***REMOVED******REMOVED***cosmos_conversation_client.create_message(
+***REMOVED******REMOVED******REMOVED***uuid=str(uuid.uuid4()),
 ***REMOVED******REMOVED******REMOVED***conversation_id=conversation_id,
 ***REMOVED******REMOVED******REMOVED***user_id=user_id,
 ***REMOVED******REMOVED******REMOVED***input_message=messages[-2]
 ***REMOVED******REMOVED***)
 ***REMOVED******REMOVED***# write the assistant message
 ***REMOVED******REMOVED***cosmos_conversation_client.create_message(
+***REMOVED******REMOVED***uuid=message_uuid,
 ***REMOVED******REMOVED***conversation_id=conversation_id,
 ***REMOVED******REMOVED***user_id=user_id,
 ***REMOVED******REMOVED***input_message=messages[-1]
@@ -694,6 +706,33 @@ def update_conversation():
 ***REMOVED***except Exception as e:
 ***REMOVED***logging.exception("Exception in /history/update")
 ***REMOVED***return jsonify({"error": str(e)}), 500
+
+@app.route("/history/message_feedback", methods=["POST"])
+def update_message():
+***REMOVED***authenticated_user = get_authenticated_user_details(request_headers=request.headers)
+***REMOVED***user_id = authenticated_user['user_principal_id']
+
+***REMOVED***## check request for message_id
+***REMOVED***message_id = request.json.get("message_id", None)
+***REMOVED***message_feedback = request.json.get("message_feedback", None)
+***REMOVED***try:
+***REMOVED***if not message_id:
+***REMOVED******REMOVED***return jsonify({"error": "message_id is required"}), 400
+***REMOVED***
+***REMOVED***if not message_feedback:
+***REMOVED******REMOVED***return jsonify({"error": "message_feedback is required"}), 400
+***REMOVED***
+***REMOVED***## update the message in cosmos
+***REMOVED***updated_message = cosmos_conversation_client.update_message_feedback(user_id, message_id, message_feedback)
+***REMOVED***if updated_message:
+***REMOVED******REMOVED***return jsonify({"message": f"Successfully updated message with feedback {message_feedback}", "message_id": message_id}), 200
+***REMOVED***else:
+***REMOVED******REMOVED***return jsonify({"error": f"Unable to update message {message_id}. It either does not exist or the user does not have access to it."}), 404
+***REMOVED***
+***REMOVED***except Exception as e:
+***REMOVED***logging.exception("Exception in /history/message_feedback")
+***REMOVED***return jsonify({"error": str(e)}), 500
+
 
 @app.route("/history/delete", methods=["DELETE"])
 def delete_conversation():
@@ -754,7 +793,7 @@ def get_conversation():
 ***REMOVED***conversation_messages = cosmos_conversation_client.get_messages(user_id, conversation_id)
 
 ***REMOVED***## format the messages in the bot frontend format
-***REMOVED***messages = [{'id': msg['id'], 'role': msg['role'], 'content': msg['content'], 'createdAt': msg['createdAt']} for msg in conversation_messages]
+***REMOVED***messages = [{'id': msg['id'], 'role': msg['role'], 'content': msg['content'], 'createdAt': msg['createdAt'], 'feedback': msg.get('feedback')} for msg in conversation_messages]
 
 ***REMOVED***return jsonify({"conversation_id": conversation_id, "messages": messages}), 200
 

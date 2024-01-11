@@ -2,6 +2,8 @@ export type AskResponse = {
 ***REMOVED***answer: string;
 ***REMOVED***citations: Citation[];
 ***REMOVED***error?: string;
+***REMOVED***message_id?: string;
+***REMOVED***feedback?: Feedback;
 };
 
 export type Citation = {
@@ -26,6 +28,7 @@ export type ChatMessage = {
 ***REMOVED***content: string;
 ***REMOVED***end_turn?: boolean;
 ***REMOVED***date: string;
+***REMOVED***feedback?: Feedback;
 };
 
 export type Conversation = {
@@ -96,4 +99,21 @@ export type ErrorMessage = {
 
 export type FrontendSettings = {
 ***REMOVED***auth_enabled?: string | null;
+***REMOVED***feedback_enabled?: string | null;
+}
+
+export enum Feedback {
+***REMOVED***Neutral = "neutral",
+***REMOVED***Positive = "positive",
+***REMOVED***Negative = "negative",
+***REMOVED***MissingCitation = "missing_citation",
+***REMOVED***WrongCitation = "wrong_citation",
+***REMOVED***OutOfScope = "out_of_scope",
+***REMOVED***InaccurateOrIrrelevant = "inaccurate_or_irrelevant",
+***REMOVED***OtherUnhelpful = "other_unhelpful",
+***REMOVED***HateSpeech = "hate_speech",
+***REMOVED***Violent = "violent",
+***REMOVED***Sexual = "sexual",
+***REMOVED***Manipulative = "manipulative",
+***REMOVED***OtherHarmful = "other_harmlful"
 }

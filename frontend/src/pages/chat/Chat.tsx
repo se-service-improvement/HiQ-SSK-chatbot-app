@@ -41,7 +41,7 @@ const enum messageStatus {
 
 const Chat = () => {
 ***REMOVED***const appStateContext = useContext(AppStateContext)
-***REMOVED***const AUTH_ENABLED = appStateContext?.state.frontendSettings?.auth_enabled === "true";
+***REMOVED***const AUTH_ENABLED = appStateContext?.state.frontendSettings?.auth_enabled;
 ***REMOVED***const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null);
 ***REMOVED***const [isLoading, setIsLoading] = useState<boolean>(false);
 ***REMOVED***const [showLoadingMessage, setShowLoadingMessage] = useState<boolean>(false);
@@ -191,7 +191,7 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED***runningText += obj;
 ***REMOVED******REMOVED******REMOVED******REMOVED***result = JSON.parse(runningText);
 ***REMOVED******REMOVED******REMOVED******REMOVED***result.choices[0].messages.forEach((obj) => {
-***REMOVED******REMOVED******REMOVED******REMOVED***obj.id = uuid();
+***REMOVED******REMOVED******REMOVED******REMOVED***obj.id = result.id;
 ***REMOVED******REMOVED******REMOVED******REMOVED***obj.date = new Date().toISOString();
 ***REMOVED******REMOVED******REMOVED***)
 ***REMOVED******REMOVED******REMOVED******REMOVED***setShowLoadingMessage(false);
@@ -323,7 +323,7 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED***runningText += obj;
 ***REMOVED******REMOVED******REMOVED******REMOVED***result = JSON.parse(runningText);
 ***REMOVED******REMOVED******REMOVED******REMOVED***result.choices[0].messages.forEach((obj) => {
-***REMOVED******REMOVED******REMOVED******REMOVED***obj.id = uuid();
+***REMOVED******REMOVED******REMOVED******REMOVED***obj.id = result.id;
 ***REMOVED******REMOVED******REMOVED******REMOVED***obj.date = new Date().toISOString();
 ***REMOVED******REMOVED******REMOVED***)
 ***REMOVED******REMOVED******REMOVED******REMOVED***setShowLoadingMessage(false);
@@ -607,6 +607,8 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***answer={{
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***answer: answer.content,
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***citations: parseCitationFromMessage(messages[index - 1]),
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***message_id: answer.id,
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***feedback: answer.feedback
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onCitationClicked={c => onShowCitation(c)}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***/>
