@@ -1029,7 +1029,8 @@ class SingletonFormRecognizerClient:
 ***REMOVED******REMOVED***url = os.getenv("FORM_RECOGNIZER_ENDPOINT")
 ***REMOVED******REMOVED***key = os.getenv("FORM_RECOGNIZER_KEY")
 ***REMOVED******REMOVED***if url and key:
-***REMOVED******REMOVED***cls.instance = DocumentAnalysisClient(endpoint=url, credential=AzureKeyCredential(key))
+***REMOVED******REMOVED***cls.instance = DocumentAnalysisClient(
+***REMOVED******REMOVED******REMOVED***endpoint=url, credential=AzureKeyCredential(key), headers={"x-ms-useragent": "sample-app-aoai-chatgpt/1.0.0"})
 ***REMOVED******REMOVED***else:
 ***REMOVED******REMOVED***print("SingletonFormRecognizerClient: Skipping since credentials not provided. Assuming NO form recognizer extensions(like .pdf) in directory")
 ***REMOVED******REMOVED***cls.instance = object() # dummy object
@@ -1040,4 +1041,4 @@ class SingletonFormRecognizerClient:
 
 ***REMOVED***def __setstate__(self, state):
 ***REMOVED***url, key = state
-***REMOVED***self.instance = DocumentAnalysisClient(endpoint=url, credential=AzureKeyCredential(key))
+***REMOVED***self.instance = DocumentAnalysisClient(endpoint=url, credential=AzureKeyCredential(key), headers={"x-ms-useragent": "sample-app-aoai-chatgpt/1.0.0"})
