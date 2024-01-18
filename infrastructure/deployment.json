@@ -616,8 +616,11 @@
 ***REMOVED******REMOVED***
 ***REMOVED******REMOVED***],
 ***REMOVED******REMOVED***"databaseAccountOfferType": "Standard",
-***REMOVED******REMOVED***"enableAutomaticFailover": false,
-***REMOVED******REMOVED***"enableMultipleWriteLocations": false
+***REMOVED******REMOVED***"capabilities": [
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED***"name": "EnableServerless"
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***]
 ***REMOVED***
 ***REMOVED***,
 ***REMOVED***{
@@ -665,10 +668,6 @@
 ***REMOVED******REMOVED******REMOVED******REMOVED***"/userId"
 ***REMOVED******REMOVED******REMOVED***],
 ***REMOVED******REMOVED******REMOVED***"kind": "Hash"
-***REMOVED******REMOVED***,
-***REMOVED******REMOVED******REMOVED***"conflictResolutionPolicy": {
-***REMOVED******REMOVED******REMOVED***"mode": "LastWriterWins",
-***REMOVED******REMOVED******REMOVED***"conflictResolutionPath": "/_ts"
 ***REMOVED******REMOVED***
 ***REMOVED******REMOVED***
 ***REMOVED***
