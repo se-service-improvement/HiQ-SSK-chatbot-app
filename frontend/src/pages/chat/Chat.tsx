@@ -7,9 +7,11 @@ import remarkGfm from 'remark-gfm'
 import rehypeRaw from "rehype-raw";
 import uuid from 'react-uuid';
 import { isEmpty } from "lodash-es";
+import DOMPurify from 'dompurify';
 
 import styles from "./Chat.module.css";
 import Contoso from "../../assets/Contoso.svg";
+import { XSSAllowTags } from "../../constants/xssAllowTags";
 
 import {
 ***REMOVED***ChatMessage,
@@ -732,7 +734,7 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED***<ReactMarkdown
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***linkTarget="_blank"
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***className={styles.citationPanelContent}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***children={activeCitation.content}
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***children={DOMPurify.sanitize(activeCitation.content, {ALLOWED_TAGS: XSSAllowTags})}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***remarkPlugins={[remarkGfm]}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***rehypePlugins={[rehypeRaw]}
 ***REMOVED******REMOVED******REMOVED******REMOVED***/>

@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState, useContext } from "react";
 import { useBoolean } from "@fluentui/react-hooks"
 import { Checkbox, DefaultButton, Dialog, FontIcon, Stack, Text } from "@fluentui/react";
+import DOMPurify from 'dompurify';
 import { AppStateContext } from '../../state/AppProvider';
 
 import styles from "./Answer.module.css";
@@ -12,6 +13,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import supersub from 'remark-supersub'
 import { ThumbDislike20Filled, ThumbLike20Filled } from "@fluentui/react-icons";
+import { XSSAllowTags } from "../../constants/xssAllowTags";
 
 interface Props {
 ***REMOVED***answer: AskResponse;
@@ -183,7 +185,7 @@ export const Answer = ({
 ***REMOVED******REMOVED******REMOVED******REMOVED***<ReactMarkdown
 ***REMOVED******REMOVED******REMOVED******REMOVED***linkTarget="_blank"
 ***REMOVED******REMOVED******REMOVED******REMOVED***remarkPlugins={[remarkGfm, supersub]}
-***REMOVED******REMOVED******REMOVED******REMOVED***children={parsedAnswer.markdownFormatText}
+***REMOVED******REMOVED******REMOVED******REMOVED***children={DOMPurify.sanitize(parsedAnswer.markdownFormatText, {ALLOWED_TAGS: XSSAllowTags})}
 ***REMOVED******REMOVED******REMOVED******REMOVED***className={styles.answerText}
 ***REMOVED******REMOVED******REMOVED******REMOVED***/>
 ***REMOVED******REMOVED******REMOVED***</Stack.Item>
