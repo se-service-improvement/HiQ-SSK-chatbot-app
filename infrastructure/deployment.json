@@ -578,7 +578,15 @@
 ***REMOVED******REMOVED******REMOVED***{
 ***REMOVED******REMOVED******REMOVED******REMOVED***"name": "ELASTICSEARCH_EMBEDDING_MODEL_ID",
 ***REMOVED******REMOVED******REMOVED******REMOVED***"value": "[parameters('ElasticsearchEmbeddingModelId')]"
-***REMOVED******REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "UWSGI_PROCESSES",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "2"
+***REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED******REMOVED***"name": "UWSGI_THREADS",
+***REMOVED******REMOVED******REMOVED******REMOVED***"value": "2"
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED******REMOVED***],
 ***REMOVED******REMOVED******REMOVED***"linuxFxVersion": "[variables('WebAppImageName')]"
 ***REMOVED******REMOVED***
