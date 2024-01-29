@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime
 from flask import Flask, request
 from azure.identity import DefaultAzureCredential  
-from azure.cosmos import CosmosClient, PartitionKey  
+from azure.cosmos import CosmosClient, exceptions
   
 class CosmosConversationClient():
 ***REMOVED***
@@ -12,10 +12,27 @@ class CosmosConversationClient():
 ***REMOVED***self.credential = credential
 ***REMOVED***self.database_name = database_name
 ***REMOVED***self.container_name = container_name
-***REMOVED***self.cosmosdb_client = CosmosClient(self.cosmosdb_endpoint, credential=credential)
-***REMOVED***self.database_client = self.cosmosdb_client.get_database_client(database_name)
-***REMOVED***self.container_client = self.database_client.get_container_client(container_name)
 ***REMOVED***self.enable_message_feedback = enable_message_feedback
+***REMOVED***try:
+***REMOVED******REMOVED***self.cosmosdb_client = CosmosClient(self.cosmosdb_endpoint, credential=credential)
+***REMOVED***except exceptions.CosmosHttpResponseError as e:
+***REMOVED******REMOVED***if e.status_code == 401:
+***REMOVED******REMOVED***raise ValueError("Invalid credentials") from e
+***REMOVED******REMOVED***else:
+***REMOVED******REMOVED***print("An error occurred:", e)
+
+***REMOVED***try:
+***REMOVED******REMOVED***self.database_client = self.cosmosdb_client.get_database_client(database_name)
+***REMOVED******REMOVED***self.database_client.read()
+***REMOVED***except exceptions.CosmosResourceNotFoundError:
+***REMOVED******REMOVED***raise ValueError("Invalid CosmosDB database name") 
+***REMOVED***
+***REMOVED***try:
+***REMOVED******REMOVED***self.container_client = self.database_client.get_container_client(container_name)
+***REMOVED******REMOVED***self.container_client.read()
+***REMOVED***except exceptions.CosmosResourceNotFoundError:
+***REMOVED******REMOVED***raise ValueError("Invalid CosmosDB container name") 
+***REMOVED***
 
 ***REMOVED***def ensure(self):
 ***REMOVED***try:
@@ -131,6 +148,8 @@ class CosmosConversationClient():
 ***REMOVED***if resp:
 ***REMOVED******REMOVED***## update the parent conversations's updatedAt field with the current message's createdAt datetime value
 ***REMOVED******REMOVED***conversation = self.get_conversation(user_id, conversation_id)
+***REMOVED******REMOVED***if not conversation:
+***REMOVED******REMOVED***return "Conversation not found"
 ***REMOVED******REMOVED***conversation['updatedAt'] = message['createdAt']
 ***REMOVED******REMOVED***self.upsert_conversation(conversation)
 ***REMOVED******REMOVED***return resp

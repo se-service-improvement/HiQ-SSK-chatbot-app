@@ -77,6 +77,9 @@ export type UserInfo = {
 export enum CosmosDBStatus {
 ***REMOVED***NotConfigured = "CosmosDB is not configured",
 ***REMOVED***NotWorking = "CosmosDB is not working",
+***REMOVED***InvalidCredentials = "CosmosDB has invalid credentials",
+***REMOVED***InvalidDatabase = "Invalid CosmosDB database name",
+***REMOVED***InvalidContainer = "Invalid CosmosDB container name",
 ***REMOVED***Working = "CosmosDB is configured and working",
 }
 

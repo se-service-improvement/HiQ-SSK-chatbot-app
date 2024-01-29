@@ -272,6 +272,10 @@ export const historyEnsure = async (): Promise<CosmosDBHealth> => {
 ***REMOVED***else{
 ***REMOVED******REMOVED***if(res.status === 500){
 ***REMOVED******REMOVED***formattedResponse = CosmosDBStatus.NotWorking
+***REMOVED***else if(res.status === 401){
+***REMOVED******REMOVED***formattedResponse = CosmosDBStatus.InvalidCredentials***REMOVED***
+***REMOVED***else if(res.status === 422){ 
+***REMOVED******REMOVED***formattedResponse = respJson.error***REMOVED***
 ***REMOVED***else{
 ***REMOVED******REMOVED***formattedResponse = CosmosDBStatus.NotConfigured
 ***REMOVED***

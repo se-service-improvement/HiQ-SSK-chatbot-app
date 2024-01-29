@@ -144,6 +144,7 @@ if AZURE_COSMOSDB_DATABASE and AZURE_COSMOSDB_ACCOUNT and AZURE_COSMOSDB_CONVERS
 ***REMOVED***)
 ***REMOVED***except Exception as e:
 ***REMOVED***logging.exception("Exception in CosmosDB initialization", e)
+***REMOVED***cosmodb_error = str(e)
 ***REMOVED***cosmos_conversation_client = None
 
 
@@ -640,12 +641,14 @@ def add_conversation():
 ***REMOVED***## then write it to the conversation history in cosmos
 ***REMOVED***messages = request.json["messages"]
 ***REMOVED***if len(messages) > 0 and messages[-1]['role'] == "user":
-***REMOVED******REMOVED***cosmos_conversation_client.create_message(
+***REMOVED******REMOVED***createdMessageValue = cosmos_conversation_client.create_message(
 ***REMOVED******REMOVED***uuid=str(uuid.uuid4()),
 ***REMOVED******REMOVED***conversation_id=conversation_id,
 ***REMOVED******REMOVED***user_id=user_id,
 ***REMOVED******REMOVED***input_message=messages[-1]
 ***REMOVED******REMOVED***)
+***REMOVED******REMOVED***if createdMessageValue == "Conversation not found":
+***REMOVED******REMOVED***raise Exception("Conversation not found for the given conversation ID: " + conversation_id + ".")
 ***REMOVED***else:
 ***REMOVED******REMOVED***raise Exception("No user message found")
 ***REMOVED***
@@ -875,7 +878,14 @@ def ensure_cosmos():
 ***REMOVED***return jsonify({"error": "CosmosDB is not configured"}), 404
 ***REMOVED***
 ***REMOVED***if not cosmos_conversation_client or not cosmos_conversation_client.ensure():
-***REMOVED***return jsonify({"error": "CosmosDB is not working"}), 500
+***REMOVED***if cosmodb_error == "Invalid credentials":
+***REMOVED******REMOVED***return jsonify({"error": cosmodb_error}), 401
+***REMOVED***elif cosmodb_error == "Invalid CosmosDB database name":
+***REMOVED******REMOVED***return jsonify({"error": f"{cosmodb_error} {AZURE_COSMOSDB_DATABASE} for account {AZURE_COSMOSDB_ACCOUNT}"}), 422
+***REMOVED***elif cosmodb_error == "Invalid CosmosDB container name":
+***REMOVED******REMOVED***return jsonify({"error": f"{cosmodb_error}: {AZURE_COSMOSDB_CONVERSATIONS_CONTAINER}"}), 422
+***REMOVED***else:
+***REMOVED******REMOVED***return jsonify({"error": "CosmosDB is not working"}), 500
 
 ***REMOVED***return jsonify({"message": "CosmosDB is configured and working"}), 200
 

@@ -74,7 +74,12 @@ const Chat = () => {
 ***REMOVED***const [ASSISTANT, TOOL, ERROR] = ["assistant", "tool", "error"]
 
 ***REMOVED***useEffect(() => {
-***REMOVED***if (appStateContext?.state.isCosmosDBAvailable?.status === CosmosDBStatus.NotWorking && appStateContext.state.chatHistoryLoadingState === ChatHistoryLoadingState.Fail && hideErrorDialog) {
+***REMOVED***if (appStateContext?.state.isCosmosDBAvailable?.status === CosmosDBStatus.NotWorking 
+***REMOVED******REMOVED***|| appStateContext?.state.isCosmosDBAvailable?.status === CosmosDBStatus.InvalidCredentials 
+***REMOVED******REMOVED***|| appStateContext?.state.isCosmosDBAvailable?.status.includes(CosmosDBStatus.InvalidDatabase) 
+***REMOVED******REMOVED***|| appStateContext?.state.isCosmosDBAvailable?.status.includes(CosmosDBStatus.InvalidContainer) 
+***REMOVED******REMOVED***&& appStateContext.state.chatHistoryLoadingState === ChatHistoryLoadingState.Fail 
+***REMOVED******REMOVED***&& hideErrorDialog) {
 ***REMOVED******REMOVED***let subtitle = `${appStateContext.state.isCosmosDBAvailable.status}. Please contact the site administrator.`
 ***REMOVED******REMOVED***setErrorMsg({
 ***REMOVED******REMOVED***title: "Chat history is not enabled",
@@ -281,10 +286,12 @@ const Chat = () => {
 ***REMOVED***try {
 ***REMOVED******REMOVED***const response = conversationId ? await historyGenerate(request, abortController.signal, conversationId) : await historyGenerate(request, abortController.signal);
 ***REMOVED******REMOVED***if (!response?.ok) {
+***REMOVED******REMOVED***const responseJson = await response.json();
+***REMOVED******REMOVED***var errorResponseMessage = responseJson.error === undefined ? "Please try again. If the problem persists, please contact the site administrator." : responseJson.error;
 ***REMOVED******REMOVED***let errorChatMsg: ChatMessage = {
 ***REMOVED******REMOVED******REMOVED***id: uuid(),
 ***REMOVED******REMOVED******REMOVED***role: ERROR,
-***REMOVED******REMOVED******REMOVED***content: "There was an error generating a response. Chat history can't be saved at this time. If the problem persists, please contact the site administrator.",
+***REMOVED******REMOVED******REMOVED***content: `There was an error generating a response. Chat history can't be saved at this time. ${errorResponseMessage}`,
 ***REMOVED******REMOVED******REMOVED***date: new Date().toISOString()
 ***REMOVED******REMOVED***
 ***REMOVED******REMOVED***let resultConversation;
@@ -376,7 +383,7 @@ const Chat = () => {
 
 ***REMOVED*** catch (e) {
 ***REMOVED******REMOVED***if (!abortController.signal.aborted) {
-***REMOVED******REMOVED***let errorMessage = "An error occurred. Please try again. If the problem persists, please contact the site administrator.";
+***REMOVED******REMOVED***let errorMessage = `An error occurred. ${errorResponseMessage}`;
 ***REMOVED******REMOVED***if (result.error?.message) {
 ***REMOVED******REMOVED******REMOVED***errorMessage = result.error.message;
 ***REMOVED******REMOVED***
@@ -403,6 +410,14 @@ const Chat = () => {
 ***REMOVED******REMOVED***
 ***REMOVED******REMOVED******REMOVED***if (!result.history_metadata) {
 ***REMOVED******REMOVED******REMOVED***console.error("Error retrieving data.", result);
+***REMOVED******REMOVED******REMOVED***console.log("errorMessage", errorMessage)
+***REMOVED******REMOVED******REMOVED***let errorChatMsg: ChatMessage = {
+***REMOVED******REMOVED******REMOVED******REMOVED***id: uuid(),
+***REMOVED******REMOVED******REMOVED******REMOVED***role: ERROR,
+***REMOVED******REMOVED******REMOVED******REMOVED***content: errorMessage,
+***REMOVED******REMOVED******REMOVED******REMOVED***date: new Date().toISOString()
+***REMOVED******REMOVED******REMOVED*** 
+***REMOVED******REMOVED******REMOVED***setMessages([...messages, userMessage, errorChatMsg])
 ***REMOVED******REMOVED******REMOVED***setIsLoading(false);
 ***REMOVED******REMOVED******REMOVED***setShowLoadingMessage(false);
 ***REMOVED******REMOVED******REMOVED***abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
