@@ -518,8 +518,8 @@ def conversation_with_data(request_body):
 ***REMOVED***return Response(stream_with_data(body, headers, endpoint, history_metadata), mimetype='text/event-stream')
 
 def stream_without_data(response, history_metadata={}):
-***REMOVED***responseText = ""
 ***REMOVED***for line in response:
+***REMOVED***responseText = ""
 ***REMOVED***if line["choices"]:
 ***REMOVED******REMOVED***deltaText = line["choices"][0]["delta"].get('content')
 ***REMOVED***else:
