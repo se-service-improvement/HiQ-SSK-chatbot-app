@@ -84,6 +84,7 @@
 }
 
 .chatMessageUserMessage {
+***REMOVED***display: flex;
 ***REMOVED***padding: 20px;
 ***REMOVED***background: #EDF5FD;
 ***REMOVED***border-radius: 8px;
@@ -93,12 +94,11 @@
 ***REMOVED***font-size: 14px;
 ***REMOVED***line-height: 22px;
 ***REMOVED***color: #242424;
-***REMOVED***flex: none;
 ***REMOVED***order: 0;
 ***REMOVED***flex-grow: 0;
 ***REMOVED***white-space: pre-wrap;
 ***REMOVED***word-wrap: break-word;
-***REMOVED***max-width: 800px;
+***REMOVED***max-width: 80%;
 }
 
 .chatMessageGpt {
