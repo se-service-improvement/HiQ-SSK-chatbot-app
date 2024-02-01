@@ -29,6 +29,7 @@ export type ChatMessage = {
 ***REMOVED***end_turn?: boolean;
 ***REMOVED***date: string;
 ***REMOVED***feedback?: Feedback;
+***REMOVED***context?: string;
 };
 
 export type Conversation = {

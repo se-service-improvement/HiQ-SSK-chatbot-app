@@ -1,0 +1,149 @@
+import os
+import json
+import logging
+import requests
+import dataclasses
+
+DEBUG = os.environ.get("DEBUG", "false")
+if DEBUG.lower() == "true":
+***REMOVED***logging.basicConfig(level=logging.DEBUG)
+
+AZURE_SEARCH_PERMITTED_GROUPS_COLUMN = os.environ.get("AZURE_SEARCH_PERMITTED_GROUPS_COLUMN")
+
+class JSONEncoder(json.JSONEncoder):
+***REMOVED***def default(self, o):
+***REMOVED***if dataclasses.is_dataclass(o):
+***REMOVED******REMOVED***return dataclasses.asdict(o)
+***REMOVED***return super().default(o)
+
+async def format_as_ndjson(r):
+***REMOVED***try:
+***REMOVED***async for event in r:
+***REMOVED******REMOVED***yield json.dumps(event, cls=JSONEncoder) + "\n"
+***REMOVED***except Exception as error:
+***REMOVED***logging.exception("Exception while generating response stream: %s", error)
+***REMOVED***yield json.dumps({"error": str(error)})
+
+def parse_multi_columns(columns: str) -> list:
+***REMOVED***if "|" in columns:
+***REMOVED***return columns.split("|")
+***REMOVED***else:
+***REMOVED***return columns.split(",")
+
+
+def fetchUserGroups(userToken, nextLink=None):
+***REMOVED***# Recursively fetch group membership
+***REMOVED***if nextLink:
+***REMOVED***endpoint = nextLink
+***REMOVED***else:
+***REMOVED***endpoint = "https://graph.microsoft.com/v1.0/me/transitiveMemberOf?$select=id"
+***REMOVED***
+***REMOVED***headers = {
+***REMOVED***'Authorization': "bearer " + userToken
+***REMOVED***
+***REMOVED***try :
+***REMOVED***r = requests.get(endpoint, headers=headers)
+***REMOVED***if r.status_code != 200:
+***REMOVED******REMOVED***logging.error(f"Error fetching user groups: {r.status_code} {r.text}")
+***REMOVED******REMOVED***return []
+***REMOVED***
+***REMOVED***r = r.json()
+***REMOVED***if "@odata.nextLink" in r:
+***REMOVED******REMOVED***nextLinkData = fetchUserGroups(userToken, r["@odata.nextLink"])
+***REMOVED******REMOVED***r['value'].extend(nextLinkData)
+***REMOVED***
+***REMOVED***return r['value']
+***REMOVED***except Exception as e:
+***REMOVED***logging.error(f"Exception in fetchUserGroups: {e}")
+***REMOVED***return []
+
+
+def generateFilterString(userToken):
+***REMOVED***# Get list of groups user is a member of
+***REMOVED***userGroups = fetchUserGroups(userToken)
+
+***REMOVED***# Construct filter string
+***REMOVED***if not userGroups:
+***REMOVED***logging.debug("No user groups found")
+
+***REMOVED***group_ids = ", ".join([obj['id'] for obj in userGroups])
+***REMOVED***return f"{AZURE_SEARCH_PERMITTED_GROUPS_COLUMN}/any(g:search.in(g, '{group_ids}'))"
+
+def format_non_streaming_response(chatCompletion, history_metadata, message_uuid=None):
+***REMOVED***response_obj = {
+***REMOVED***"id": message_uuid if message_uuid else chatCompletion.id,
+***REMOVED***"model": chatCompletion.model,
+***REMOVED***"created": chatCompletion.created,
+***REMOVED***"object": chatCompletion.object,
+***REMOVED***"choices": [
+***REMOVED******REMOVED***{
+***REMOVED******REMOVED***"messages": []
+***REMOVED***
+***REMOVED***],
+***REMOVED***"history_metadata": history_metadata
+***REMOVED***
+
+***REMOVED***if len(chatCompletion.choices) > 0:
+***REMOVED***message = chatCompletion.choices[0].message
+***REMOVED***if message:
+***REMOVED******REMOVED***if hasattr(message, "context") and message.context.get("messages"):
+***REMOVED******REMOVED***for m in message.context["messages"]:
+***REMOVED******REMOVED******REMOVED***if m["role"] == "tool":
+***REMOVED******REMOVED******REMOVED***response_obj["choices"][0]["messages"].append({
+***REMOVED******REMOVED******REMOVED******REMOVED***"role": "tool",
+***REMOVED******REMOVED******REMOVED******REMOVED***"content": m["content"]
+***REMOVED******REMOVED******REMOVED***)
+***REMOVED******REMOVED***elif hasattr(message, "context"):
+***REMOVED******REMOVED***response_obj["choices"][0]["messages"].append({
+***REMOVED******REMOVED******REMOVED***"role": "tool",
+***REMOVED******REMOVED******REMOVED***"content": json.dumps(message.context),
+***REMOVED******REMOVED***)
+***REMOVED******REMOVED***response_obj["choices"][0]["messages"].append({
+***REMOVED******REMOVED***"role": "assistant",
+***REMOVED******REMOVED***"content": message.content,
+***REMOVED***)
+***REMOVED******REMOVED***return response_obj
+***REMOVED***
+***REMOVED***return {}
+
+def format_stream_response(chatCompletionChunk, history_metadata, message_uuid=None):
+***REMOVED***response_obj = {
+***REMOVED***"id": message_uuid if message_uuid else chatCompletionChunk.id,
+***REMOVED***"model": chatCompletionChunk.model,
+***REMOVED***"created": chatCompletionChunk.created,
+***REMOVED***"object": chatCompletionChunk.object,
+***REMOVED***"choices": [{
+***REMOVED******REMOVED***"messages": []
+***REMOVED***],
+***REMOVED***"history_metadata": history_metadata
+***REMOVED***
+
+***REMOVED***if len(chatCompletionChunk.choices) > 0:
+***REMOVED***delta = chatCompletionChunk.choices[0].delta
+***REMOVED***if delta:
+***REMOVED******REMOVED***if hasattr(delta, "context") and delta.context.get("messages"):
+***REMOVED******REMOVED***for m in delta.context["messages"]:
+***REMOVED******REMOVED******REMOVED***if m["role"] == "tool":
+***REMOVED******REMOVED******REMOVED***messageObj = {
+***REMOVED******REMOVED******REMOVED******REMOVED***"role": "tool",
+***REMOVED******REMOVED******REMOVED******REMOVED***"content": m["content"]
+***REMOVED******REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED***response_obj["choices"][0]["messages"].append(messageObj)
+***REMOVED******REMOVED******REMOVED***return response_obj
+***REMOVED******REMOVED***if delta.role == "assistant" and hasattr(delta, "context"):
+***REMOVED******REMOVED***messageObj = {
+***REMOVED******REMOVED******REMOVED***"role": "assistant",
+***REMOVED******REMOVED******REMOVED***"context": delta.context,
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***response_obj["choices"][0]["messages"].append(messageObj)
+***REMOVED******REMOVED***return response_obj
+***REMOVED******REMOVED***else:
+***REMOVED******REMOVED***if delta.content:
+***REMOVED******REMOVED******REMOVED***messageObj = {
+***REMOVED******REMOVED******REMOVED***"role": "assistant",
+***REMOVED******REMOVED******REMOVED***"content": delta.content,
+***REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED***response_obj["choices"][0]["messages"].append(messageObj)
+***REMOVED******REMOVED******REMOVED***return response_obj
+***REMOVED***
+***REMOVED***return {}

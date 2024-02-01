@@ -74,11 +74,8 @@ const Chat = () => {
 ***REMOVED***const [ASSISTANT, TOOL, ERROR] = ["assistant", "tool", "error"]
 
 ***REMOVED***useEffect(() => {
-***REMOVED***if (appStateContext?.state.isCosmosDBAvailable?.status === CosmosDBStatus.NotWorking 
-***REMOVED******REMOVED***|| appStateContext?.state.isCosmosDBAvailable?.status === CosmosDBStatus.InvalidCredentials 
-***REMOVED******REMOVED***|| appStateContext?.state.isCosmosDBAvailable?.status.includes(CosmosDBStatus.InvalidDatabase) 
-***REMOVED******REMOVED***|| appStateContext?.state.isCosmosDBAvailable?.status.includes(CosmosDBStatus.InvalidContainer) 
-***REMOVED******REMOVED***&& appStateContext.state.chatHistoryLoadingState === ChatHistoryLoadingState.Fail 
+***REMOVED***if (appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.Working  
+***REMOVED******REMOVED***&& appStateContext?.state.chatHistoryLoadingState === ChatHistoryLoadingState.Fail 
 ***REMOVED******REMOVED***&& hideErrorDialog) {
 ***REMOVED******REMOVED***let subtitle = `${appStateContext.state.isCosmosDBAvailable.status}. Please contact the site administrator.`
 ***REMOVED******REMOVED***setErrorMsg({
@@ -123,6 +120,15 @@ const Chat = () => {
 ***REMOVED******REMOVED***assistantContent += resultMessage.content
 ***REMOVED******REMOVED***assistantMessage = resultMessage
 ***REMOVED******REMOVED***assistantMessage.content = assistantContent
+
+***REMOVED******REMOVED***if (resultMessage.context) {
+***REMOVED******REMOVED***toolMessage = {
+***REMOVED******REMOVED******REMOVED***id: uuid(),
+***REMOVED******REMOVED******REMOVED***role: TOOL,
+***REMOVED******REMOVED******REMOVED***content: resultMessage.context,
+***REMOVED******REMOVED******REMOVED***date: new Date().toISOString(),
+***REMOVED******REMOVED***
+***REMOVED***
 ***REMOVED***
 
 ***REMOVED***if (resultMessage.role === TOOL) toolMessage = resultMessage
@@ -184,7 +190,6 @@ const Chat = () => {
 ***REMOVED******REMOVED***const response = await conversationApi(request, abortController.signal);
 ***REMOVED******REMOVED***if (response?.body) {
 ***REMOVED******REMOVED***const reader = response.body.getReader();
-***REMOVED******REMOVED***let runningText = "";
 
 ***REMOVED******REMOVED***while (true) {
 ***REMOVED******REMOVED******REMOVED***setProcessMessages(messageStatus.Processing)
@@ -195,19 +200,27 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED***const objects = text.split("\n");
 ***REMOVED******REMOVED******REMOVED***objects.forEach((obj) => {
 ***REMOVED******REMOVED******REMOVED***try {
-***REMOVED******REMOVED******REMOVED******REMOVED***runningText += obj;
-***REMOVED******REMOVED******REMOVED******REMOVED***result = JSON.parse(runningText);
-***REMOVED******REMOVED******REMOVED******REMOVED***result.choices[0].messages.forEach((obj) => {
-***REMOVED******REMOVED******REMOVED******REMOVED***obj.id = result.id;
-***REMOVED******REMOVED******REMOVED******REMOVED***obj.date = new Date().toISOString();
-***REMOVED******REMOVED******REMOVED***)
-***REMOVED******REMOVED******REMOVED******REMOVED***setShowLoadingMessage(false);
-***REMOVED******REMOVED******REMOVED******REMOVED***result.choices[0].messages.forEach((resultObj) => {
-***REMOVED******REMOVED******REMOVED******REMOVED***processResultMessage(resultObj, userMessage, conversationId);
-***REMOVED******REMOVED******REMOVED***)
-***REMOVED******REMOVED******REMOVED******REMOVED***runningText = "";
+***REMOVED******REMOVED******REMOVED******REMOVED***if (obj !== "" && obj !== "{}") {
+***REMOVED******REMOVED******REMOVED******REMOVED***result = JSON.parse(obj);
+***REMOVED******REMOVED******REMOVED******REMOVED***if (result.choices?.length > 0) {
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***result.choices[0].messages.forEach((msg) => {
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***msg.id = result.id;
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***msg.date = new Date().toISOString();
+***REMOVED******REMOVED******REMOVED******REMOVED***)
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***setShowLoadingMessage(false);
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***result.choices[0].messages.forEach((resultObj) => {
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***processResultMessage(resultObj, userMessage, conversationId);
+***REMOVED******REMOVED******REMOVED******REMOVED***)
+***REMOVED******REMOVED******REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED******REMOVED***else if (result.error) {
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***throw Error(result.error);
+***REMOVED******REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED***catch { }
+***REMOVED******REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED***catch (e) {
+***REMOVED******REMOVED******REMOVED******REMOVED***console.error(e);
+***REMOVED******REMOVED******REMOVED******REMOVED***throw e;
+***REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED***);
 ***REMOVED******REMOVED***
 ***REMOVED******REMOVED***conversation.messages.push(toolMessage, assistantMessage)
@@ -318,7 +331,6 @@ const Chat = () => {
 ***REMOVED***
 ***REMOVED******REMOVED***if (response?.body) {
 ***REMOVED******REMOVED***const reader = response.body.getReader();
-***REMOVED******REMOVED***let runningText = "";
 
 ***REMOVED******REMOVED***while (true) {
 ***REMOVED******REMOVED******REMOVED***setProcessMessages(messageStatus.Processing)
@@ -329,19 +341,27 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED***const objects = text.split("\n");
 ***REMOVED******REMOVED******REMOVED***objects.forEach((obj) => {
 ***REMOVED******REMOVED******REMOVED***try {
-***REMOVED******REMOVED******REMOVED******REMOVED***runningText += obj;
-***REMOVED******REMOVED******REMOVED******REMOVED***result = JSON.parse(runningText);
-***REMOVED******REMOVED******REMOVED******REMOVED***result.choices[0].messages.forEach((obj) => {
-***REMOVED******REMOVED******REMOVED******REMOVED***obj.id = result.id;
-***REMOVED******REMOVED******REMOVED******REMOVED***obj.date = new Date().toISOString();
-***REMOVED******REMOVED******REMOVED***)
-***REMOVED******REMOVED******REMOVED******REMOVED***setShowLoadingMessage(false);
-***REMOVED******REMOVED******REMOVED******REMOVED***result.choices[0].messages.forEach((resultObj) => {
-***REMOVED******REMOVED******REMOVED******REMOVED***processResultMessage(resultObj, userMessage, conversationId);
-***REMOVED******REMOVED******REMOVED***)
-***REMOVED******REMOVED******REMOVED******REMOVED***runningText = "";
+***REMOVED******REMOVED******REMOVED******REMOVED***if (obj !== "" && obj !== "{}") {
+***REMOVED******REMOVED******REMOVED******REMOVED***result = JSON.parse(obj);
+***REMOVED******REMOVED******REMOVED******REMOVED***if (result.choices?.length > 0) {
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***result.choices[0].messages.forEach((msg) => {
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***msg.id = result.id;
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***msg.date = new Date().toISOString();
+***REMOVED******REMOVED******REMOVED******REMOVED***)
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***setShowLoadingMessage(false);
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***result.choices[0].messages.forEach((resultObj) => {
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***processResultMessage(resultObj, userMessage, conversationId);
+***REMOVED******REMOVED******REMOVED******REMOVED***)
+***REMOVED******REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED***catch { }
+***REMOVED******REMOVED******REMOVED******REMOVED***else if (result.error) {
+***REMOVED******REMOVED******REMOVED******REMOVED***throw Error(result.error);
+***REMOVED******REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED***catch (e) {
+***REMOVED******REMOVED******REMOVED******REMOVED***console.error(e);
+***REMOVED******REMOVED******REMOVED******REMOVED***throw e;
+***REMOVED******REMOVED*** ***REMOVED***
 ***REMOVED******REMOVED***);
 ***REMOVED******REMOVED***
 
