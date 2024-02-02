@@ -75,6 +75,7 @@ const Chat = () => {
 
 ***REMOVED***useEffect(() => {
 ***REMOVED***if (appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.Working  
+***REMOVED******REMOVED***&& appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured
 ***REMOVED******REMOVED***&& appStateContext?.state.chatHistoryLoadingState === ChatHistoryLoadingState.Fail 
 ***REMOVED******REMOVED***&& hideErrorDialog) {
 ***REMOVED******REMOVED***let subtitle = `${appStateContext.state.isCosmosDBAvailable.status}. Please contact the site administrator.`

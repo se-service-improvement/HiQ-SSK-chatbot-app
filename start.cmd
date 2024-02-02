@@ -28,13 +28,13 @@ if "%errorlevel%" neq "0" (
 ***REMOVED***exit /B %errorlevel%
 )
 
-echo.
-echo Starting backend
-echo.
-cd ..
-start http://127.0.0.1:5000
-call python ./app.py
-if "%errorlevel%" neq "0" (
-***REMOVED***echo Failed to start backend
-***REMOVED***exit /B %errorlevel%
-)
+echo.***REMOVED***
+echo Starting backend***REMOVED***
+echo.***REMOVED***
+cd ..  
+start http://127.0.0.1:50505
+call uvicorn app:app  
+if "%errorlevel%" neq "0" (***REMOVED***
+***REMOVED***echo Failed to start backend***REMOVED***
+***REMOVED***exit /B %errorlevel%***REMOVED***
+) 
