@@ -7,11 +7,6 @@ on:
 ***REMOVED***description: 'The branch to build'
 ***REMOVED***required: true
 
-
-  push:
-***REMOVED***branches:
-***REMOVED***- main
-
 jobs:
 
   build:
