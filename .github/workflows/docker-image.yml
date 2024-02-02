@@ -1,6 +1,13 @@
 name: Docker Image CI
 
 on:
+  workflow_dispatch:
+***REMOVED***inputs:
+***REMOVED***  branch:
+***REMOVED***description: 'The branch to build'
+***REMOVED***required: true
+
+
   push:
 ***REMOVED***branches:
 ***REMOVED***- main
@@ -23,6 +30,8 @@ jobs:
 ***REMOVED***login-server: ${{ secrets.ACR_LOGIN_SERVER }}
 ***REMOVED***
 ***REMOVED***- uses: actions/checkout@v3
+***REMOVED***  with:
+***REMOVED***ref: ${{ github.event.inputs.branch }}
 ***REMOVED***- name: Build the Docker image
 ***REMOVED***  run:***REMOVED*** 
 ***REMOVED***docker build . --file WebApp.Dockerfile --tag fruoccopublic.azurecr.io/sample-app-aoai-chatgpt:$(date +'%Y-%m-%d')_$GITHUB_RUN_NUMBER;
