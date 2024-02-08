@@ -192,6 +192,7 @@ const Chat = () => {
 ***REMOVED******REMOVED***if (response?.body) {
 ***REMOVED******REMOVED***const reader = response.body.getReader();
 
+***REMOVED******REMOVED***let runningText = "";
 ***REMOVED******REMOVED***while (true) {
 ***REMOVED******REMOVED******REMOVED***setProcessMessages(messageStatus.Processing)
 ***REMOVED******REMOVED******REMOVED***const { done, value } = await reader.read();
@@ -202,7 +203,8 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED***objects.forEach((obj) => {
 ***REMOVED******REMOVED******REMOVED***try {
 ***REMOVED******REMOVED******REMOVED******REMOVED***if (obj !== "" && obj !== "{}") {
-***REMOVED******REMOVED******REMOVED******REMOVED***result = JSON.parse(obj);
+***REMOVED******REMOVED******REMOVED******REMOVED***runningText += obj;
+***REMOVED******REMOVED******REMOVED******REMOVED***result = JSON.parse(runningText);
 ***REMOVED******REMOVED******REMOVED******REMOVED***if (result.choices?.length > 0) {
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***result.choices[0].messages.forEach((msg) => {
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***msg.id = result.id;
@@ -216,11 +218,16 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED***else if (result.error) {
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***throw Error(result.error);
 ***REMOVED******REMOVED******REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED******REMOVED***runningText = "";
 ***REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED******REMOVED***catch (e) {
+***REMOVED******REMOVED******REMOVED******REMOVED***if (!(e instanceof SyntaxError)) {
 ***REMOVED******REMOVED******REMOVED******REMOVED***console.error(e);
 ***REMOVED******REMOVED******REMOVED******REMOVED***throw e;
+***REMOVED******REMOVED******REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED******REMOVED***console.log("Incomplete message. Continuing...")
+***REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED***);
 ***REMOVED******REMOVED***
@@ -333,6 +340,7 @@ const Chat = () => {
 ***REMOVED******REMOVED***if (response?.body) {
 ***REMOVED******REMOVED***const reader = response.body.getReader();
 
+***REMOVED******REMOVED***let runningText = "";
 ***REMOVED******REMOVED***while (true) {
 ***REMOVED******REMOVED******REMOVED***setProcessMessages(messageStatus.Processing)
 ***REMOVED******REMOVED******REMOVED***const { done, value } = await reader.read();
@@ -343,7 +351,8 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED***objects.forEach((obj) => {
 ***REMOVED******REMOVED******REMOVED***try {
 ***REMOVED******REMOVED******REMOVED******REMOVED***if (obj !== "" && obj !== "{}") {
-***REMOVED******REMOVED******REMOVED******REMOVED***result = JSON.parse(obj);
+***REMOVED******REMOVED******REMOVED******REMOVED***runningText += obj;
+***REMOVED******REMOVED******REMOVED******REMOVED***result = JSON.parse(runningText);
 ***REMOVED******REMOVED******REMOVED******REMOVED***if (result.choices?.length > 0) {
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***result.choices[0].messages.forEach((msg) => {
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***msg.id = result.id;
@@ -354,14 +363,19 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***processResultMessage(resultObj, userMessage, conversationId);
 ***REMOVED******REMOVED******REMOVED******REMOVED***)
 ***REMOVED******REMOVED******REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED******REMOVED***runningText = "";
 ***REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED******REMOVED******REMOVED***else if (result.error) {
 ***REMOVED******REMOVED******REMOVED******REMOVED***throw Error(result.error);
 ***REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED******REMOVED***catch (e) {
+***REMOVED******REMOVED******REMOVED******REMOVED***if (!(e instanceof SyntaxError)) {
 ***REMOVED******REMOVED******REMOVED******REMOVED***console.error(e);
 ***REMOVED******REMOVED******REMOVED******REMOVED***throw e;
+***REMOVED******REMOVED******REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED******REMOVED***console.log("Incomplete message. Continuing...")
+***REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED*** ***REMOVED***
 ***REMOVED******REMOVED***);
 ***REMOVED******REMOVED***
