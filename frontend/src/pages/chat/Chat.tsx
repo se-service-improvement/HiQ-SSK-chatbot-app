@@ -43,6 +43,7 @@ const enum messageStatus {
 
 const Chat = () => {
 ***REMOVED***const appStateContext = useContext(AppStateContext)
+***REMOVED***const ui = appStateContext?.state.frontendSettings?.ui;
 ***REMOVED***const AUTH_ENABLED = appStateContext?.state.frontendSettings?.auth_enabled;
 ***REMOVED***const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null);
 ***REMOVED***const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -638,12 +639,12 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED***{!messages || messages.length < 1 ? (
 ***REMOVED******REMOVED******REMOVED******REMOVED***<Stack className={styles.chatEmptyState}>
 ***REMOVED******REMOVED******REMOVED******REMOVED***<img
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***src={Contoso}
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***src={ui?.chat_logo ? ui.chat_logo : Contoso}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***className={styles.chatIcon}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***aria-hidden="true"
 ***REMOVED******REMOVED******REMOVED******REMOVED***/>
-***REMOVED******REMOVED******REMOVED******REMOVED***<h1 className={styles.chatEmptyStateTitle}>Start chatting</h1>
-***REMOVED******REMOVED******REMOVED******REMOVED***<h2 className={styles.chatEmptyStateSubtitle}>This chatbot is configured to answer your questions</h2>
+***REMOVED******REMOVED******REMOVED******REMOVED***<h1 className={styles.chatEmptyStateTitle}>{ui?.chat_title}</h1>
+***REMOVED******REMOVED******REMOVED******REMOVED***<h2 className={styles.chatEmptyStateSubtitle}>{ui?.chat_description}</h2>
 ***REMOVED******REMOVED******REMOVED******REMOVED***</Stack>
 ***REMOVED******REMOVED******REMOVED***) : (
 ***REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageStream} style={{ marginBottom: isLoading ? "40px" : "0px" }} role="log">

@@ -101,9 +101,19 @@ export type ErrorMessage = {
 ***REMOVED***subtitle: string
 }
 
+export type UI = {
+***REMOVED***title: string;
+***REMOVED***chat_title: string;
+***REMOVED***chat_description: string;
+***REMOVED***logo?: string;
+***REMOVED***chat_logo?: string;
+***REMOVED***show_share_button?: boolean
+}
+
 export type FrontendSettings = {
 ***REMOVED***auth_enabled?: string | null;
 ***REMOVED***feedback_enabled?: string | null;
+***REMOVED***ui?: UI;
 }
 
 export enum Feedback {

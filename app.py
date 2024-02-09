@@ -12,6 +12,7 @@ from quart import (
 ***REMOVED***make_response,
 ***REMOVED***request,
 ***REMOVED***send_from_directory,
+***REMOVED***render_template
 )
 
 from openai import AsyncAzureOpenAI
@@ -21,7 +22,16 @@ from backend.history.cosmosdbservice import CosmosConversationClient
 
 from backend.utils import format_as_ndjson, format_stream_response, generateFilterString, parse_multi_columns, format_non_streaming_response
 
-bp = Blueprint("routes", __name__, static_folder='static')
+bp = Blueprint("routes", __name__, static_folder="static", template_folder="static")
+
+# UI configuration (optional)
+UI_TITLE = os.environ.get("UI_TITLE") or "Contoso"
+UI_LOGO = os.environ.get("UI_LOGO")
+UI_CHAT_LOGO = os.environ.get("UI_CHAT_LOGO")
+UI_CHAT_TITLE = os.environ.get("UI_CHAT_TITLE") or "Start chatting"
+UI_CHAT_DESCRIPTION = os.environ.get("UI_CHAT_DESCRIPTION") or "This chatbot is configured to answer your questions"
+UI_FAVICON = os.environ.get("UI_FAVICON") or "/favicon.ico"
+UI_SHOW_SHARE_BUTTON = os.environ.get("UI_SHOW_SHARE_BUTTON", "true").lower() == "true"
 
 def create_app():
 ***REMOVED***app = Quart(__name__)
@@ -31,7 +41,7 @@ def create_app():
 
 @bp.route("/")
 async def index():
-***REMOVED***return await bp.send_static_file("index.html")
+***REMOVED***return await render_template("index.html", title=UI_TITLE, favicon=UI_FAVICON)
 
 @bp.route("/favicon.ico")
 async def favicon():
@@ -162,6 +172,14 @@ CHAT_HISTORY_ENABLED = AZURE_COSMOSDB_ACCOUNT and AZURE_COSMOSDB_DATABASE and AZ
 frontend_settings = { 
 ***REMOVED***"auth_enabled": AUTH_ENABLED, 
 ***REMOVED***"feedback_enabled": AZURE_COSMOSDB_ENABLE_FEEDBACK and CHAT_HISTORY_ENABLED,
+***REMOVED***"ui": {
+***REMOVED***"title": UI_TITLE,
+***REMOVED***"logo": UI_LOGO,
+***REMOVED***"chat_logo": UI_CHAT_LOGO or UI_LOGO,
+***REMOVED***"chat_title": UI_CHAT_TITLE,
+***REMOVED***"chat_description": UI_CHAT_DESCRIPTION,
+***REMOVED***"show_share_button": UI_SHOW_SHARE_BUTTON
+***REMOVED***
 }
 
 message_uuid = ""
