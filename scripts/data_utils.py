@@ -5,7 +5,7 @@ import json
 import os
 import re
 import requests
-import openai
+from openai import AzureOpenAI
 import re
 import tempfile
 import time
@@ -623,18 +623,16 @@ def get_embedding(text, embedding_model_endpoint=None, embedding_model_key=None,
 ***REMOVED***base_url = endpoint_parts[0]
 ***REMOVED***deployment_id = endpoint_parts[1].split("/embeddings")[0]
 
-***REMOVED***openai.api_version = '2023-05-15'
-***REMOVED***openai.api_base = base_url
+***REMOVED***api_version = endpoint_parts[1].split("api-version=")[1].split("&")[0]
 
 ***REMOVED***if azure_credential is not None:
-***REMOVED******REMOVED***openai.api_key = azure_credential.get_token("https://cognitiveservices.azure.com/.default").token
-***REMOVED******REMOVED***openai.api_type = "azure_ad"
+***REMOVED******REMOVED***api_key = azure_credential.get_token("https://cognitiveservices.azure.com/.default").token
 ***REMOVED***else:
-***REMOVED******REMOVED***openai.api_type = 'azure'
-***REMOVED******REMOVED***openai.api_key = key
+***REMOVED******REMOVED***api_key = key
 
-***REMOVED***embeddings = openai.Embedding.create(deployment_id=deployment_id, input=text)
-***REMOVED***return embeddings['data'][0]["embedding"]
+***REMOVED***client = AzureOpenAI(api_version=api_version, azure_endpoint=base_url, azure_ad_token=api_key)
+***REMOVED***embeddings = client.embeddings.create(model=deployment_id, input=text)
+***REMOVED***return embeddings.dict()['data'][0]['embedding']
 
 ***REMOVED***except Exception as e:
 ***REMOVED***raise Exception(f"Error getting embeddings with endpoint={endpoint} with error={e}")
