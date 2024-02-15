@@ -182,8 +182,6 @@ frontend_settings = {
 ***REMOVED***
 }
 
-message_uuid = ""
-
 def should_use_data():
 ***REMOVED***global DATASOURCE_TYPE
 ***REMOVED***if AZURE_SEARCH_SERVICE and AZURE_SEARCH_INDEX:
@@ -554,7 +552,7 @@ async def complete_chat_request(request_body):
 ***REMOVED***response = await send_chat_request(request_body)
 ***REMOVED***history_metadata = request_body.get("history_metadata", {})
 
-***REMOVED***return format_non_streaming_response(response, history_metadata, message_uuid)
+***REMOVED***return format_non_streaming_response(response, history_metadata)
 
 async def stream_chat_request(request_body):
 ***REMOVED***response = await send_chat_request(request_body)
@@ -562,7 +560,7 @@ async def stream_chat_request(request_body):
 
 ***REMOVED***async def generate():
 ***REMOVED***async for completionChunk in response:
-***REMOVED******REMOVED***yield format_stream_response(completionChunk, history_metadata, message_uuid)
+***REMOVED******REMOVED***yield format_stream_response(completionChunk, history_metadata)
 
 ***REMOVED***return generate()
 
@@ -605,8 +603,6 @@ def get_frontend_settings():
 ## Conversation History API ## 
 @bp.route("/history/generate", methods=["POST"])
 async def add_conversation():
-***REMOVED***global message_uuid
-***REMOVED***message_uuid = str(uuid.uuid4())
 ***REMOVED***authenticated_user = get_authenticated_user_details(request_headers=request.headers)
 ***REMOVED***user_id = authenticated_user['user_principal_id']
 
@@ -690,7 +686,7 @@ async def update_conversation():
 ***REMOVED******REMOVED***)
 ***REMOVED******REMOVED***# write the assistant message
 ***REMOVED******REMOVED***await cosmos_conversation_client.create_message(
-***REMOVED******REMOVED***uuid=message_uuid,
+***REMOVED******REMOVED***uuid=messages[-1]['id'],
 ***REMOVED******REMOVED***conversation_id=conversation_id,
 ***REMOVED******REMOVED***user_id=user_id,
 ***REMOVED******REMOVED***input_message=messages[-1]
