@@ -211,7 +211,9 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***msg.id = result.id;
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***msg.date = new Date().toISOString();
 ***REMOVED******REMOVED******REMOVED******REMOVED***)
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***if (result.choices[0].messages?.some(m => m.role === ASSISTANT)) {
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***setShowLoadingMessage(false);
+***REMOVED******REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***result.choices[0].messages.forEach((resultObj) => {
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***processResultMessage(resultObj, userMessage, conversationId);
 ***REMOVED******REMOVED******REMOVED******REMOVED***)
@@ -359,7 +361,9 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***msg.id = result.id;
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***msg.date = new Date().toISOString();
 ***REMOVED******REMOVED******REMOVED******REMOVED***)
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***if (result.choices[0].messages?.some(m => m.role === ASSISTANT)) {
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***setShowLoadingMessage(false);
+***REMOVED******REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***result.choices[0].messages.forEach((resultObj) => {
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***processResultMessage(resultObj, userMessage, conversationId);
 ***REMOVED******REMOVED******REMOVED******REMOVED***)
