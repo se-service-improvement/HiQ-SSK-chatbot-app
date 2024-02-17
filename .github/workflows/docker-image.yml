@@ -1,11 +1,9 @@
 name: Docker Image CI
 
 on:
-  workflow_dispatch:
-***REMOVED***inputs:
-***REMOVED***  branch:
-***REMOVED***description: 'The branch to build'
-***REMOVED***required: true
+  push:
+***REMOVED***branches:
+***REMOVED***- main
 
 jobs:
 
@@ -18,19 +16,17 @@ jobs:
 ***REMOVED***  uses: Azure/docker-login@v1
 ***REMOVED***  with:
 ***REMOVED***# Container registry username
-***REMOVED***username: ${{ secrets.ACR_USERNAME }}
+***REMOVED***username: ${{ secrets.SAMPLEAPP_ACR_USERNAME }}
 ***REMOVED***# Container registry password
-***REMOVED***password: ${{ secrets.ACR_PASSWORD }}
+***REMOVED***password: ${{ secrets.SAMPLEAPP_ACR_PASSWORD }}
 ***REMOVED***# Container registry server url
-***REMOVED***login-server: ${{ secrets.ACR_LOGIN_SERVER }}
+***REMOVED***login-server: sampleappaoaichatgpt.azurecr.io
 ***REMOVED***
 ***REMOVED***- uses: actions/checkout@v3
-***REMOVED***  with:
-***REMOVED***ref: ${{ github.event.inputs.branch }}
 ***REMOVED***- name: Build the Docker image
 ***REMOVED***  run:***REMOVED*** 
-***REMOVED***docker build . --file WebApp.Dockerfile --tag fruoccopublic.azurecr.io/sample-app-aoai-chatgpt:$(date +'%Y-%m-%d')_$GITHUB_RUN_NUMBER;
-***REMOVED***docker tag fruoccopublic.azurecr.io/sample-app-aoai-chatgpt:$(date +'%Y-%m-%d')_$GITHUB_RUN_NUMBER fruoccopublic.azurecr.io/sample-app-aoai-chatgpt:latest;
-***REMOVED***docker push fruoccopublic.azurecr.io/sample-app-aoai-chatgpt:$(date +'%Y-%m-%d')_$GITHUB_RUN_NUMBER;
-***REMOVED***docker push fruoccopublic.azurecr.io/sample-app-aoai-chatgpt:latest;
+***REMOVED***docker build . --file WebApp.Dockerfile --tag sampleappaoaichatgpt.azurecr.io/sample-app-aoai-chatgpt:$(date +'%Y-%m-%d')_$GITHUB_RUN_NUMBER;
+***REMOVED***docker tag sampleappaoaichatgpt.azurecr.io/sample-app-aoai-chatgpt:$(date +'%Y-%m-%d')_$GITHUB_RUN_NUMBER sampleappaoaichatgpt.azurecr.io/sample-app-aoai-chatgpt:latest;
+***REMOVED***docker push sampleappaoaichatgpt.azurecr.io/sample-app-aoai-chatgpt:$(date +'%Y-%m-%d')_$GITHUB_RUN_NUMBER;
+***REMOVED***docker push sampleappaoaichatgpt.azurecr.io/sample-app-aoai-chatgpt:latest;
 ***REMOVED***  

@@ -190,7 +190,7 @@
 ***REMOVED***,
 ***REMOVED***"AzureOpenAIApiVersion": {
 ***REMOVED******REMOVED***"type": "string",
-***REMOVED******REMOVED***"defaultValue": "2023-06-01-preview",
+***REMOVED******REMOVED***"defaultValue": "2023-12-01-preview",
 ***REMOVED******REMOVED***"metadata": {
 ***REMOVED******REMOVED***"description": "Azure OpenAI Api Version"
 ***REMOVED***
@@ -358,7 +358,7 @@
 ***REMOVED***
 ***REMOVED***,
 ***REMOVED***"variables": {
-***REMOVED***"WebAppImageName": "DOCKER|fruoccopublic.azurecr.io/sample-app-aoai-chatgpt:latest",
+***REMOVED***"WebAppImageName": "DOCKER|sampleappaoaichatgpt.azurecr.io/sample-app-aoai-chatgpt:latest",
 ***REMOVED***"cosmosdb_account_name": "[format('db-{0}', parameters('WebsiteName'))]",
 ***REMOVED***"cosmosdb_database_name": "db_conversation_history",
 ***REMOVED***"cosmosdb_container_name": "conversations",
