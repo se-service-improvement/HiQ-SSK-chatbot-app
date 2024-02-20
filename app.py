@@ -36,6 +36,7 @@ UI_SHOW_SHARE_BUTTON = os.environ.get("UI_SHOW_SHARE_BUTTON", "true").lower() ==
 def create_app():
 ***REMOVED***app = Quart(__name__)
 ***REMOVED***app.register_blueprint(bp)
+***REMOVED***app.config["TEMPLATES_AUTO_RELOAD"] = True
 ***REMOVED***return app
 
 
