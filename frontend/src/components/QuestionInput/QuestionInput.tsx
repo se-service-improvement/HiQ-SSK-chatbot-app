@@ -32,7 +32,7 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
 ***REMOVED***;
 
 ***REMOVED***const onEnterPress = (ev: React.KeyboardEvent<Element>) => {
-***REMOVED***if (ev.key === "Enter" && !ev.shiftKey) {
+***REMOVED***if (ev.key === "Enter" && !ev.shiftKey && !(ev.nativeEvent?.isComposing === true)) {
 ***REMOVED******REMOVED***ev.preventDefault();
 ***REMOVED******REMOVED***sendQuestion();
 ***REMOVED***
