@@ -53,7 +53,6 @@
 ***REMOVED***font-weight: 400;
 ***REMOVED***font-size: 16px;
 ***REMOVED***line-height: 150%;
-***REMOVED***display: flex;
 ***REMOVED***align-items: flex-end;
 ***REMOVED***text-align: center;
 ***REMOVED***letter-spacing: -0.01em;
@@ -323,4 +322,27 @@ a {
 .viewSourceButton:hover {
 ***REMOVED***text-decoration: underline;
 ***REMOVED***cursor: pointer;
+}
+
+@media (max-width: 480px) {
+***REMOVED***.chatInput {
+***REMOVED***width: 90%;
+***REMOVED***max-width: 90%;
+***REMOVED***
+
+***REMOVED***.newChatIcon {
+***REMOVED***left: 0px;
+***REMOVED***
+
+***REMOVED***.clearChatBroom {
+***REMOVED***left: 0px;
+***REMOVED***
+
+***REMOVED***.clearChatBroomNoCosmos {
+***REMOVED***left: 0px;
+***REMOVED***
+
+***REMOVED***.chatEmptyStateTitle {
+***REMOVED***line-height: 36px;
+***REMOVED***
 }

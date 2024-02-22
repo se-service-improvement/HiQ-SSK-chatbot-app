@@ -1,8 +1,8 @@
 import { Outlet, Link } from "react-router-dom";
 import styles from "./Layout.module.css";
 import Contoso from "../../assets/Contoso.svg";
-import { CopyRegular, ShareRegular } from "@fluentui/react-icons";
-import { Dialog, Stack, TextField, ICommandBarStyles, IButtonStyles } from "@fluentui/react";
+import { CopyRegular } from "@fluentui/react-icons";
+import { Dialog, Stack, TextField } from "@fluentui/react";
 import { useContext, useEffect, useState } from "react";
 import { HistoryButton, ShareButton } from "../../components/common/Button";
 import { AppStateContext } from "../../state/AppProvider";
@@ -12,6 +12,9 @@ const Layout = () => {
 ***REMOVED***const [isSharePanelOpen, setIsSharePanelOpen] = useState<boolean>(false);
 ***REMOVED***const [copyClicked, setCopyClicked] = useState<boolean>(false);
 ***REMOVED***const [copyText, setCopyText] = useState<string>("Copy URL");
+***REMOVED***const [shareLabel, setShareLabel] = useState<string | undefined>("Share");
+***REMOVED***const [hideHistoryLabel, setHideHistoryLabel] = useState<string>("Hide chat history");
+***REMOVED***const [showHistoryLabel, setShowHistoryLabel] = useState<string>("Show chat history");
 ***REMOVED***const appStateContext = useContext(AppStateContext)
 ***REMOVED***const ui = appStateContext?.state.frontendSettings?.ui;
 
@@ -42,6 +45,25 @@ const Layout = () => {
 
 ***REMOVED***useEffect(() => { }, [appStateContext?.state.isCosmosDBAvailable.status]);
 
+***REMOVED***useEffect(() => {
+***REMOVED***const handleResize = () => {
+***REMOVED***  if (window.innerWidth < 480) {
+***REMOVED******REMOVED***setShareLabel(undefined)
+***REMOVED******REMOVED***setHideHistoryLabel("Hide history")
+***REMOVED******REMOVED***setShowHistoryLabel("Show history")
+  ***REMOVED***
+***REMOVED******REMOVED***setShareLabel("Share")
+***REMOVED******REMOVED***setHideHistoryLabel("Hide chat history")
+***REMOVED******REMOVED***setShowHistoryLabel("Show chat history")
+  ***REMOVED***
+***REMOVED***;
+***REMOVED***
+***REMOVED***window.addEventListener('resize', handleResize);
+***REMOVED***handleResize();
+***REMOVED***
+***REMOVED***return () => window.removeEventListener('resize', handleResize);
+  ***REMOVED***, []);
+
 ***REMOVED***return (
 ***REMOVED***<div className={styles.layout}>
 ***REMOVED******REMOVED***<header className={styles.header} role={"banner"}>
@@ -59,9 +81,9 @@ const Layout = () => {
 ***REMOVED******REMOVED******REMOVED***{ui?.show_share_button &&
 ***REMOVED******REMOVED******REMOVED***<Stack horizontal tokens={{ childrenGap: 4 }}>
 ***REMOVED******REMOVED******REMOVED******REMOVED***{(appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured) &&
-***REMOVED******REMOVED******REMOVED******REMOVED***<HistoryButton onClick={handleHistoryClick} text={appStateContext?.state?.isChatHistoryOpen ? "Hide chat history" : "Show chat history"} />
+***REMOVED******REMOVED******REMOVED******REMOVED***<HistoryButton onClick={handleHistoryClick} text={appStateContext?.state?.isChatHistoryOpen ? hideHistoryLabel : showHistoryLabel} />
 ***REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED******REMOVED***<ShareButton onClick={handleShareClick} />
+***REMOVED******REMOVED******REMOVED******REMOVED***<ShareButton onClick={handleShareClick} text={shareLabel} />
 ***REMOVED******REMOVED******REMOVED***</Stack>
 ***REMOVED******REMOVED***
 ***REMOVED******REMOVED***</Stack>

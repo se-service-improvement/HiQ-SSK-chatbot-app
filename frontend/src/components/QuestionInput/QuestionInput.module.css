@@ -54,3 +54,10 @@
 ***REMOVED***width: 27px;
 ***REMOVED***height: 30px;
 }
+
+
+@media (max-width: 480px) {
+***REMOVED***.questionInputContainer {
+***REMOVED***left: 16.5%;
+***REMOVED***
+}

@@ -111,3 +111,13 @@
 ***REMOVED***align-items: center;
 ***REMOVED***color: #242424;
 }
+
+@media (max-width: 480px) {
+***REMOVED***.headerTitleContainer {
+***REMOVED***margin-left: 4px;
+***REMOVED***
+
+***REMOVED***.headerIcon {
+***REMOVED***margin-left: 26px;
+***REMOVED***
+}
