@@ -104,10 +104,26 @@ class PdfTextSplitter(TextSplitter):
 
 ***REMOVED***return caption
 ***REMOVED***
+***REMOVED***def mask_urls(self, text) -> Tuple[Dict[str, str], str]:
+
+***REMOVED***def find_urls(string):
+***REMOVED******REMOVED***regex = r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^()\s<>]+|\(([^()\s<>]+|(\([^()\s<>]+\)))*\))+(?:\(([^()\s<>]+|(\([^()\s<>]+\)))*\)|[^()\s`!()\[\]{};:'\".,<>?«»“”‘’]))"
+***REMOVED******REMOVED***urls = re.findall(regex, string)
+***REMOVED******REMOVED***return [x[0] for x in urls]
+***REMOVED***url_dict = {}
+***REMOVED***masked_text = text
+***REMOVED***urls = set(find_urls(text))
+
+***REMOVED***for i, url in enumerate(urls):
+***REMOVED******REMOVED***masked_text = masked_text.replace(url, f"##URL{i}##")
+***REMOVED******REMOVED***url_dict[f"##URL{i}##"] = url
+***REMOVED***return url_dict, masked_text
+
 ***REMOVED***def split_text(self, text: str) -> List[str]:
+***REMOVED***url_dict, masked_text = self.mask_urls(text)
 ***REMOVED***start_tag = self._table_tags["table_open"]
 ***REMOVED***end_tag = self._table_tags["table_close"]
-***REMOVED***splits = text.split(start_tag)
+***REMOVED***splits = masked_text.split(start_tag)
 ***REMOVED***
 ***REMOVED***final_chunks = self.chunk_rest(splits[0]) # the first split is before the first table tag so it is regular text
 ***REMOVED***
@@ -128,7 +144,7 @@ class PdfTextSplitter(TextSplitter):
 ***REMOVED******REMOVED***table_caption_prefix = ""
 ***REMOVED******REMOVED***
 
-***REMOVED***final_final_chunks = [chunk for chunk, chunk_size in merge_chunks_serially(final_chunks, self._chunk_size)]
+***REMOVED***final_final_chunks = [chunk for chunk, chunk_size in merge_chunks_serially(final_chunks, self._chunk_size, url_dict)]
 
 ***REMOVED***return final_final_chunks
 
@@ -593,11 +609,17 @@ def extract_pdf_content(file_path, form_recognizer_client, use_layout=False):
 ***REMOVED***full_text = "".join([page_text for _, _, page_text in page_map])
 ***REMOVED***return full_text
 
-def merge_chunks_serially(chunked_content_list: List[str], num_tokens: int) -> Generator[Tuple[str, int], None, None]:
+def merge_chunks_serially(chunked_content_list: List[str], num_tokens: int, url_dict: Dict[str, str]={}) -> Generator[Tuple[str, int], None, None]:
+***REMOVED***def unmask_urls(text, url_dict={}):
+***REMOVED***if "##URL" in text:
+***REMOVED******REMOVED***for key, value in url_dict.items():
+***REMOVED******REMOVED***text = text.replace(key, value)
+***REMOVED***return text
 ***REMOVED***# TODO: solve for token overlap
 ***REMOVED***current_chunk = ""
 ***REMOVED***total_size = 0
 ***REMOVED***for chunked_content in chunked_content_list:
+***REMOVED***chunked_content = unmask_urls(chunked_content, url_dict)
 ***REMOVED***chunk_size = TOKEN_ESTIMATOR.estimate_tokens(chunked_content)
 ***REMOVED***if total_size > 0:
 ***REMOVED******REMOVED***new_size = total_size + chunk_size
