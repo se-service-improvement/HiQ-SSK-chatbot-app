@@ -7,6 +7,20 @@ type ParsedAnswer = {
 ***REMOVED***markdownFormatText: string;
 };
 
+const enumerateCitations = (citations: Citation[]) => {
+***REMOVED***const filepathMap = new Map();
+***REMOVED***for (const citation of citations) {
+***REMOVED***const { filepath } = citation;
+***REMOVED***let part_i = 1
+***REMOVED***if (filepathMap.has(filepath)) {
+***REMOVED******REMOVED***part_i = filepathMap.get(filepath) + 1;
+***REMOVED***
+***REMOVED***filepathMap.set(filepath, part_i);
+***REMOVED***citation.part_index = part_i;
+***REMOVED***
+***REMOVED***return citations;
+}
+
 export function parseAnswer(answer: AskResponse): ParsedAnswer {
 ***REMOVED***let answerText = answer.answer;
 ***REMOVED***const citationLinks = answerText.match(/\[(doc\d\d?\d?)]/g);
@@ -27,6 +41,7 @@ export function parseAnswer(answer: AskResponse): ParsedAnswer {
 ***REMOVED***
 ***REMOVED***)
 
+***REMOVED***filteredCitations = enumerateCitations(filteredCitations);
 
 ***REMOVED***return {
 ***REMOVED***citations: filteredCitations,

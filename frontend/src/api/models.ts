@@ -7,6 +7,7 @@ export type AskResponse = {
 };
 
 export type Citation = {
+***REMOVED***part_index?: number;
 ***REMOVED***content: string;
 ***REMOVED***id: string;
 ***REMOVED***title: string | null;
