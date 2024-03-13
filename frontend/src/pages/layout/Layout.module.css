@@ -41,19 +41,7 @@
 ***REMOVED***display: flex;
 ***REMOVED***flex-direction: row;
 ***REMOVED***justify-content: center;
-***REMOVED***align-items: center;
-***REMOVED***padding: 5px 12px;
-***REMOVED***gap: 4px;
-***REMOVED***width: 86px;
-***REMOVED***height: 32px;
-***REMOVED***background: radial-gradient(109.81% 107.82% at 100.1% 90.19%, #0F6CBD 33.63%, #2D87C3 70.31%, #8DDDD8 100%) /* warning: gradient uses a rotation that is not supported by CSS and may not behave as expected */;
-***REMOVED***border-radius: 4px;
-***REMOVED***flex: none;
-***REMOVED***order: 1;
-***REMOVED***flex-grow: 0;
-***REMOVED***position: absolute;
-***REMOVED***right: 20px;
-***REMOVED***cursor: pointer;
+***REMOVED***margin-right: 20px;
 }
 
 .shareButton {

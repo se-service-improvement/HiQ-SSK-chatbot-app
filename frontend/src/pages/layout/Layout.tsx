@@ -78,14 +78,12 @@ const Layout = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED***<h1 className={styles.headerTitle}>{ui?.title}</h1>
 ***REMOVED******REMOVED******REMOVED***</Link>
 ***REMOVED******REMOVED******REMOVED***</Stack>
-***REMOVED******REMOVED******REMOVED***{ui?.show_share_button &&
-***REMOVED******REMOVED******REMOVED***<Stack horizontal tokens={{ childrenGap: 4 }}>
-***REMOVED******REMOVED******REMOVED******REMOVED***{(appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured) &&
+***REMOVED******REMOVED******REMOVED***<Stack horizontal tokens={{ childrenGap: 4 }} className={styles.shareButtonContainer}>
+***REMOVED******REMOVED******REMOVED***{(appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured) &&
 ***REMOVED******REMOVED******REMOVED******REMOVED***<HistoryButton onClick={handleHistoryClick} text={appStateContext?.state?.isChatHistoryOpen ? hideHistoryLabel : showHistoryLabel} />
 ***REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED******REMOVED***<ShareButton onClick={handleShareClick} text={shareLabel} />
+***REMOVED******REMOVED******REMOVED***{ui?.show_share_button &&<ShareButton onClick={handleShareClick} text={shareLabel} />}
 ***REMOVED******REMOVED******REMOVED***</Stack>
-***REMOVED******REMOVED***
 ***REMOVED******REMOVED***</Stack>
 ***REMOVED******REMOVED***</header>
 ***REMOVED******REMOVED***<Outlet />
