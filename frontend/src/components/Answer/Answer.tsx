@@ -43,6 +43,7 @@ export const Answer = ({
 ***REMOVED***const [negativeFeedbackList, setNegativeFeedbackList] = useState<Feedback[]>([]);
 ***REMOVED***const appStateContext = useContext(AppStateContext)
 ***REMOVED***const FEEDBACK_ENABLED = appStateContext?.state.frontendSettings?.feedback_enabled && appStateContext?.state.isCosmosDBAvailable?.cosmosDB; 
+***REMOVED***const SANITIZE_ANSWER = appStateContext?.state.frontendSettings?.sanitize_answer 
 ***REMOVED***
 ***REMOVED***const handleChevronClick = () => {
 ***REMOVED***setChevronIsExpanded(!chevronIsExpanded);
@@ -187,7 +188,7 @@ export const Answer = ({
 ***REMOVED******REMOVED******REMOVED******REMOVED***<ReactMarkdown
 ***REMOVED******REMOVED******REMOVED******REMOVED***linkTarget="_blank"
 ***REMOVED******REMOVED******REMOVED******REMOVED***remarkPlugins={[remarkGfm, supersub]}
-***REMOVED******REMOVED******REMOVED******REMOVED***children={DOMPurify.sanitize(parsedAnswer.markdownFormatText, {ALLOWED_TAGS: XSSAllowTags})}
+***REMOVED******REMOVED******REMOVED******REMOVED***children={SANITIZE_ANSWER ? DOMPurify.sanitize(parsedAnswer.markdownFormatText, {ALLOWED_TAGS: XSSAllowTags}) : parsedAnswer.markdownFormatText}
 ***REMOVED******REMOVED******REMOVED******REMOVED***className={styles.answerText}
 ***REMOVED******REMOVED******REMOVED******REMOVED***/>
 ***REMOVED******REMOVED******REMOVED***</Stack.Item>

@@ -115,6 +115,7 @@ export type FrontendSettings = {
 ***REMOVED***auth_enabled?: string | null;
 ***REMOVED***feedback_enabled?: string | null;
 ***REMOVED***ui?: UI;
+***REMOVED***sanitize_answer?: boolean;
 }
 
 export enum Feedback {
