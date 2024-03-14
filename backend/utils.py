@@ -86,14 +86,7 @@ def format_non_streaming_response(chatCompletion, history_metadata, message_uuid
 ***REMOVED***if len(chatCompletion.choices) > 0:
 ***REMOVED***message = chatCompletion.choices[0].message
 ***REMOVED***if message:
-***REMOVED******REMOVED***if hasattr(message, "context") and message.context.get("messages"):
-***REMOVED******REMOVED***for m in message.context["messages"]:
-***REMOVED******REMOVED******REMOVED***if m["role"] == "tool":
-***REMOVED******REMOVED******REMOVED***response_obj["choices"][0]["messages"].append({
-***REMOVED******REMOVED******REMOVED******REMOVED***"role": "tool",
-***REMOVED******REMOVED******REMOVED******REMOVED***"content": m["content"]
-***REMOVED******REMOVED******REMOVED***)
-***REMOVED******REMOVED***elif hasattr(message, "context"):
+***REMOVED******REMOVED***if hasattr(message, "context"):
 ***REMOVED******REMOVED***response_obj["choices"][0]["messages"].append({
 ***REMOVED******REMOVED******REMOVED***"role": "tool",
 ***REMOVED******REMOVED******REMOVED***"content": json.dumps(message.context),
@@ -121,15 +114,13 @@ def format_stream_response(chatCompletionChunk, history_metadata, message_uuid=N
 ***REMOVED***if len(chatCompletionChunk.choices) > 0:
 ***REMOVED***delta = chatCompletionChunk.choices[0].delta
 ***REMOVED***if delta:
-***REMOVED******REMOVED***if hasattr(delta, "context") and delta.context.get("messages"):
-***REMOVED******REMOVED***for m in delta.context["messages"]:
-***REMOVED******REMOVED******REMOVED***if m["role"] == "tool":
-***REMOVED******REMOVED******REMOVED***messageObj = {
-***REMOVED******REMOVED******REMOVED******REMOVED***"role": "tool",
-***REMOVED******REMOVED******REMOVED******REMOVED***"content": m["content"]
-***REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED***response_obj["choices"][0]["messages"].append(messageObj)
-***REMOVED******REMOVED******REMOVED***return response_obj
+***REMOVED******REMOVED***if hasattr(delta, "context"):
+***REMOVED******REMOVED***messageObj = {
+***REMOVED******REMOVED******REMOVED***"role": "tool",
+***REMOVED******REMOVED******REMOVED***"content": json.dumps(delta.context)
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***response_obj["choices"][0]["messages"].append(messageObj)
+***REMOVED******REMOVED***return response_obj
 ***REMOVED******REMOVED***if delta.role == "assistant" and hasattr(delta, "context"):
 ***REMOVED******REMOVED***messageObj = {
 ***REMOVED******REMOVED******REMOVED***"role": "assistant",
