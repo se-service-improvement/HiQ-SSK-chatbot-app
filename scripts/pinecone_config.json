@@ -1,0 +1,10 @@
+[
+***REMOVED***{
+***REMOVED***"data_path": "<path to data>",
+***REMOVED***"environment": "<Pinecone environment name>",
+***REMOVED***"api_key": "<Pinecone API key>",
+***REMOVED***"index_name": "<Pinecone vector index>",
+***REMOVED***"chunk_size": 1024,
+***REMOVED***"token_overlap": 128
+***REMOVED***
+]
