@@ -48,7 +48,7 @@ export const Answer = ({
 ***REMOVED***const handleChevronClick = () => {
 ***REMOVED***setChevronIsExpanded(!chevronIsExpanded);
 ***REMOVED***toggleIsRefAccordionOpen();
-  ***REMOVED***;
+***REMOVED***;
 
 ***REMOVED***useEffect(() => {
 ***REMOVED***setChevronIsExpanded(isRefAccordionOpen);
@@ -216,35 +216,35 @@ export const Answer = ({
 ***REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED***</Stack.Item>
 ***REMOVED******REMOVED***<Stack horizontal className={styles.answerFooter}>
-***REMOVED******REMOVED***{!!parsedAnswer.citations.length && (
+***REMOVED******REMOVED******REMOVED***{!!parsedAnswer.citations.length && (
 ***REMOVED******REMOVED******REMOVED***<Stack.Item
-***REMOVED******REMOVED******REMOVED***onKeyDown={e => e.key === "Enter" || e.key === " " ? toggleIsRefAccordionOpen() : null}
+***REMOVED******REMOVED******REMOVED******REMOVED***onKeyDown={e => e.key === "Enter" || e.key === " " ? toggleIsRefAccordionOpen() : null}
 ***REMOVED******REMOVED******REMOVED***>
-***REMOVED******REMOVED******REMOVED***<Stack style={{width: "100%"}} >
+***REMOVED******REMOVED******REMOVED******REMOVED***<Stack style={{ width: "100%" }} >
 ***REMOVED******REMOVED******REMOVED******REMOVED***<Stack horizontal horizontalAlign='start' verticalAlign='center'>
-***REMOVED******REMOVED******REMOVED******REMOVED***<Text
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<Text
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***className={styles.accordionTitle}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onClick={toggleIsRefAccordionOpen}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***aria-label="Open references"
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***tabIndex={0}
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***role="button"
-***REMOVED******REMOVED******REMOVED******REMOVED***>
-***REMOVED******REMOVED******REMOVED******REMOVED***<span>{parsedAnswer.citations.length > 1 ? parsedAnswer.citations.length + " references" : "1 reference"}</span>
-***REMOVED******REMOVED******REMOVED******REMOVED***</Text>
-***REMOVED******REMOVED******REMOVED******REMOVED***<FontIcon className={styles.accordionIcon}
-***REMOVED******REMOVED******REMOVED******REMOVED***onClick={handleChevronClick} iconName={chevronIsExpanded ? 'ChevronDown' : 'ChevronRight'}
-***REMOVED******REMOVED******REMOVED******REMOVED***/>
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***>
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<span>{parsedAnswer.citations.length > 1 ? parsedAnswer.citations.length + " references" : "1 reference"}</span>
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***</Text>
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<FontIcon className={styles.accordionIcon}
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onClick={handleChevronClick} iconName={chevronIsExpanded ? 'ChevronDown' : 'ChevronRight'}
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***/>
 ***REMOVED******REMOVED******REMOVED******REMOVED***</Stack>
-***REMOVED******REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED***</Stack>
+
+***REMOVED******REMOVED******REMOVED******REMOVED***</Stack>
 ***REMOVED******REMOVED******REMOVED***</Stack.Item>
-***REMOVED******REMOVED***)}
-***REMOVED******REMOVED***<Stack.Item className={styles.answerDisclaimerContainer}>
+***REMOVED******REMOVED******REMOVED***)}
+***REMOVED******REMOVED******REMOVED***<Stack.Item className={styles.answerDisclaimerContainer}>
 ***REMOVED******REMOVED******REMOVED***<span className={styles.answerDisclaimer}>AI-generated content may be incorrect</span>
-***REMOVED******REMOVED***</Stack.Item>
+***REMOVED******REMOVED******REMOVED***</Stack.Item>
 ***REMOVED******REMOVED***</Stack>
-***REMOVED******REMOVED***{chevronIsExpanded && 
-***REMOVED******REMOVED******REMOVED***<div style={{ marginTop: 8, display: "flex", flexFlow: "wrap column", maxHeight: "150px", gap: "4px" }}>
+***REMOVED******REMOVED***{chevronIsExpanded &&
+***REMOVED******REMOVED******REMOVED***<div className={styles.citationWrapper} >
 ***REMOVED******REMOVED******REMOVED***{parsedAnswer.citations.map((citation, idx) => {
 ***REMOVED******REMOVED******REMOVED******REMOVED***return (
 ***REMOVED******REMOVED******REMOVED******REMOVED***<span 

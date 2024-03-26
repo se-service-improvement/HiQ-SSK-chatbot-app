@@ -59,6 +59,14 @@
 ***REMOVED***flex-grow: 0;
 }
 
+.citationWrapper {
+***REMOVED***margin-top: 8;
+***REMOVED***display: flex;
+***REMOVED***flex-flow: wrap column;
+***REMOVED***max-height: 150px;
+***REMOVED***gap: 4px;
+}
+
 .citationContainer {
 ***REMOVED***margin-left: 10px;
 ***REMOVED***font-style: normal;
@@ -172,4 +180,22 @@
 sup {
 ***REMOVED***font-size: 10px;
 ***REMOVED***line-height: 10px;
+}
+
+@media (max-width: 480px) {
+***REMOVED***.answerFooter {
+***REMOVED***flex-direction: column-reverse;
+***REMOVED***
+
+***REMOVED***.citationWrapper {
+***REMOVED***max-height: max-content;
+***REMOVED***
+
+***REMOVED***.citationContainer {
+***REMOVED***margin-left: 0;
+***REMOVED***
+
+***REMOVED***.answerDisclaimer {
+***REMOVED***margin-bottom: 5px;
+***REMOVED***
 }
