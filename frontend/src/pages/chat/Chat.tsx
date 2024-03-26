@@ -450,7 +450,6 @@ const Chat = () => {
 ***REMOVED******REMOVED***
 ***REMOVED******REMOVED******REMOVED***if (!result.history_metadata) {
 ***REMOVED******REMOVED******REMOVED***console.error("Error retrieving data.", result);
-***REMOVED******REMOVED******REMOVED***console.log("errorMessage", errorMessage)
 ***REMOVED******REMOVED******REMOVED***let errorChatMsg: ChatMessage = {
 ***REMOVED******REMOVED******REMOVED******REMOVED***id: uuid(),
 ***REMOVED******REMOVED******REMOVED******REMOVED***role: ERROR,
