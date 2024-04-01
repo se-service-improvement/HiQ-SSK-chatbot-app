@@ -73,6 +73,7 @@ const Chat = () => {
 ***REMOVED***
 
 ***REMOVED***const [ASSISTANT, TOOL, ERROR] = ["assistant", "tool", "error"]
+***REMOVED***const NO_CONTENT_ERROR = "No content in messages object."
 
 ***REMOVED***useEffect(() => {
 ***REMOVED***if (appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.Working  
@@ -356,6 +357,10 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED***if (obj !== "" && obj !== "{}") {
 ***REMOVED******REMOVED******REMOVED******REMOVED***runningText += obj;
 ***REMOVED******REMOVED******REMOVED******REMOVED***result = JSON.parse(runningText);
+***REMOVED******REMOVED******REMOVED******REMOVED***if (!result.choices?.[0]?.messages?.[0].content) {
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***errorResponseMessage = NO_CONTENT_ERROR;
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***throw Error();
+***REMOVED******REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED******REMOVED******REMOVED***if (result.choices?.length > 0) {
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***result.choices[0].messages.forEach((msg) => {
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***msg.id = result.id;
@@ -547,36 +552,40 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED***console.error("Failure fetching current chat state.")
 ***REMOVED******REMOVED******REMOVED***return
 ***REMOVED******REMOVED***
-***REMOVED******REMOVED***saveToDB(appStateContext.state.currentChat.messages, appStateContext.state.currentChat.id)
+***REMOVED******REMOVED***const noContentError = appStateContext.state.currentChat.messages.find(m => m.role === ERROR)
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***if (noContentError && !noContentError.content.includes(NO_CONTENT_ERROR)) {
+***REMOVED******REMOVED******REMOVED***saveToDB(appStateContext.state.currentChat.messages, appStateContext.state.currentChat.id)
 ***REMOVED******REMOVED******REMOVED***.then((res) => {
-***REMOVED******REMOVED******REMOVED***if (!res.ok) {
+***REMOVED******REMOVED******REMOVED******REMOVED***if (!res.ok) {
 ***REMOVED******REMOVED******REMOVED******REMOVED***let errorMessage = "An error occurred. Answers can't be saved at this time. If the problem persists, please contact the site administrator.";
 ***REMOVED******REMOVED******REMOVED******REMOVED***let errorChatMsg: ChatMessage = {
-***REMOVED******REMOVED******REMOVED******REMOVED***id: uuid(),
-***REMOVED******REMOVED******REMOVED******REMOVED***role: ERROR,
-***REMOVED******REMOVED******REMOVED******REMOVED***content: errorMessage,
-***REMOVED******REMOVED******REMOVED******REMOVED***date: new Date().toISOString()
-***REMOVED******REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***id: uuid(),
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***role: ERROR,
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***content: errorMessage,
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***date: new Date().toISOString()
+***REMOVED******REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED******REMOVED******REMOVED***if (!appStateContext?.state.currentChat?.messages) {
-***REMOVED******REMOVED******REMOVED******REMOVED***let err: Error = {
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***let err: Error = {
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***...new Error,
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***message: "Failure fetching current chat state."
 ***REMOVED******REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED******REMOVED***throw err
-***REMOVED******REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***throw err
+***REMOVED******REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED******REMOVED******REMOVED***setMessages([...appStateContext?.state.currentChat?.messages, errorChatMsg])
 ***REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED***return res as Response
-***REMOVED******REMOVED***)
+***REMOVED******REMOVED******REMOVED******REMOVED***return res as Response
+***REMOVED******REMOVED******REMOVED***)
 ***REMOVED******REMOVED******REMOVED***.catch((err) => {
-***REMOVED******REMOVED******REMOVED***console.error("Error: ", err)
-***REMOVED******REMOVED******REMOVED***let errRes: Response = {
+***REMOVED******REMOVED******REMOVED******REMOVED***console.error("Error: ", err)
+***REMOVED******REMOVED******REMOVED******REMOVED***let errRes: Response = {
 ***REMOVED******REMOVED******REMOVED******REMOVED***...new Response,
 ***REMOVED******REMOVED******REMOVED******REMOVED***ok: false,
 ***REMOVED******REMOVED******REMOVED******REMOVED***status: 500,
 ***REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED***return errRes;
-***REMOVED******REMOVED***)
+***REMOVED******REMOVED******REMOVED******REMOVED***return errRes;
+***REMOVED******REMOVED******REMOVED***)
+***REMOVED******REMOVED***
 ***REMOVED******REMOVED***
 ***REMOVED***
 ***REMOVED******REMOVED***appStateContext?.dispatch({ type: 'UPDATE_CHAT_HISTORY', payload: appStateContext.state.currentChat });
