@@ -51,7 +51,7 @@ const Chat = () => {
 ***REMOVED***const [activeCitation, setActiveCitation] = useState<Citation>();
 ***REMOVED***const [isCitationPanelOpen, setIsCitationPanelOpen] = useState<boolean>(false);
 ***REMOVED***const abortFuncs = useRef([] as AbortController[]);
-***REMOVED***const [showAuthMessage, setShowAuthMessage] = useState<boolean>(true);
+***REMOVED***const [showAuthMessage, setShowAuthMessage] = useState<boolean | undefined>();
 ***REMOVED***const [messages, setMessages] = useState<ChatMessage[]>([])
 ***REMOVED***const [processMessages, setProcessMessages] = useState<messageStatus>(messageStatus.NotRunning);
 ***REMOVED***const [clearingChat, setClearingChat] = useState<boolean>(false);
