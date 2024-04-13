@@ -820,7 +820,12 @@ async def promptflow_request(request):
 
 
 async def send_chat_request(request):
-***REMOVED***filtered_messages = [message for message in request['messages'] if message['role'] != 'tool']
+***REMOVED***filtered_messages = []
+***REMOVED***messages = request.get("messages", [])
+***REMOVED***for message in messages:
+***REMOVED***if message.get("role") != 'tool':
+***REMOVED******REMOVED***filtered_messages.append(message)
+***REMOVED******REMOVED***
 ***REMOVED***request['messages'] = filtered_messages
 ***REMOVED***model_args = prepare_model_args(request)
 
