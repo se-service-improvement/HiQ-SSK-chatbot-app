@@ -6,7 +6,8 @@
   "scripts": {
 ***REMOVED***"dev": "vite",
 ***REMOVED***"build": "tsc && vite build",
-***REMOVED***"watch": "tsc && vite build --watch"
+***REMOVED***"watch": "tsc && vite build --watch",
+***REMOVED***"test": "jest"
   },
   "dependencies": {
 ***REMOVED***"@fluentui/react": "^8.105.3",
@@ -27,12 +28,18 @@
   },
   "devDependencies": {
 ***REMOVED***"@types/dompurify": "^3.0.5",
-***REMOVED***"@types/lodash-es": "^4.17.7",
+***REMOVED***"@types/jest": "^29.5.12",
+***REMOVED***"@types/lodash-es": "^4.17.12",
+***REMOVED***"@types/mocha": "^10.0.6",
 ***REMOVED***"@types/react": "^18.0.27",
 ***REMOVED***"@types/react-dom": "^18.0.10",
 ***REMOVED***"@types/react-syntax-highlighter": "^15.5.11",
 ***REMOVED***"@vitejs/plugin-react": "^3.1.0",
+***REMOVED***"jest": "^29.7.0",
 ***REMOVED***"prettier": "^2.8.3",
+***REMOVED***"react-test-renderer": "^18.2.0",
+***REMOVED***"ts-jest": "^29.1.2",
+***REMOVED***"ts-node": "^10.9.2",
 ***REMOVED***"typescript": "^4.9.3",
 ***REMOVED***"vite": "^4.1.5"
   }

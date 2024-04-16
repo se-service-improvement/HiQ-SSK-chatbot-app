@@ -15,7 +15,7 @@
 ***REMOVED***"isolatedModules": true,
 ***REMOVED***"noEmit": true,
 ***REMOVED***"jsx": "react-jsx",
-***REMOVED***"types": ["vite/client"]
+***REMOVED***"types": ["vite/client", "jest", "mocha"]
   },
   "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]
