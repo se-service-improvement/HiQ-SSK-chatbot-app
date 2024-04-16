@@ -831,13 +831,14 @@ async def send_chat_request(request):
 
 ***REMOVED***try:
 ***REMOVED***azure_openai_client = init_openai_client()
-***REMOVED***response = await azure_openai_client.chat.completions.create(**model_args)
-
+***REMOVED***raw_response = await azure_openai_client.chat.completions.with_raw_response.create(**model_args)
+***REMOVED***response = raw_response.parse()
+***REMOVED***apim_request_id = raw_response.headers.get("apim-request-id") 
 ***REMOVED***except Exception as e:
 ***REMOVED***logging.exception("Exception in send_chat_request")
 ***REMOVED***raise e
 
-***REMOVED***return response
+***REMOVED***return response, apim_request_id
 
 
 async def complete_chat_request(request_body):
@@ -848,18 +849,18 @@ async def complete_chat_request(request_body):
 ***REMOVED******REMOVED***response, history_metadata, PROMPTFLOW_RESPONSE_FIELD_NAME
 ***REMOVED***)
 ***REMOVED***else:
-***REMOVED***response = await send_chat_request(request_body)
+***REMOVED***response, apim_request_id = await send_chat_request(request_body)
 ***REMOVED***history_metadata = request_body.get("history_metadata", {})
-***REMOVED***return format_non_streaming_response(response, history_metadata)
+***REMOVED***return format_non_streaming_response(response, history_metadata, apim_request_id)
 
 
 async def stream_chat_request(request_body):
-***REMOVED***response = await send_chat_request(request_body)
+***REMOVED***response, apim_request_id = await send_chat_request(request_body)
 ***REMOVED***history_metadata = request_body.get("history_metadata", {})
-
+***REMOVED***
 ***REMOVED***async def generate():
 ***REMOVED***async for completionChunk in response:
-***REMOVED******REMOVED***yield format_stream_response(completionChunk, history_metadata)
+***REMOVED******REMOVED***yield format_stream_response(completionChunk, history_metadata, apim_request_id)
 
 ***REMOVED***return generate()
 

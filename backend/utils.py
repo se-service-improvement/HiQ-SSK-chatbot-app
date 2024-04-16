@@ -73,7 +73,7 @@ def generateFilterString(userToken):
 ***REMOVED***return f"{AZURE_SEARCH_PERMITTED_GROUPS_COLUMN}/any(g:search.in(g, '{group_ids}'))"
 
 
-def format_non_streaming_response(chatCompletion, history_metadata, message_uuid=None):
+def format_non_streaming_response(chatCompletion, history_metadata, apim_request_id):
 ***REMOVED***response_obj = {
 ***REMOVED***"id": chatCompletion.id,
 ***REMOVED***"model": chatCompletion.model,
@@ -81,6 +81,7 @@ def format_non_streaming_response(chatCompletion, history_metadata, message_uuid
 ***REMOVED***"object": chatCompletion.object,
 ***REMOVED***"choices": [{"messages": []}],
 ***REMOVED***"history_metadata": history_metadata,
+***REMOVED***"apim-request-id": apim_request_id,
 ***REMOVED***
 
 ***REMOVED***if len(chatCompletion.choices) > 0:
@@ -103,8 +104,7 @@ def format_non_streaming_response(chatCompletion, history_metadata, message_uuid
 
 ***REMOVED***return {}
 
-
-def format_stream_response(chatCompletionChunk, history_metadata, message_uuid=None):
+def format_stream_response(chatCompletionChunk, history_metadata, apim_request_id):
 ***REMOVED***response_obj = {
 ***REMOVED***"id": chatCompletionChunk.id,
 ***REMOVED***"model": chatCompletionChunk.model,
@@ -112,6 +112,7 @@ def format_stream_response(chatCompletionChunk, history_metadata, message_uuid=N
 ***REMOVED***"object": chatCompletionChunk.object,
 ***REMOVED***"choices": [{"messages": []}],
 ***REMOVED***"history_metadata": history_metadata,
+***REMOVED***"apim-request-id": apim_request_id,
 ***REMOVED***
 
 ***REMOVED***if len(chatCompletionChunk.choices) > 0:
