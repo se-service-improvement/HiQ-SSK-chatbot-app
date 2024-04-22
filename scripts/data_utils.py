@@ -752,11 +752,12 @@ def chunk_content(
 ***REMOVED***for chunk, chunk_size, doc in chunked_context:
 ***REMOVED******REMOVED***if chunk_size >= min_chunk_size:
 ***REMOVED******REMOVED***if add_embeddings:
-***REMOVED******REMOVED******REMOVED***for _ in range(RETRY_COUNT):
+***REMOVED******REMOVED******REMOVED***for i in range(RETRY_COUNT):
 ***REMOVED******REMOVED******REMOVED***try:
 ***REMOVED******REMOVED******REMOVED******REMOVED***doc.contentVector = get_embedding(chunk, azure_credential=azure_credential, embedding_model_endpoint=embedding_endpoint)
 ***REMOVED******REMOVED******REMOVED******REMOVED***break
-***REMOVED******REMOVED******REMOVED***except:
+***REMOVED******REMOVED******REMOVED***except Exception as e:
+***REMOVED******REMOVED******REMOVED******REMOVED***print(f"Error getting embedding for chunk with error={e}, retrying, current at {i + 1} retry, {RETRY_COUNT - (i + 1)} retries left")
 ***REMOVED******REMOVED******REMOVED******REMOVED***time.sleep(30)
 ***REMOVED******REMOVED******REMOVED***if doc.contentVector is None:
 ***REMOVED******REMOVED******REMOVED***raise Exception(f"Error getting embedding for chunk={chunk}")
