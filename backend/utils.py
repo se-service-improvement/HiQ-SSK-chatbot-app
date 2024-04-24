@@ -142,7 +142,7 @@ def format_stream_response(chatCompletionChunk, history_metadata, apim_request_i
 
 
 def format_pf_non_streaming_response(
-***REMOVED***chatCompletion, history_metadata, response_field_name, message_uuid=None
+***REMOVED***chatCompletion, history_metadata, response_field_name, citations_field_name, message_uuid=None
 ):
 ***REMOVED***if chatCompletion is None:
 ***REMOVED***logging.error(
@@ -157,22 +157,28 @@ def format_pf_non_streaming_response(
 
 ***REMOVED***logging.debug(f"chatCompletion: {chatCompletion}")
 ***REMOVED***try:
-***REMOVED***response_obj = {
+***REMOVED***messages = []
+***REMOVED***if response_field_name in chatCompletion:
+***REMOVED******REMOVED***messages.append({
+***REMOVED******REMOVED***"role": "assistant",
+***REMOVED******REMOVED***"content": chatCompletion[response_field_name] 
+***REMOVED***)
+***REMOVED***if citations_field_name in chatCompletion:
+***REMOVED******REMOVED***messages.append({ 
+***REMOVED******REMOVED***"role": "tool",
+***REMOVED******REMOVED***"content": chatCompletion[citations_field_name]
+***REMOVED***)
+***REMOVED*** response_obj = {
 ***REMOVED******REMOVED***"id": chatCompletion["id"],
 ***REMOVED******REMOVED***"model": "",
 ***REMOVED******REMOVED***"created": "",
 ***REMOVED******REMOVED***"object": "",
 ***REMOVED******REMOVED***"choices": [
 ***REMOVED******REMOVED***{
-***REMOVED******REMOVED******REMOVED***"messages": [
-***REMOVED******REMOVED******REMOVED***{
-***REMOVED******REMOVED******REMOVED******REMOVED***"role": "assistant",
-***REMOVED******REMOVED******REMOVED******REMOVED***"content": chatCompletion[response_field_name],
-***REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED***]
+***REMOVED******REMOVED******REMOVED***"messages": messages,
+***REMOVED******REMOVED******REMOVED***"history_metadata": history_metadata,
 ***REMOVED******REMOVED***
-***REMOVED******REMOVED***],
-***REMOVED******REMOVED***"history_metadata": history_metadata,
+***REMOVED******REMOVED***]
 ***REMOVED***
 ***REMOVED***return response_obj
 ***REMOVED***except Exception as e:
