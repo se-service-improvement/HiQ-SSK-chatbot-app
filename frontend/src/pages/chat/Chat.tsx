@@ -249,6 +249,9 @@ const Chat = () => {
 ***REMOVED******REMOVED***else if (typeof result.error === "string") {
 ***REMOVED******REMOVED******REMOVED***errorMessage = result.error;
 ***REMOVED******REMOVED***
+
+***REMOVED******REMOVED***errorMessage = parseErrorMessage(errorMessage);
+
 ***REMOVED******REMOVED***let errorChatMsg: ChatMessage = {
 ***REMOVED******REMOVED******REMOVED***id: uuid(),
 ***REMOVED******REMOVED******REMOVED***role: ERROR,
@@ -308,11 +311,12 @@ const Chat = () => {
 ***REMOVED******REMOVED***setMessages(request.messages)
 ***REMOVED***
 ***REMOVED***let result = {} as ChatResponse;
+***REMOVED***var errorResponseMessage = "Please try again. If the problem persists, please contact the site administrator.";
 ***REMOVED***try {
 ***REMOVED******REMOVED***const response = conversationId ? await historyGenerate(request, abortController.signal, conversationId) : await historyGenerate(request, abortController.signal);
 ***REMOVED******REMOVED***if (!response?.ok) {
 ***REMOVED******REMOVED***const responseJson = await response.json();
-***REMOVED******REMOVED***var errorResponseMessage = responseJson.error === undefined ? "Please try again. If the problem persists, please contact the site administrator." : responseJson.error;
+***REMOVED******REMOVED***errorResponseMessage = responseJson.error === undefined ? errorResponseMessage : parseErrorMessage(responseJson.error);
 ***REMOVED******REMOVED***let errorChatMsg: ChatMessage = {
 ***REMOVED******REMOVED******REMOVED***id: uuid(),
 ***REMOVED******REMOVED******REMOVED***role: ERROR,
@@ -435,6 +439,9 @@ const Chat = () => {
 ***REMOVED******REMOVED***else if (typeof result.error === "string") {
 ***REMOVED******REMOVED******REMOVED***errorMessage = result.error;
 ***REMOVED******REMOVED***
+
+***REMOVED******REMOVED***errorMessage = parseErrorMessage(errorMessage);
+
 ***REMOVED******REMOVED***let errorChatMsg: ChatMessage = {
 ***REMOVED******REMOVED******REMOVED***id: uuid(),
 ***REMOVED******REMOVED******REMOVED***role: ERROR,
@@ -515,6 +522,27 @@ const Chat = () => {
 ***REMOVED***
 ***REMOVED***
 ***REMOVED***setClearingChat(false)
+***REMOVED***;
+
+***REMOVED***const parseErrorMessage = (errorMessage: string) => {
+***REMOVED***let errorCodeMessage = errorMessage.substring(0, errorMessage.indexOf("-") + 1);
+***REMOVED***const innerErrorCue = "{\\'error\\': {\\'message\\': ";
+***REMOVED***if (errorMessage.includes(innerErrorCue))
+***REMOVED***{
+***REMOVED******REMOVED***try {
+***REMOVED******REMOVED***let innerErrorString = errorMessage.substring(errorMessage.indexOf(innerErrorCue));
+***REMOVED******REMOVED***if (innerErrorString.endsWith("'}}")) {
+***REMOVED******REMOVED******REMOVED***innerErrorString = innerErrorString.substring(0, innerErrorString.length - 3);
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***innerErrorString = innerErrorString.replaceAll("\\'", "'")
+***REMOVED******REMOVED***let newErrorMessage = errorCodeMessage + " " + innerErrorString;
+***REMOVED******REMOVED***errorMessage = newErrorMessage;
+
+***REMOVED*** catch (e) {
+***REMOVED******REMOVED***console.error("Error parsing inner error message: ", e);
+***REMOVED***
+***REMOVED***
+***REMOVED***return errorMessage;
 ***REMOVED***;
 
 ***REMOVED***const newChat = () => {

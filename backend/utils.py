@@ -168,7 +168,7 @@ def format_pf_non_streaming_response(
 ***REMOVED******REMOVED***"role": "tool",
 ***REMOVED******REMOVED***"content": chatCompletion[citations_field_name]
 ***REMOVED***)
-***REMOVED*** response_obj = {
+***REMOVED***response_obj = {
 ***REMOVED******REMOVED***"id": chatCompletion["id"],
 ***REMOVED******REMOVED***"model": "",
 ***REMOVED******REMOVED***"created": "",
