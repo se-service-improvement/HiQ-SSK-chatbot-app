@@ -1,75 +1,77 @@
-import { useState } from "react";
-import { Stack, TextField } from "@fluentui/react";
-import { SendRegular } from "@fluentui/react-icons";
-import Send from "../../assets/Send.svg";
-import styles from "./QuestionInput.module.css";
+import { useState } from 'react'
+import { Stack, TextField } from '@fluentui/react'
+import { SendRegular } from '@fluentui/react-icons'
+
+import Send from '../../assets/Send.svg'
+
+import styles from './QuestionInput.module.css'
 
 interface Props {
-***REMOVED***onSend: (question: string, id?: string) => void;
-***REMOVED***disabled: boolean;
-***REMOVED***placeholder?: string;
-***REMOVED***clearOnSend?: boolean;
-***REMOVED***conversationId?: string;
+  onSend: (question: string, id?: string) => void
+  disabled: boolean
+  placeholder?: string
+  clearOnSend?: boolean
+  conversationId?: string
 }
 
 export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conversationId }: Props) => {
-***REMOVED***const [question, setQuestion] = useState<string>("");
+  const [question, setQuestion] = useState<string>('')
 
-***REMOVED***const sendQuestion = () => {
+  const sendQuestion = () => {
 ***REMOVED***if (disabled || !question.trim()) {
-***REMOVED******REMOVED***return;
+***REMOVED***  return
 ***REMOVED***
 
-***REMOVED***if(conversationId){
-***REMOVED******REMOVED***onSend(question, conversationId);
-***REMOVED***else{
-***REMOVED******REMOVED***onSend(question);
+***REMOVED***if (conversationId) {
+***REMOVED***  onSend(question, conversationId)
+***REMOVED***
+***REMOVED***  onSend(question)
 ***REMOVED***
 
 ***REMOVED***if (clearOnSend) {
-***REMOVED******REMOVED***setQuestion("");
+***REMOVED***  setQuestion('')
 ***REMOVED***
-***REMOVED***;
+  }
 
-***REMOVED***const onEnterPress = (ev: React.KeyboardEvent<Element>) => {
-***REMOVED***if (ev.key === "Enter" && !ev.shiftKey && !(ev.nativeEvent?.isComposing === true)) {
-***REMOVED******REMOVED***ev.preventDefault();
-***REMOVED******REMOVED***sendQuestion();
+  const onEnterPress = (ev: React.KeyboardEvent<Element>) => {
+***REMOVED***if (ev.key === 'Enter' && !ev.shiftKey && !(ev.nativeEvent?.isComposing === true)) {
+***REMOVED***  ev.preventDefault()
+***REMOVED***  sendQuestion()
 ***REMOVED***
-***REMOVED***;
+  }
 
-***REMOVED***const onQuestionChange = (_ev: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, newValue?: string) => {
-***REMOVED***setQuestion(newValue || "");
-***REMOVED***;
+  const onQuestionChange = (_ev: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, newValue?: string) => {
+***REMOVED***setQuestion(newValue || '')
+  }
 
-***REMOVED***const sendQuestionDisabled = disabled || !question.trim();
+  const sendQuestionDisabled = disabled || !question.trim()
 
-***REMOVED***return (
+  return (
 ***REMOVED***<Stack horizontal className={styles.questionInputContainer}>
-***REMOVED******REMOVED***<TextField
-***REMOVED******REMOVED***className={styles.questionInputTextArea}
-***REMOVED******REMOVED***placeholder={placeholder}
-***REMOVED******REMOVED***multiline
-***REMOVED******REMOVED***resizable={false}
-***REMOVED******REMOVED***borderless
-***REMOVED******REMOVED***value={question}
-***REMOVED******REMOVED***onChange={onQuestionChange}
-***REMOVED******REMOVED***onKeyDown={onEnterPress}
-***REMOVED******REMOVED***/>
-***REMOVED******REMOVED***<div className={styles.questionInputSendButtonContainer} 
-***REMOVED******REMOVED***role="button" 
-***REMOVED******REMOVED***tabIndex={0}
-***REMOVED******REMOVED***aria-label="Ask question button"
-***REMOVED******REMOVED***onClick={sendQuestion}
-***REMOVED******REMOVED***onKeyDown={e => e.key === "Enter" || e.key === " " ? sendQuestion() : null}
-***REMOVED******REMOVED***>
-***REMOVED******REMOVED***{ sendQuestionDisabled ? 
-***REMOVED******REMOVED******REMOVED***<SendRegular className={styles.questionInputSendButtonDisabled}/>
-***REMOVED******REMOVED******REMOVED***:
-***REMOVED******REMOVED******REMOVED***<img src={Send} className={styles.questionInputSendButton}/>
-***REMOVED******REMOVED***
-***REMOVED******REMOVED***</div>
-***REMOVED******REMOVED***<div className={styles.questionInputBottomBorder} />
+***REMOVED***  <TextField
+***REMOVED***className={styles.questionInputTextArea}
+***REMOVED***placeholder={placeholder}
+***REMOVED***multiline
+***REMOVED***resizable={false}
+***REMOVED***borderless
+***REMOVED***value={question}
+***REMOVED***onChange={onQuestionChange}
+***REMOVED***onKeyDown={onEnterPress}
+***REMOVED***  />
+***REMOVED***  <div
+***REMOVED***className={styles.questionInputSendButtonContainer}
+***REMOVED***role="button"
+***REMOVED***tabIndex={0}
+***REMOVED***aria-label="Ask question button"
+***REMOVED***onClick={sendQuestion}
+***REMOVED***onKeyDown={e => (e.key === 'Enter' || e.key === ' ' ? sendQuestion() : null)}>
+***REMOVED***{sendQuestionDisabled ? (
+***REMOVED***  <SendRegular className={styles.questionInputSendButtonDisabled} />
+***REMOVED***) : (
+***REMOVED***  <img src={Send} className={styles.questionInputSendButton} alt="Send Button" />
+***REMOVED***)}
+***REMOVED***  </div>
+***REMOVED***  <div className={styles.questionInputBottomBorder} />
 ***REMOVED***</Stack>
-***REMOVED***);
-};
+  )
+}

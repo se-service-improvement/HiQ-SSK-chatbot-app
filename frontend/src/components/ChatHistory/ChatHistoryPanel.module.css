@@ -1,79 +1,79 @@
 .container {
-***REMOVED***max-height: calc(100vh - 100px);
-***REMOVED***width: 300px;
+  max-height: calc(100vh - 100px);
+  width: 300px;
 }
 
 .listContainer {
-***REMOVED***overflow: hidden auto;
-***REMOVED***max-height: calc(90vh - 105px);
+  overflow: hidden auto;
+  max-height: calc(90vh - 105px);
 }
 
 .itemCell {
-***REMOVED***max-width: 270px;
-***REMOVED***min-height: 32px;
-***REMOVED***cursor: pointer;
-***REMOVED***padding-left: 15px;
-***REMOVED***padding-right: 5px;
-***REMOVED***padding-top: 5px;
-***REMOVED***padding-bottom: 5px;
-***REMOVED***box-sizing: border-box;
-***REMOVED***border-radius: 5px;
-***REMOVED***display: flex;
+  max-width: 270px;
+  min-height: 32px;
+  cursor: pointer;
+  padding-left: 15px;
+  padding-right: 5px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  box-sizing: border-box;
+  border-radius: 5px;
+  display: flex;
 }
 
 .itemCell:hover {
-***REMOVED***background: #E6E6E6;
+  background: #e6e6e6;
 }
 
 .itemButton {
-***REMOVED***display: flex;
-***REMOVED***justify-content: center;
-***REMOVED***align-items: center;
-***REMOVED***width: 28px;
-***REMOVED***height: 28px;
-***REMOVED***border: 1px solid #d1d1d1;
-***REMOVED***border-radius: 5px;
-***REMOVED***background-color: white;
-***REMOVED***margin: auto 2.5px;
-***REMOVED***cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid #d1d1d1;
+  border-radius: 5px;
+  background-color: white;
+  margin: auto 2.5px;
+  cursor: pointer;
 }
 
 .itemButton:hover {
-***REMOVED***background-color: #E6E6E6;
+  background-color: #e6e6e6;
 }
 
 .chatGroup {
-***REMOVED***margin: auto 5px;
-***REMOVED***width: 100%;
+  margin: auto 5px;
+  width: 100%;
 }
 
 .spinnerContainer {
-***REMOVED***display: flex;
-***REMOVED***justify-content: center;
-***REMOVED***align-items: center;
-***REMOVED***height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50px;
 }
 
 .chatList {
-***REMOVED***width: 100%;
+  width: 100%;
 }
 
 .chatMonth {
-***REMOVED***font-size: 14px;
-***REMOVED***font-weight: 600;
-***REMOVED***margin-bottom: 5px;
-***REMOVED***padding-left: 15px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 5px;
+  padding-left: 15px;
 }
 
 .chatTitle {
-***REMOVED***width: 80%;
-***REMOVED***overflow: hidden;
-***REMOVED***white-space: nowrap;
-***REMOVED***text-overflow: ellipsis;
+  width: 80%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 @media (max-width: 480px) {
-***REMOVED***.container {
-***REMOVED***width: 100%; 
-***REMOVED***
+  .container {
+***REMOVED***width: 100%;
+  }
 }

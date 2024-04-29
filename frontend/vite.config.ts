@@ -1,18 +1,18 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-***REMOVED***plugins: [react()],
-***REMOVED***build: {
-***REMOVED***outDir: "../static",
+  plugins: [react()],
+  build: {
+***REMOVED***outDir: '../static',
 ***REMOVED***emptyOutDir: true,
 ***REMOVED***sourcemap: true
-***REMOVED***,
-***REMOVED***server: {
+  },
+  server: {
 ***REMOVED***proxy: {
-***REMOVED******REMOVED***"/ask": "http://localhost:5000",
-***REMOVED******REMOVED***"/chat": "http://localhost:5000"
+***REMOVED***  '/ask': 'http://localhost:5000',
+***REMOVED***  '/chat': 'http://localhost:5000'
 ***REMOVED***
-***REMOVED***
-});
+  }
+})

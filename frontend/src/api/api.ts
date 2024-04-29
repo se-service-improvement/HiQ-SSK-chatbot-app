@@ -1,341 +1,354 @@
-import { UserInfo, ConversationRequest, Conversation, ChatMessage, CosmosDBHealth, CosmosDBStatus } from "./models";
-import { chatHistorySampleData } from "../constants/chatHistory";
+import { chatHistorySampleData } from '../constants/chatHistory'
+
+import { ChatMessage, Conversation, ConversationRequest, CosmosDBHealth, CosmosDBStatus, UserInfo } from './models'
 
 export async function conversationApi(options: ConversationRequest, abortSignal: AbortSignal): Promise<Response> {
-***REMOVED***const response = await fetch("/conversation", {
-***REMOVED***method: "POST",
+  const response = await fetch('/conversation', {
+***REMOVED***method: 'POST',
 ***REMOVED***headers: {
-***REMOVED******REMOVED***"Content-Type": "application/json"
+***REMOVED***  'Content-Type': 'application/json'
 ***REMOVED***,
 ***REMOVED***body: JSON.stringify({
-***REMOVED******REMOVED***messages: options.messages
+***REMOVED***  messages: options.messages
 ***REMOVED***),
 ***REMOVED***signal: abortSignal
-***REMOVED***);
+  })
 
-***REMOVED***return response;
+  return response
 }
 
 export async function getUserInfo(): Promise<UserInfo[]> {
-***REMOVED***const response = await fetch('/.auth/me');
-***REMOVED***if (!response.ok) {
-***REMOVED***console.log("No identity provider found. Access to chat will be blocked.")
-***REMOVED***return [];
-***REMOVED***
+  const response = await fetch('/.auth/me')
+  if (!response.ok) {
+***REMOVED***console.log('No identity provider found. Access to chat will be blocked.')
+***REMOVED***return []
+  }
 
-***REMOVED***const payload = await response.json();
-***REMOVED***return payload;
+  const payload = await response.json()
+  return payload
 }
 
 // export const fetchChatHistoryInit = async (): Promise<Conversation[] | null> => {
 export const fetchChatHistoryInit = (): Conversation[] | null => {
-***REMOVED***// Make initial API call here
+  // Make initial API call here
 
-***REMOVED***// return null;
-***REMOVED***return chatHistorySampleData;
+  return chatHistorySampleData
 }
 
-export const historyList = async (offset=0): Promise<Conversation[] | null> => {
-***REMOVED***const response = await fetch(`/history/list?offset=${offset}`, {
-***REMOVED***method: "GET",
-***REMOVED***).then(async (res) => {
-***REMOVED***const payload = await res.json();
-***REMOVED***if (!Array.isArray(payload)) {
-***REMOVED******REMOVED***console.error("There was an issue fetching your data.");
-***REMOVED******REMOVED***return null;
-***REMOVED***
-***REMOVED***const conversations: Conversation[] = await Promise.all(payload.map(async (conv: any) => {
-***REMOVED******REMOVED***let convMessages: ChatMessage[] = [];
-***REMOVED******REMOVED***convMessages = await historyRead(conv.id)
-***REMOVED******REMOVED***.then((res) => {
-***REMOVED******REMOVED***return res
+export const historyList = async (offset = 0): Promise<Conversation[] | null> => {
+  const response = await fetch(`/history/list?offset=${offset}`, {
+***REMOVED***method: 'GET'
+  })
+***REMOVED***.then(async res => {
+***REMOVED***  const payload = await res.json()
+***REMOVED***  if (!Array.isArray(payload)) {
+***REMOVED***console.error('There was an issue fetching your data.')
+***REMOVED***return null
+  ***REMOVED***
+***REMOVED***  const conversations: Conversation[] = await Promise.all(
+***REMOVED***payload.map(async (conv: any) => {
+***REMOVED***  let convMessages: ChatMessage[] = []
+***REMOVED***  convMessages = await historyRead(conv.id)
+***REMOVED******REMOVED***.then(res => {
+***REMOVED******REMOVED***  return res
 ***REMOVED***)
-***REMOVED******REMOVED***.catch((err) => {
-***REMOVED******REMOVED***console.error("error fetching messages: ", err)
-***REMOVED******REMOVED***return []
+***REMOVED******REMOVED***.catch(err => {
+***REMOVED******REMOVED***  console.error('error fetching messages: ', err)
+***REMOVED******REMOVED***  return []
 ***REMOVED***)
-***REMOVED******REMOVED***const conversation: Conversation = {
+***REMOVED***  const conversation: Conversation = {
 ***REMOVED******REMOVED***id: conv.id,
 ***REMOVED******REMOVED***title: conv.title,
 ***REMOVED******REMOVED***date: conv.createdAt,
 ***REMOVED******REMOVED***messages: convMessages
-***REMOVED***;
-***REMOVED******REMOVED***return conversation;
-***REMOVED***));
-***REMOVED***return conversations;
-***REMOVED***).catch((err) => {
-***REMOVED***console.error("There was an issue fetching your data.");
-***REMOVED***return null
+  ***REMOVED***
+***REMOVED***  return conversation
+***REMOVED***)
+***REMOVED***  )
+***REMOVED***  return conversations
+***REMOVED***)
+***REMOVED***.catch(_err => {
+***REMOVED***  console.error('There was an issue fetching your data.')
+***REMOVED***  return null
 ***REMOVED***)
 
-***REMOVED***return response
+  return response
 }
 
 export const historyRead = async (convId: string): Promise<ChatMessage[]> => {
-***REMOVED***const response = await fetch("/history/read", {
-***REMOVED***method: "POST",
+  const response = await fetch('/history/read', {
+***REMOVED***method: 'POST',
 ***REMOVED***body: JSON.stringify({
-***REMOVED******REMOVED***conversation_id: convId
+***REMOVED***  conversation_id: convId
 ***REMOVED***),
 ***REMOVED***headers: {
-***REMOVED******REMOVED***"Content-Type": "application/json"
-***REMOVED***,
-***REMOVED***)
-***REMOVED***.then(async (res) => {
-***REMOVED***if(!res){
-***REMOVED******REMOVED***return []
+***REMOVED***  'Content-Type': 'application/json'
 ***REMOVED***
-***REMOVED***const payload = await res.json();
-***REMOVED***let messages: ChatMessage[] = [];
-***REMOVED***if(payload?.messages){
-***REMOVED******REMOVED***payload.messages.forEach((msg: any) => {
-***REMOVED******REMOVED***const message: ChatMessage = {
-***REMOVED******REMOVED******REMOVED***id: msg.id,
-***REMOVED******REMOVED******REMOVED***role: msg.role,
-***REMOVED******REMOVED******REMOVED***date: msg.createdAt,
-***REMOVED******REMOVED******REMOVED***content: msg.content,
-***REMOVED******REMOVED******REMOVED***feedback: msg.feedback ?? undefined
-***REMOVED******REMOVED***
-***REMOVED******REMOVED***messages.push(message)
-***REMOVED***);
-***REMOVED***
-***REMOVED***return messages;
-***REMOVED***).catch((err) => {
-***REMOVED***console.error("There was an issue fetching your data.");
+  })
+***REMOVED***.then(async res => {
+***REMOVED***  if (!res) {
 ***REMOVED***return []
+  ***REMOVED***
+***REMOVED***  const payload = await res.json()
+***REMOVED***  const messages: ChatMessage[] = []
+***REMOVED***  if (payload?.messages) {
+***REMOVED***payload.messages.forEach((msg: any) => {
+***REMOVED***  const message: ChatMessage = {
+***REMOVED******REMOVED***id: msg.id,
+***REMOVED******REMOVED***role: msg.role,
+***REMOVED******REMOVED***date: msg.createdAt,
+***REMOVED******REMOVED***content: msg.content,
+***REMOVED******REMOVED***feedback: msg.feedback ?? undefined
+  ***REMOVED***
+***REMOVED***  messages.push(message)
 ***REMOVED***)
-***REMOVED***return response
+  ***REMOVED***
+***REMOVED***  return messages
+***REMOVED***)
+***REMOVED***.catch(_err => {
+***REMOVED***  console.error('There was an issue fetching your data.')
+***REMOVED***  return []
+***REMOVED***)
+  return response
 }
 
-export const historyGenerate = async (options: ConversationRequest, abortSignal: AbortSignal, convId?: string): Promise<Response> => {
-***REMOVED***let body;
-***REMOVED***if(convId){
+export const historyGenerate = async (
+  options: ConversationRequest,
+  abortSignal: AbortSignal,
+  convId?: string
+): Promise<Response> => {
+  let body
+  if (convId) {
 ***REMOVED***body = JSON.stringify({
-***REMOVED******REMOVED***conversation_id: convId,
-***REMOVED******REMOVED***messages: options.messages
+***REMOVED***  conversation_id: convId,
+***REMOVED***  messages: options.messages
 ***REMOVED***)
-***REMOVED***else{
+  } else {
 ***REMOVED***body = JSON.stringify({
-***REMOVED******REMOVED***messages: options.messages
+***REMOVED***  messages: options.messages
 ***REMOVED***)
-***REMOVED***
-***REMOVED***const response = await fetch("/history/generate", {
-***REMOVED***method: "POST",
+  }
+  const response = await fetch('/history/generate', {
+***REMOVED***method: 'POST',
 ***REMOVED***headers: {
-***REMOVED******REMOVED***"Content-Type": "application/json"
+***REMOVED***  'Content-Type': 'application/json'
 ***REMOVED***,
 ***REMOVED***body: body,
 ***REMOVED***signal: abortSignal
-***REMOVED***).then((res) => {
-***REMOVED***return res
+  })
+***REMOVED***.then(res => {
+***REMOVED***  return res
 ***REMOVED***)
-***REMOVED***.catch((err) => {
-***REMOVED***console.error("There was an issue fetching your data.");
-***REMOVED***return new Response;
+***REMOVED***.catch(_err => {
+***REMOVED***  console.error('There was an issue fetching your data.')
+***REMOVED***  return new Response()
 ***REMOVED***)
-***REMOVED***return response
+  return response
 }
 
 export const historyUpdate = async (messages: ChatMessage[], convId: string): Promise<Response> => {
-***REMOVED***const response = await fetch("/history/update", {
-***REMOVED***method: "POST",
+  const response = await fetch('/history/update', {
+***REMOVED***method: 'POST',
 ***REMOVED***body: JSON.stringify({
-***REMOVED******REMOVED***conversation_id: convId,
-***REMOVED******REMOVED***messages: messages
+***REMOVED***  conversation_id: convId,
+***REMOVED***  messages: messages
 ***REMOVED***),
 ***REMOVED***headers: {
-***REMOVED******REMOVED***"Content-Type": "application/json"
-***REMOVED***,
-***REMOVED***).then(async (res) => {
-***REMOVED***return res
-***REMOVED***)
-***REMOVED***.catch((err) => {
-***REMOVED***console.error("There was an issue fetching your data.");
-***REMOVED***let errRes: Response = {
-***REMOVED******REMOVED***...new Response,
-***REMOVED******REMOVED***ok: false,
-***REMOVED******REMOVED***status: 500,
+***REMOVED***  'Content-Type': 'application/json'
 ***REMOVED***
-***REMOVED***return errRes;
+  })
+***REMOVED***.then(async res => {
+***REMOVED***  return res
 ***REMOVED***)
-***REMOVED***return response
+***REMOVED***.catch(_err => {
+***REMOVED***  console.error('There was an issue fetching your data.')
+***REMOVED***  const errRes: Response = {
+***REMOVED***...new Response(),
+***REMOVED***ok: false,
+***REMOVED***status: 500
+  ***REMOVED***
+***REMOVED***  return errRes
+***REMOVED***)
+  return response
 }
 
-export const historyDelete = async (convId: string) : Promise<Response> => {
-***REMOVED***const response = await fetch("/history/delete", {
-***REMOVED***method: "DELETE",
+export const historyDelete = async (convId: string): Promise<Response> => {
+  const response = await fetch('/history/delete', {
+***REMOVED***method: 'DELETE',
 ***REMOVED***body: JSON.stringify({
-***REMOVED******REMOVED***conversation_id: convId,
+***REMOVED***  conversation_id: convId
 ***REMOVED***),
 ***REMOVED***headers: {
-***REMOVED******REMOVED***"Content-Type": "application/json"
-***REMOVED***,
-***REMOVED***)
-***REMOVED***.then((res) => {
-***REMOVED***return res
-***REMOVED***)
-***REMOVED***.catch((err) => {
-***REMOVED***console.error("There was an issue fetching your data.");
-***REMOVED***let errRes: Response = {
-***REMOVED******REMOVED***...new Response,
-***REMOVED******REMOVED***ok: false,
-***REMOVED******REMOVED***status: 500,
+***REMOVED***  'Content-Type': 'application/json'
 ***REMOVED***
-***REMOVED***return errRes;
+  })
+***REMOVED***.then(res => {
+***REMOVED***  return res
 ***REMOVED***)
-***REMOVED***return response;
+***REMOVED***.catch(_err => {
+***REMOVED***  console.error('There was an issue fetching your data.')
+***REMOVED***  const errRes: Response = {
+***REMOVED***...new Response(),
+***REMOVED***ok: false,
+***REMOVED***status: 500
+  ***REMOVED***
+***REMOVED***  return errRes
+***REMOVED***)
+  return response
 }
 
-export const historyDeleteAll = async () : Promise<Response> => {
-***REMOVED***const response = await fetch("/history/delete_all", {
-***REMOVED***method: "DELETE",
+export const historyDeleteAll = async (): Promise<Response> => {
+  const response = await fetch('/history/delete_all', {
+***REMOVED***method: 'DELETE',
 ***REMOVED***body: JSON.stringify({}),
 ***REMOVED***headers: {
-***REMOVED******REMOVED***"Content-Type": "application/json"
-***REMOVED***,
-***REMOVED***)
-***REMOVED***.then((res) => {
-***REMOVED***return res
-***REMOVED***)
-***REMOVED***.catch((err) => {
-***REMOVED***console.error("There was an issue fetching your data.");
-***REMOVED***let errRes: Response = {
-***REMOVED******REMOVED***...new Response,
-***REMOVED******REMOVED***ok: false,
-***REMOVED******REMOVED***status: 500,
+***REMOVED***  'Content-Type': 'application/json'
 ***REMOVED***
-***REMOVED***return errRes;
+  })
+***REMOVED***.then(res => {
+***REMOVED***  return res
 ***REMOVED***)
-***REMOVED***return response;
+***REMOVED***.catch(_err => {
+***REMOVED***  console.error('There was an issue fetching your data.')
+***REMOVED***  const errRes: Response = {
+***REMOVED***...new Response(),
+***REMOVED***ok: false,
+***REMOVED***status: 500
+  ***REMOVED***
+***REMOVED***  return errRes
+***REMOVED***)
+  return response
 }
 
-export const historyClear = async (convId: string) : Promise<Response> => {
-***REMOVED***const response = await fetch("/history/clear", {
-***REMOVED***method: "POST",
+export const historyClear = async (convId: string): Promise<Response> => {
+  const response = await fetch('/history/clear', {
+***REMOVED***method: 'POST',
 ***REMOVED***body: JSON.stringify({
-***REMOVED******REMOVED***conversation_id: convId,
+***REMOVED***  conversation_id: convId
 ***REMOVED***),
 ***REMOVED***headers: {
-***REMOVED******REMOVED***"Content-Type": "application/json"
-***REMOVED***,
-***REMOVED***)
-***REMOVED***.then((res) => {
-***REMOVED***return res
-***REMOVED***)
-***REMOVED***.catch((err) => {
-***REMOVED***console.error("There was an issue fetching your data.");
-***REMOVED***let errRes: Response = {
-***REMOVED******REMOVED***...new Response,
-***REMOVED******REMOVED***ok: false,
-***REMOVED******REMOVED***status: 500,
+***REMOVED***  'Content-Type': 'application/json'
 ***REMOVED***
-***REMOVED***return errRes;
+  })
+***REMOVED***.then(res => {
+***REMOVED***  return res
 ***REMOVED***)
-***REMOVED***return response;
+***REMOVED***.catch(_err => {
+***REMOVED***  console.error('There was an issue fetching your data.')
+***REMOVED***  const errRes: Response = {
+***REMOVED***...new Response(),
+***REMOVED***ok: false,
+***REMOVED***status: 500
+  ***REMOVED***
+***REMOVED***  return errRes
+***REMOVED***)
+  return response
 }
 
-export const historyRename = async (convId: string, title: string) : Promise<Response> => {
-***REMOVED***const response = await fetch("/history/rename", {
-***REMOVED***method: "POST",
+export const historyRename = async (convId: string, title: string): Promise<Response> => {
+  const response = await fetch('/history/rename', {
+***REMOVED***method: 'POST',
 ***REMOVED***body: JSON.stringify({
-***REMOVED******REMOVED***conversation_id: convId,
-***REMOVED******REMOVED***title: title
+***REMOVED***  conversation_id: convId,
+***REMOVED***  title: title
 ***REMOVED***),
 ***REMOVED***headers: {
-***REMOVED******REMOVED***"Content-Type": "application/json"
-***REMOVED***,
-***REMOVED***)
-***REMOVED***.then((res) => {
-***REMOVED***return res
-***REMOVED***)
-***REMOVED***.catch((err) => {
-***REMOVED***console.error("There was an issue fetching your data.");
-***REMOVED***let errRes: Response = {
-***REMOVED******REMOVED***...new Response,
-***REMOVED******REMOVED***ok: false,
-***REMOVED******REMOVED***status: 500,
+***REMOVED***  'Content-Type': 'application/json'
 ***REMOVED***
-***REMOVED***return errRes;
+  })
+***REMOVED***.then(res => {
+***REMOVED***  return res
 ***REMOVED***)
-***REMOVED***return response;
+***REMOVED***.catch(_err => {
+***REMOVED***  console.error('There was an issue fetching your data.')
+***REMOVED***  const errRes: Response = {
+***REMOVED***...new Response(),
+***REMOVED***ok: false,
+***REMOVED***status: 500
+  ***REMOVED***
+***REMOVED***  return errRes
+***REMOVED***)
+  return response
 }
 
 export const historyEnsure = async (): Promise<CosmosDBHealth> => {
-***REMOVED***const response = await fetch("/history/ensure", {
-***REMOVED***method: "GET",
-***REMOVED***)
+  const response = await fetch('/history/ensure', {
+***REMOVED***method: 'GET'
+  })
 ***REMOVED***.then(async res => {
-***REMOVED***let respJson = await res.json();
-***REMOVED***let formattedResponse;
-***REMOVED***if(respJson.message){
-***REMOVED******REMOVED***formattedResponse = CosmosDBStatus.Working
-***REMOVED***else{
-***REMOVED******REMOVED***if(res.status === 500){
-***REMOVED******REMOVED***formattedResponse = CosmosDBStatus.NotWorking
-***REMOVED***else if(res.status === 401){
-***REMOVED******REMOVED***formattedResponse = CosmosDBStatus.InvalidCredentials***REMOVED***
-***REMOVED***else if(res.status === 422){ 
-***REMOVED******REMOVED***formattedResponse = respJson.error***REMOVED***
-***REMOVED***else{
-***REMOVED******REMOVED***formattedResponse = CosmosDBStatus.NotConfigured
+***REMOVED***  const respJson = await res.json()
+***REMOVED***  let formattedResponse
+***REMOVED***  if (respJson.message) {
+***REMOVED***formattedResponse = CosmosDBStatus.Working
+  ***REMOVED***
+***REMOVED***if (res.status === 500) {
+***REMOVED***  formattedResponse = CosmosDBStatus.NotWorking
+***REMOVED*** else if (res.status === 401) {
+***REMOVED***  formattedResponse = CosmosDBStatus.InvalidCredentials
+***REMOVED*** else if (res.status === 422) {
+***REMOVED***  formattedResponse = respJson.error
 ***REMOVED***
+***REMOVED***  formattedResponse = CosmosDBStatus.NotConfigured
 ***REMOVED***
-***REMOVED***if(!res.ok){
-***REMOVED******REMOVED***return {
-***REMOVED******REMOVED***cosmosDB: false,
-***REMOVED******REMOVED***status: formattedResponse
-***REMOVED***
-***REMOVED***else{
-***REMOVED******REMOVED***return {
-***REMOVED******REMOVED***cosmosDB: true,
-***REMOVED******REMOVED***status: formattedResponse
-***REMOVED***
-***REMOVED***
-***REMOVED***)
-***REMOVED***.catch((err) => {
-***REMOVED***console.error("There was an issue fetching your data.");
+  ***REMOVED***
+***REMOVED***  if (!res.ok) {
 ***REMOVED***return {
-***REMOVED******REMOVED***cosmosDB: false,
-***REMOVED******REMOVED***status: err
+***REMOVED***  cosmosDB: false,
+***REMOVED***  status: formattedResponse
 ***REMOVED***
+  ***REMOVED***
+***REMOVED***return {
+***REMOVED***  cosmosDB: true,
+***REMOVED***  status: formattedResponse
+***REMOVED***
+  ***REMOVED***
 ***REMOVED***)
-***REMOVED***return response;
+***REMOVED***.catch(err => {
+***REMOVED***  console.error('There was an issue fetching your data.')
+***REMOVED***  return {
+***REMOVED***cosmosDB: false,
+***REMOVED***status: err
+  ***REMOVED***
+***REMOVED***)
+  return response
 }
 
 export const frontendSettings = async (): Promise<Response | null> => {
-***REMOVED***const response = await fetch("/frontend_settings", {
-***REMOVED***method: "GET",
-***REMOVED***).then((res) => {
-***REMOVED***return res.json()
-***REMOVED***).catch((err) => {
-***REMOVED***console.error("There was an issue fetching your data.");
-***REMOVED***return null
+  const response = await fetch('/frontend_settings', {
+***REMOVED***method: 'GET'
+  })
+***REMOVED***.then(res => {
+***REMOVED***  return res.json()
+***REMOVED***)
+***REMOVED***.catch(_err => {
+***REMOVED***  console.error('There was an issue fetching your data.')
+***REMOVED***  return null
 ***REMOVED***)
 
-***REMOVED***return response
+  return response
 }
 export const historyMessageFeedback = async (messageId: string, feedback: string): Promise<Response> => {
-***REMOVED***const response = await fetch("/history/message_feedback", {
-***REMOVED***method: "POST",
+  const response = await fetch('/history/message_feedback', {
+***REMOVED***method: 'POST',
 ***REMOVED***body: JSON.stringify({
-***REMOVED******REMOVED***message_id: messageId,
-***REMOVED******REMOVED***message_feedback: feedback
+***REMOVED***  message_id: messageId,
+***REMOVED***  message_feedback: feedback
 ***REMOVED***),
 ***REMOVED***headers: {
-***REMOVED******REMOVED***"Content-Type": "application/json"
-***REMOVED***,
-***REMOVED***)
-***REMOVED***.then((res) => {
-***REMOVED***return res
-***REMOVED***)
-***REMOVED***.catch((err) => {
-***REMOVED***console.error("There was an issue logging feedback.");
-***REMOVED***let errRes: Response = {
-***REMOVED******REMOVED***...new Response,
-***REMOVED******REMOVED***ok: false,
-***REMOVED******REMOVED***status: 500,
+***REMOVED***  'Content-Type': 'application/json'
 ***REMOVED***
-***REMOVED***return errRes;
+  })
+***REMOVED***.then(res => {
+***REMOVED***  return res
 ***REMOVED***)
-***REMOVED***return response;
+***REMOVED***.catch(_err => {
+***REMOVED***  console.error('There was an issue logging feedback.')
+***REMOVED***  const errRes: Response = {
+***REMOVED***...new Response(),
+***REMOVED***ok: false,
+***REMOVED***status: 500
+  ***REMOVED***
+***REMOVED***  return errRes
+***REMOVED***)
+  return response
 }

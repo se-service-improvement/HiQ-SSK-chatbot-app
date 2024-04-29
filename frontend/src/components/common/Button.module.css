@@ -1,47 +1,48 @@
 .shareButtonRoot {
-***REMOVED***width: 86px;
-***REMOVED***height: 32px;
-***REMOVED***border-radius: 4px;
-***REMOVED***background: radial-gradient(109.81% 107.82% at 100.1% 90.19%, #0F6CBD 33.63%, #2D87C3 70.31%, #8DDDD8 100%);
-***REMOVED***padding: 5px 12px;
-  }
-  
-  .shareButtonRoot:hover {
-***REMOVED***background: linear-gradient(135deg, #0F6CBD 0%, #2D87C3 51.04%, #8DDDD8 100%);
-  }
-  
-  .shareButtonRoot span {
-***REMOVED***font-weight: 600;
-***REMOVED***font-size: 14px;
-***REMOVED***line-height: 20px;
-***REMOVED***color: #FFFFFF;
+  width: 86px;
+  height: 32px;
+  border-radius: 4px;
+  background: radial-gradient(109.81% 107.82% at 100.1% 90.19%, #0f6cbd 33.63%, #2d87c3 70.31%, #8dddd8 100%);
+  padding: 5px 12px;
+}
+
+.shareButtonRoot:hover {
+  background: linear-gradient(135deg, #0f6cbd 0%, #2d87c3 51.04%, #8dddd8 100%);
+}
+
+.shareButtonRoot span {
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  color: #ffffff;
+}
+
+.shareButtonRoot i,
+.shareButtonRoot:hover i {
+  color: #ffffff !important;
+}
+
+.historyButtonRoot {
+  width: 180px;
+  border: 1px solid #d1d1d1;
+}
+
+.historyButtonRoot:hover {
+  border: 1px solid #d1d1d1;
+}
+
+.historyButtonRoot:active {
+  border: 1px solid #d1d1d1;
+}
+
+@media (max-width: 480px) {
+  .shareButtonRoot {
+***REMOVED***width: auto;
+***REMOVED***padding: 5px 8px;
   }
 
-  .shareButtonRoot i, .shareButtonRoot:hover i {
-***REMOVED***color: #FFFFFF !important;
-  }
-  
   .historyButtonRoot {
-***REMOVED***width: 180px;
-***REMOVED***border: 1px solid #D1D1D1;
+***REMOVED***width: auto;
+***REMOVED***padding: 0 8px;
   }
-
-  .historyButtonRoot:hover {
-***REMOVED***border: 1px solid #D1D1D1;
-  }
-
-  .historyButtonRoot:active {
-***REMOVED***border: 1px solid #D1D1D1;
-  }
-
-  @media (max-width: 480px) {
-***REMOVED***.shareButtonRoot {
-***REMOVED***  width: auto; 
-***REMOVED***  padding: 5px 8px; 
-***REMOVED***
-
-***REMOVED***.historyButtonRoot {
-***REMOVED***  width: auto;
-***REMOVED***  padding: 0 8px  
-***REMOVED***
-  }
+}

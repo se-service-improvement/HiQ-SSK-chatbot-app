@@ -1,21 +1,29 @@
 * {
-***REMOVED***box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 html,
 body {
-***REMOVED***height: 100%;
-***REMOVED***margin: 0;
-***REMOVED***padding: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 html {
-***REMOVED***background: #f2f2f2;
-***REMOVED***font-family: "Segoe UI", "Segoe UI Web (West European)", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
-***REMOVED***-webkit-font-smoothing: antialiased;
-***REMOVED***-moz-osx-font-smoothing: grayscale;
+  background: #f2f2f2;
+  font-family:
+***REMOVED***'Segoe UI',
+***REMOVED***'Segoe UI Web (West European)',
+***REMOVED***'Segoe UI',
+***REMOVED***-apple-system,
+***REMOVED***BlinkMacSystemFont,
+***REMOVED***Roboto,
+***REMOVED***'Helvetica Neue',
+***REMOVED***sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #root {
-***REMOVED***height: 100%;
+  height: 100%;
 }

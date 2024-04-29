@@ -1,111 +1,111 @@
 .layout {
-***REMOVED***display: flex;
-***REMOVED***flex-direction: column;
-***REMOVED***height: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .header {
-***REMOVED***background-color: #f2f2f2;
+  background-color: #f2f2f2;
 }
 
 .headerContainer {
-***REMOVED***display: flex;
-***REMOVED***justify-content: left;
-***REMOVED***align-items: center;
+  display: flex;
+  justify-content: left;
+  align-items: center;
 }
 
 .headerTitleContainer {
-***REMOVED***display: flex;
-***REMOVED***align-items: center;
-***REMOVED***margin-left: 14px;
-***REMOVED***text-decoration: none;
+  display: flex;
+  align-items: center;
+  margin-left: 14px;
+  text-decoration: none;
 }
 
 .headerTitle {
-***REMOVED***font-style: normal;
-***REMOVED***font-weight: 600;
-***REMOVED***font-size: 20px;
-***REMOVED***line-height: 28px;
-***REMOVED***display: flex;
-***REMOVED***align-items: flex-end;
-***REMOVED***color: #242424;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 28px;
+  display: flex;
+  align-items: flex-end;
+  color: #242424;
 }
 
 .headerIcon {
-***REMOVED***height: 32px;
-***REMOVED***width: auto;
-***REMOVED***margin-left: 36px;
+  height: 32px;
+  width: auto;
+  margin-left: 36px;
 }
 
 .shareButtonContainer {
-***REMOVED***display: flex;
-***REMOVED***flex-direction: row;
-***REMOVED***justify-content: center;
-***REMOVED***margin-right: 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  margin-right: 20px;
 }
 
 .shareButton {
-***REMOVED***color: #FFFFFF;
+  color: #ffffff;
 }
 
 .shareButtonText {
-***REMOVED***font-style: normal;
-***REMOVED***font-weight: 600;
-***REMOVED***font-size: 14px;
-***REMOVED***line-height: 20px;
-***REMOVED***display: flex;
-***REMOVED***align-items: center;
-***REMOVED***color: #FFFFFF;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  display: flex;
+  align-items: center;
+  color: #ffffff;
 }
 
 .urlTextBox {
-***REMOVED***font-style: normal;
-***REMOVED***font-weight: 400;
-***REMOVED***font-size: 14px;
-***REMOVED***line-height: 20px;
-***REMOVED***color: #707070;
-***REMOVED***border: 1px solid #D1D1D1;
-***REMOVED***border-radius: 4px;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  color: #707070;
+  border: 1px solid #d1d1d1;
+  border-radius: 4px;
 }
 
 .copyButtonContainer {
-***REMOVED***box-sizing: border-box;
-***REMOVED***display: flex;
-***REMOVED***flex-direction: row;
-***REMOVED***justify-content: center;
-***REMOVED***align-items: center;
-***REMOVED***padding: 5px 12px;
-***REMOVED***gap: 4px;
-***REMOVED***background: #FFFFFF;
-***REMOVED***border: 1px solid #D1D1D1;
-***REMOVED***border-radius: 4px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 5px 12px;
+  gap: 4px;
+  background: #ffffff;
+  border: 1px solid #d1d1d1;
+  border-radius: 4px;
 }
 
 .copyButtonContainer:hover {
-***REMOVED***cursor: pointer;
-***REMOVED***background: #D1D1D1;
+  cursor: pointer;
+  background: #d1d1d1;
 }
 
 .copyButton {
-***REMOVED***color: #424242;
+  color: #424242;
 }
 
 .copyButtonText {
-***REMOVED***font-style: normal;
-***REMOVED***font-weight: 600;
-***REMOVED***font-size: 14px;
-***REMOVED***line-height: 20px;
-***REMOVED***display: flex;
-***REMOVED***align-items: center;
-***REMOVED***color: #242424;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  display: flex;
+  align-items: center;
+  color: #242424;
 }
 
 @media (max-width: 480px) {
-***REMOVED***.headerTitleContainer {
+  .headerTitleContainer {
 ***REMOVED***margin-left: 4px;
-***REMOVED***
+  }
 
-***REMOVED***.headerIcon {
+  .headerIcon {
 ***REMOVED***margin-left: 26px;
-***REMOVED***
+  }
 }

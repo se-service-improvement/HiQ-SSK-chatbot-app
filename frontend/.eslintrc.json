@@ -1,0 +1,94 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "extends": [
+***REMOVED***"eslint:recommended",
+***REMOVED***"plugin:@typescript-eslint/eslint-recommended",
+***REMOVED***"plugin:@typescript-eslint/recommended",
+***REMOVED***"plugin:react/jsx-runtime",
+***REMOVED***"plugin:react-hooks/recommended",
+***REMOVED***"plugin:jsx-a11y/recommended",
+***REMOVED***"prettier"
+  ],
+  "plugins": ["@typescript-eslint", "import", "simple-import-sort", "prettier"],
+  "env": {
+***REMOVED***"browser": true,
+***REMOVED***"jest": true
+  },
+  "rules": {
+***REMOVED***// "prettier/prettier": "error",
+***REMOVED***"prettier/prettier": [
+***REMOVED***  "error",
+***REMOVED***  {},
+***REMOVED***  {
+***REMOVED***"usePrettierrc": false
+  ***REMOVED***
+***REMOVED***],
+***REMOVED***"quote-props": [2, "as-needed"],
+***REMOVED***"comma-dangle": "error",
+***REMOVED***"no-console": ["warn", { "allow": ["warn", "error"] }],
+***REMOVED***"no-debugger": "error",
+***REMOVED***"react/prop-types": 0,
+***REMOVED***"import/no-extraneous-dependencies": ["error", { "devDependencies": true }],
+***REMOVED***"object-curly-newline": [
+***REMOVED***  "error",
+***REMOVED***  {
+***REMOVED***"ObjectExpression": "always",
+***REMOVED***"ObjectPattern": { "multiline": "as-needed" },
+***REMOVED***"ImportDeclaration": "never",
+***REMOVED***"ExportDeclaration": { "multiline": true, "minProperties": 3 }
+  ***REMOVED***
+***REMOVED***],
+***REMOVED***"object-curly-spacing": ["error", "as-needed", { "objectsInObjects": true }],
+***REMOVED***"no-underscore-dangle": 0,
+***REMOVED***"jsx-a11y/click-events-have-key-events": 0,
+***REMOVED***"jsx-a11y/anchor-is-valid": 0,
+***REMOVED***"no-await-in-loop": 0,
+***REMOVED***"no-unused-expressions": ["error", { "allowShortCircuit": true, "allowTernary": true }],
+***REMOVED***"arrow-parens": ["error", "as-needed"],
+***REMOVED***"no-unused-vars": "off", // Turn off the base rule and use @typescript-eslint/no-unused-vars
+***REMOVED***"@typescript-eslint/no-unused-vars": [
+***REMOVED***  "error",
+***REMOVED***  {
+***REMOVED***"argsIgnorePattern": "^_",
+***REMOVED***"varsIgnorePattern": "^_",
+***REMOVED***"ignoreRestSiblings": true,
+***REMOVED***"args": "after-used"
+  ***REMOVED***
+***REMOVED***],
+***REMOVED***"import/prefer-default-export": 0,
+***REMOVED***"react/no-find-dom-node": 0,
+***REMOVED***"no-shadow": 0,
+***REMOVED***"max-len": 0,
+***REMOVED***"consistent-return": 0,
+***REMOVED***"no-plusplus": 0,
+***REMOVED***"spaced-comment": 0,
+***REMOVED***"react/react-in-jsx-scope": 0,
+***REMOVED***"react/jsx-filename-extension": 0,
+***REMOVED***"indent": ["error", 2],
+***REMOVED***"react/jsx-indent": ["error", 2],
+***REMOVED***"react/jsx-indent-props": ["error", 2],
+***REMOVED***"@typescript-eslint/no-explicit-any": "warn",
+***REMOVED***"simple-import-sort/exports": "error",
+***REMOVED***"simple-import-sort/imports": [
+***REMOVED***  "error",
+***REMOVED***  {
+***REMOVED***"groups": [
+***REMOVED***  // Packages `react` related packages come first.
+***REMOVED***  ["^react", "^@?\\w"],
+***REMOVED***  // Internal packages.
+***REMOVED***  ["^(@|components)(/.*|$)"],
+***REMOVED***  // Side effect imports.
+***REMOVED***  ["^\\u0000"],
+***REMOVED***  // Parent imports. Put `..` last.
+***REMOVED***  ["^\\.\\.(?!/?$)", "^\\.\\./?$"],
+***REMOVED***  // Other relative imports. Put same-folder imports and `.` last.
+***REMOVED***  ["^\\./(?=.*/)(?!/?$)", "^\\.(?!/?$)", "^\\./?$"],
+***REMOVED***  // Style imports.
+***REMOVED***  ["^.+\\.?(css)$"]
+***REMOVED***]
+  ***REMOVED***
+***REMOVED***]
+  },
+  "ignorePatterns": ["node_modules/", "build/", "dist/", "public/", "*.config.ts"]
+}

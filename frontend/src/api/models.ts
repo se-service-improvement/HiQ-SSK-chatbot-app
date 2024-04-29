@@ -1,135 +1,135 @@
 export type AskResponse = {
-***REMOVED***answer: string;
-***REMOVED***citations: Citation[];
-***REMOVED***error?: string;
-***REMOVED***message_id?: string;
-***REMOVED***feedback?: Feedback;
-};
+  answer: string
+  citations: Citation[]
+  error?: string
+  message_id?: string
+  feedback?: Feedback
+}
 
 export type Citation = {
-***REMOVED***part_index?: number;
-***REMOVED***content: string;
-***REMOVED***id: string;
-***REMOVED***title: string | null;
-***REMOVED***filepath: string | null;
-***REMOVED***url: string | null;
-***REMOVED***metadata: string | null;
-***REMOVED***chunk_id: string | null;
-***REMOVED***reindex_id: string | null;
+  part_index?: number
+  content: string
+  id: string
+  title: string | null
+  filepath: string | null
+  url: string | null
+  metadata: string | null
+  chunk_id: string | null
+  reindex_id: string | null
 }
 
 export type ToolMessageContent = {
-***REMOVED***citations: Citation[];
-***REMOVED***intent: string;
+  citations: Citation[]
+  intent: string
 }
 
 export type ChatMessage = {
-***REMOVED***id: string;
-***REMOVED***role: string;
-***REMOVED***content: string;
-***REMOVED***end_turn?: boolean;
-***REMOVED***date: string;
-***REMOVED***feedback?: Feedback;
-***REMOVED***context?: string;
-};
+  id: string
+  role: string
+  content: string
+  end_turn?: boolean
+  date: string
+  feedback?: Feedback
+  context?: string
+}
 
 export type Conversation = {
-***REMOVED***id: string;
-***REMOVED***title: string;
-***REMOVED***messages: ChatMessage[];
-***REMOVED***date: string;
+  id: string
+  title: string
+  messages: ChatMessage[]
+  date: string
 }
 
 export enum ChatCompletionType {
-***REMOVED***ChatCompletion = "chat.completion",
-***REMOVED***ChatCompletionChunk = "chat.completion.chunk"
+  ChatCompletion = 'chat.completion',
+  ChatCompletionChunk = 'chat.completion.chunk'
 }
 
 export type ChatResponseChoice = {
-***REMOVED***messages: ChatMessage[];
+  messages: ChatMessage[]
 }
 
 export type ChatResponse = {
-***REMOVED***id: string;
-***REMOVED***model: string;
-***REMOVED***created: number;
-***REMOVED***object: ChatCompletionType;
-***REMOVED***choices: ChatResponseChoice[];
-***REMOVED***history_metadata: {
-***REMOVED***conversation_id: string;
-***REMOVED***title: string;
-***REMOVED***date: string;
-***REMOVED***
-***REMOVED***error?: any;
+  id: string
+  model: string
+  created: number
+  object: ChatCompletionType
+  choices: ChatResponseChoice[]
+  history_metadata: {
+***REMOVED***conversation_id: string
+***REMOVED***title: string
+***REMOVED***date: string
+  }
+  error?: any
 }
 
 export type ConversationRequest = {
-***REMOVED***messages: ChatMessage[];
-};
+  messages: ChatMessage[]
+}
 
 export type UserInfo = {
-***REMOVED***access_token: string;
-***REMOVED***expires_on: string;
-***REMOVED***id_token: string;
-***REMOVED***provider_name: string;
-***REMOVED***user_claims: any[];
-***REMOVED***user_id: string;
-};
+  access_token: string
+  expires_on: string
+  id_token: string
+  provider_name: string
+  user_claims: any[]
+  user_id: string
+}
 
 export enum CosmosDBStatus {
-***REMOVED***NotConfigured = "CosmosDB is not configured",
-***REMOVED***NotWorking = "CosmosDB is not working",
-***REMOVED***InvalidCredentials = "CosmosDB has invalid credentials",
-***REMOVED***InvalidDatabase = "Invalid CosmosDB database name",
-***REMOVED***InvalidContainer = "Invalid CosmosDB container name",
-***REMOVED***Working = "CosmosDB is configured and working",
+  NotConfigured = 'CosmosDB is not configured',
+  NotWorking = 'CosmosDB is not working',
+  InvalidCredentials = 'CosmosDB has invalid credentials',
+  InvalidDatabase = 'Invalid CosmosDB database name',
+  InvalidContainer = 'Invalid CosmosDB container name',
+  Working = 'CosmosDB is configured and working'
 }
 
 export type CosmosDBHealth = {
-***REMOVED***cosmosDB: boolean,
-***REMOVED***status: string
+  cosmosDB: boolean
+  status: string
 }
 
 export enum ChatHistoryLoadingState {
-***REMOVED***Loading = "loading",
-***REMOVED***Success = "success",
-***REMOVED***Fail = "fail",
-***REMOVED***NotStarted = "notStarted"
+  Loading = 'loading',
+  Success = 'success',
+  Fail = 'fail',
+  NotStarted = 'notStarted'
 }
 
 export type ErrorMessage = {
-***REMOVED***title: string,
-***REMOVED***subtitle: string
+  title: string
+  subtitle: string
 }
 
 export type UI = {
-***REMOVED***title: string;
-***REMOVED***chat_title: string;
-***REMOVED***chat_description: string;
-***REMOVED***logo?: string;
-***REMOVED***chat_logo?: string;
-***REMOVED***show_share_button?: boolean
+  title: string
+  chat_title: string
+  chat_description: string
+  logo?: string
+  chat_logo?: string
+  show_share_button?: boolean
 }
 
 export type FrontendSettings = {
-***REMOVED***auth_enabled?: string | null;
-***REMOVED***feedback_enabled?: string | null;
-***REMOVED***ui?: UI;
-***REMOVED***sanitize_answer?: boolean;
+  auth_enabled?: string | null
+  feedback_enabled?: string | null
+  ui?: UI
+  sanitize_answer?: boolean
 }
 
 export enum Feedback {
-***REMOVED***Neutral = "neutral",
-***REMOVED***Positive = "positive",
-***REMOVED***Negative = "negative",
-***REMOVED***MissingCitation = "missing_citation",
-***REMOVED***WrongCitation = "wrong_citation",
-***REMOVED***OutOfScope = "out_of_scope",
-***REMOVED***InaccurateOrIrrelevant = "inaccurate_or_irrelevant",
-***REMOVED***OtherUnhelpful = "other_unhelpful",
-***REMOVED***HateSpeech = "hate_speech",
-***REMOVED***Violent = "violent",
-***REMOVED***Sexual = "sexual",
-***REMOVED***Manipulative = "manipulative",
-***REMOVED***OtherHarmful = "other_harmlful"
+  Neutral = 'neutral',
+  Positive = 'positive',
+  Negative = 'negative',
+  MissingCitation = 'missing_citation',
+  WrongCitation = 'wrong_citation',
+  OutOfScope = 'out_of_scope',
+  InaccurateOrIrrelevant = 'inaccurate_or_irrelevant',
+  OtherUnhelpful = 'other_unhelpful',
+  HateSpeech = 'hate_speech',
+  Violent = 'violent',
+  Sexual = 'sexual',
+  Manipulative = 'manipulative',
+  OtherHarmful = 'other_harmlful'
 }

@@ -1,34 +1,34 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { HashRouter, Routes, Route } from "react-router-dom";
-import { initializeIcons } from "@fluentui/react";
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { HashRouter, Route, Routes } from 'react-router-dom'
+import { initializeIcons } from '@fluentui/react'
 
-import "./index.css";
+import Chat from './pages/chat/Chat'
+import Layout from './pages/layout/Layout'
+import NoPage from './pages/NoPage'
+import { AppStateProvider } from './state/AppProvider'
 
-import Layout from "./pages/layout/Layout";
-import NoPage from "./pages/NoPage";
-import Chat from "./pages/chat/Chat";
-import { AppStateProvider } from "./state/AppProvider";
+import './index.css'
 
-initializeIcons();
+initializeIcons()
 
 export default function App() {
-***REMOVED***return (
+  return (
 ***REMOVED***<AppStateProvider>
-***REMOVED******REMOVED***<HashRouter>
-***REMOVED******REMOVED***<Routes>
-***REMOVED******REMOVED******REMOVED***<Route path="/" element={<Layout />}>
-***REMOVED******REMOVED******REMOVED***<Route index element={<Chat />} />
-***REMOVED******REMOVED******REMOVED***<Route path="*" element={<NoPage />} />
-***REMOVED******REMOVED******REMOVED***</Route>
-***REMOVED******REMOVED***</Routes>
-***REMOVED******REMOVED***</HashRouter>
+***REMOVED***  <HashRouter>
+***REMOVED***<Routes>
+***REMOVED***  <Route path="/" element={<Layout />}>
+***REMOVED******REMOVED***<Route index element={<Chat />} />
+***REMOVED******REMOVED***<Route path="*" element={<NoPage />} />
+***REMOVED***  </Route>
+***REMOVED***</Routes>
+***REMOVED***  </HashRouter>
 ***REMOVED***</AppStateProvider>
-***REMOVED***);
+  )
 }
 
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-***REMOVED***<React.StrictMode>
+ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
+  <React.StrictMode>
 ***REMOVED***<App />
-***REMOVED***</React.StrictMode>
-);
+  </React.StrictMode>
+)

@@ -14,20 +14,20 @@ import Contoso from "../../assets/Contoso.svg";
 import { XSSAllowTags } from "../../constants/xssAllowTags";
 
 import {
-***REMOVED***ChatMessage,
-***REMOVED***ConversationRequest,
-***REMOVED***conversationApi,
-***REMOVED***Citation,
-***REMOVED***ToolMessageContent,
-***REMOVED***ChatResponse,
-***REMOVED***getUserInfo,
-***REMOVED***Conversation,
-***REMOVED***historyGenerate,
-***REMOVED***historyUpdate,
-***REMOVED***historyClear,
-***REMOVED***ChatHistoryLoadingState,
-***REMOVED***CosmosDBStatus,
-***REMOVED***ErrorMessage
+  ChatMessage,
+  ConversationRequest,
+  conversationApi,
+  Citation,
+  ToolMessageContent,
+  ChatResponse,
+  getUserInfo,
+  Conversation,
+  historyGenerate,
+  historyUpdate,
+  historyClear,
+  ChatHistoryLoadingState,
+  CosmosDBStatus,
+  ErrorMessage
 } from "../../api";
 import { Answer } from "../../components/Answer";
 import { QuestionInput } from "../../components/QuestionInput";
@@ -36,805 +36,804 @@ import { AppStateContext } from "../../state/AppProvider";
 import { useBoolean } from "@fluentui/react-hooks";
 
 const enum messageStatus {
-***REMOVED***NotRunning = "Not Running",
-***REMOVED***Processing = "Processing",
-***REMOVED***Done = "Done"
+  NotRunning = "Not Running",
+  Processing = "Processing",
+  Done = "Done"
 }
 
 const Chat = () => {
-***REMOVED***const appStateContext = useContext(AppStateContext)
-***REMOVED***const ui = appStateContext?.state.frontendSettings?.ui;
-***REMOVED***const AUTH_ENABLED = appStateContext?.state.frontendSettings?.auth_enabled;
-***REMOVED***const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null);
-***REMOVED***const [isLoading, setIsLoading] = useState<boolean>(false);
-***REMOVED***const [showLoadingMessage, setShowLoadingMessage] = useState<boolean>(false);
-***REMOVED***const [activeCitation, setActiveCitation] = useState<Citation>();
-***REMOVED***const [isCitationPanelOpen, setIsCitationPanelOpen] = useState<boolean>(false);
-***REMOVED***const abortFuncs = useRef([] as AbortController[]);
-***REMOVED***const [showAuthMessage, setShowAuthMessage] = useState<boolean | undefined>();
-***REMOVED***const [messages, setMessages] = useState<ChatMessage[]>([])
-***REMOVED***const [processMessages, setProcessMessages] = useState<messageStatus>(messageStatus.NotRunning);
-***REMOVED***const [clearingChat, setClearingChat] = useState<boolean>(false);
-***REMOVED***const [hideErrorDialog, { toggle: toggleErrorDialog }] = useBoolean(true);
-***REMOVED***const [errorMsg, setErrorMsg] = useState<ErrorMessage | null>()
+  const appStateContext = useContext(AppStateContext)
+  const ui = appStateContext?.state.frontendSettings?.ui;
+  const AUTH_ENABLED = appStateContext?.state.frontendSettings?.auth_enabled;
+  const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showLoadingMessage, setShowLoadingMessage] = useState<boolean>(false);
+  const [activeCitation, setActiveCitation] = useState<Citation>();
+  const [isCitationPanelOpen, setIsCitationPanelOpen] = useState<boolean>(false);
+  const abortFuncs = useRef([] as AbortController[]);
+  const [showAuthMessage, setShowAuthMessage] = useState<boolean | undefined>();
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [processMessages, setProcessMessages] = useState<messageStatus>(messageStatus.NotRunning);
+  const [clearingChat, setClearingChat] = useState<boolean>(false);
+  const [hideErrorDialog, { toggle: toggleErrorDialog }] = useBoolean(true);
+  const [errorMsg, setErrorMsg] = useState<ErrorMessage | null>()
 
-***REMOVED***const errorDialogContentProps = {
+  const errorDialogContentProps = {
 ***REMOVED***type: DialogType.close,
 ***REMOVED***title: errorMsg?.title,
 ***REMOVED***closeButtonAriaLabel: 'Close',
 ***REMOVED***subText: errorMsg?.subtitle,
-***REMOVED***;
+  };
 
-***REMOVED***const modalProps = {
+  const modalProps = {
 ***REMOVED***titleAriaId: 'labelId',
 ***REMOVED***subtitleAriaId: 'subTextId',
 ***REMOVED***isBlocking: true,
 ***REMOVED***styles: { main: { maxWidth: 450 } },
+  }
+
+  const [ASSISTANT, TOOL, ERROR] = ["assistant", "tool", "error"]
+  const NO_CONTENT_ERROR = "No content in messages object."
+
+  useEffect(() => {
+***REMOVED***if (appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.Working
+***REMOVED***  && appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured
+***REMOVED***  && appStateContext?.state.chatHistoryLoadingState === ChatHistoryLoadingState.Fail
+***REMOVED***  && hideErrorDialog) {
+***REMOVED***  let subtitle = `${appStateContext.state.isCosmosDBAvailable.status}. Please contact the site administrator.`
+***REMOVED***  setErrorMsg({
+***REMOVED***title: "Chat history is not enabled",
+***REMOVED***subtitle: subtitle
+  ***REMOVED***)
+***REMOVED***  toggleErrorDialog();
 ***REMOVED***
+  }, [appStateContext?.state.isCosmosDBAvailable]);
 
-***REMOVED***const [ASSISTANT, TOOL, ERROR] = ["assistant", "tool", "error"]
-***REMOVED***const NO_CONTENT_ERROR = "No content in messages object."
-
-***REMOVED***useEffect(() => {
-***REMOVED***if (appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.Working  
-***REMOVED******REMOVED***&& appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured
-***REMOVED******REMOVED***&& appStateContext?.state.chatHistoryLoadingState === ChatHistoryLoadingState.Fail 
-***REMOVED******REMOVED***&& hideErrorDialog) {
-***REMOVED******REMOVED***let subtitle = `${appStateContext.state.isCosmosDBAvailable.status}. Please contact the site administrator.`
-***REMOVED******REMOVED***setErrorMsg({
-***REMOVED******REMOVED***title: "Chat history is not enabled",
-***REMOVED******REMOVED***subtitle: subtitle
-***REMOVED***)
-***REMOVED******REMOVED***toggleErrorDialog();
-***REMOVED***
-***REMOVED***, [appStateContext?.state.isCosmosDBAvailable]);
-
-***REMOVED***const handleErrorDialogClose = () => {
+  const handleErrorDialogClose = () => {
 ***REMOVED***toggleErrorDialog()
 ***REMOVED***setTimeout(() => {
-***REMOVED******REMOVED***setErrorMsg(null)
+***REMOVED***  setErrorMsg(null)
 ***REMOVED***, 500);
-***REMOVED***
+  }
 
-***REMOVED***useEffect(() => {
+  useEffect(() => {
 ***REMOVED***setIsLoading(appStateContext?.state.chatHistoryLoadingState === ChatHistoryLoadingState.Loading)
-***REMOVED***, [appStateContext?.state.chatHistoryLoadingState])
+  }, [appStateContext?.state.chatHistoryLoadingState])
 
-***REMOVED***const getUserInfoList = async () => {
+  const getUserInfoList = async () => {
 ***REMOVED***if (!AUTH_ENABLED) {
-***REMOVED******REMOVED***setShowAuthMessage(false);
-***REMOVED******REMOVED***return;
+***REMOVED***  setShowAuthMessage(false);
+***REMOVED***  return;
 ***REMOVED***
 ***REMOVED***const userInfoList = await getUserInfo();
 ***REMOVED***if (userInfoList.length === 0 && window.location.hostname !== "127.0.0.1") {
-***REMOVED******REMOVED***setShowAuthMessage(true);
+***REMOVED***  setShowAuthMessage(true);
 ***REMOVED***
 ***REMOVED***else {
-***REMOVED******REMOVED***setShowAuthMessage(false);
+***REMOVED***  setShowAuthMessage(false);
 ***REMOVED***
-***REMOVED***
+  }
 
-***REMOVED***let assistantMessage = {} as ChatMessage
-***REMOVED***let toolMessage = {} as ChatMessage
-***REMOVED***let assistantContent = ""
+  let assistantMessage = {} as ChatMessage
+  let toolMessage = {} as ChatMessage
+  let assistantContent = ""
 
-***REMOVED***const processResultMessage = (resultMessage: ChatMessage, userMessage: ChatMessage, conversationId?: string) => {
+  const processResultMessage = (resultMessage: ChatMessage, userMessage: ChatMessage, conversationId?: string) => {
 ***REMOVED***if (resultMessage.role === ASSISTANT) {
-***REMOVED******REMOVED***assistantContent += resultMessage.content
-***REMOVED******REMOVED***assistantMessage = resultMessage
-***REMOVED******REMOVED***assistantMessage.content = assistantContent
+***REMOVED***  assistantContent += resultMessage.content
+***REMOVED***  assistantMessage = resultMessage
+***REMOVED***  assistantMessage.content = assistantContent
 
-***REMOVED******REMOVED***if (resultMessage.context) {
-***REMOVED******REMOVED***toolMessage = {
-***REMOVED******REMOVED******REMOVED***id: uuid(),
-***REMOVED******REMOVED******REMOVED***role: TOOL,
-***REMOVED******REMOVED******REMOVED***content: resultMessage.context,
-***REMOVED******REMOVED******REMOVED***date: new Date().toISOString(),
-***REMOVED******REMOVED***
+***REMOVED***  if (resultMessage.context) {
+***REMOVED***toolMessage = {
+***REMOVED***  id: uuid(),
+***REMOVED***  role: TOOL,
+***REMOVED***  content: resultMessage.context,
+***REMOVED***  date: new Date().toISOString(),
 ***REMOVED***
+  ***REMOVED***
 ***REMOVED***
 
 ***REMOVED***if (resultMessage.role === TOOL) toolMessage = resultMessage
 
 ***REMOVED***if (!conversationId) {
-***REMOVED******REMOVED***isEmpty(toolMessage) ?
-***REMOVED******REMOVED***setMessages([...messages, userMessage, assistantMessage]) :
-***REMOVED******REMOVED***setMessages([...messages, userMessage, toolMessage, assistantMessage]);
+***REMOVED***  isEmpty(toolMessage) ?
+***REMOVED***setMessages([...messages, userMessage, assistantMessage]) :
+***REMOVED***setMessages([...messages, userMessage, toolMessage, assistantMessage]);
 ***REMOVED***
-***REMOVED******REMOVED***isEmpty(toolMessage) ?
-***REMOVED******REMOVED***setMessages([...messages, assistantMessage]) :
-***REMOVED******REMOVED***setMessages([...messages, toolMessage, assistantMessage]);
+***REMOVED***  isEmpty(toolMessage) ?
+***REMOVED***setMessages([...messages, assistantMessage]) :
+***REMOVED***setMessages([...messages, toolMessage, assistantMessage]);
 ***REMOVED***
-***REMOVED***
+  }
 
-***REMOVED***const makeApiRequestWithoutCosmosDB = async (question: string, conversationId?: string) => {
+  const makeApiRequestWithoutCosmosDB = async (question: string, conversationId?: string) => {
 ***REMOVED***setIsLoading(true);
 ***REMOVED***setShowLoadingMessage(true);
 ***REMOVED***const abortController = new AbortController();
 ***REMOVED***abortFuncs.current.unshift(abortController);
 
 ***REMOVED***const userMessage: ChatMessage = {
-***REMOVED******REMOVED***id: uuid(),
-***REMOVED******REMOVED***role: "user",
-***REMOVED******REMOVED***content: question,
-***REMOVED******REMOVED***date: new Date().toISOString(),
+***REMOVED***  id: uuid(),
+***REMOVED***  role: "user",
+***REMOVED***  content: question,
+***REMOVED***  date: new Date().toISOString(),
 ***REMOVED***;
 
 ***REMOVED***let conversation: Conversation | null | undefined;
 ***REMOVED***if (!conversationId) {
-***REMOVED******REMOVED***conversation = {
-***REMOVED******REMOVED***id: conversationId ?? uuid(),
-***REMOVED******REMOVED***title: question,
-***REMOVED******REMOVED***messages: [userMessage],
-***REMOVED******REMOVED***date: new Date().toISOString(),
+***REMOVED***  conversation = {
+***REMOVED***id: conversationId ?? uuid(),
+***REMOVED***title: question,
+***REMOVED***messages: [userMessage],
+***REMOVED***date: new Date().toISOString(),
+  ***REMOVED***
 ***REMOVED***
-***REMOVED***
-***REMOVED******REMOVED***conversation = appStateContext?.state?.currentChat
-***REMOVED******REMOVED***if (!conversation) {
-***REMOVED******REMOVED***console.error("Conversation not found.");
-***REMOVED******REMOVED***setIsLoading(false);
-***REMOVED******REMOVED***setShowLoadingMessage(false);
-***REMOVED******REMOVED***abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
-***REMOVED******REMOVED***return;
-***REMOVED******REMOVED***
-***REMOVED******REMOVED***conversation.messages.push(userMessage);
-***REMOVED***
+***REMOVED***  conversation = appStateContext?.state?.currentChat
+***REMOVED***  if (!conversation) {
+***REMOVED***console.error("Conversation not found.");
+***REMOVED***setIsLoading(false);
+***REMOVED***setShowLoadingMessage(false);
+***REMOVED***abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
+***REMOVED***return;
+  ***REMOVED***
+***REMOVED***conversation.messages.push(userMessage);
+  ***REMOVED***
 ***REMOVED***
 
 ***REMOVED***appStateContext?.dispatch({ type: 'UPDATE_CURRENT_CHAT', payload: conversation });
 ***REMOVED***setMessages(conversation.messages)
 
 ***REMOVED***const request: ConversationRequest = {
-***REMOVED******REMOVED***messages: [...conversation.messages.filter((answer) => answer.role !== ERROR)]
+***REMOVED***  messages: [...conversation.messages.filter((answer) => answer.role !== ERROR)]
 ***REMOVED***;
 
 ***REMOVED***let result = {} as ChatResponse;
 ***REMOVED***try {
-***REMOVED******REMOVED***const response = await conversationApi(request, abortController.signal);
-***REMOVED******REMOVED***if (response?.body) {
-***REMOVED******REMOVED***const reader = response.body.getReader();
+***REMOVED***  const response = await conversationApi(request, abortController.signal);
+***REMOVED***  if (response?.body) {
+***REMOVED***const reader = response.body.getReader();
 
-***REMOVED******REMOVED***let runningText = "";
-***REMOVED******REMOVED***while (true) {
-***REMOVED******REMOVED******REMOVED***setProcessMessages(messageStatus.Processing)
-***REMOVED******REMOVED******REMOVED***const { done, value } = await reader.read();
-***REMOVED******REMOVED******REMOVED***if (done) break;
+***REMOVED***let runningText = "";
+***REMOVED***while (true) {
+***REMOVED***  setProcessMessages(messageStatus.Processing)
+***REMOVED***  const { done, value } = await reader.read();
+***REMOVED***  if (done) break;
 
-***REMOVED******REMOVED******REMOVED***var text = new TextDecoder("utf-8").decode(value);
-***REMOVED******REMOVED******REMOVED***const objects = text.split("\n");
-***REMOVED******REMOVED******REMOVED***objects.forEach((obj) => {
-***REMOVED******REMOVED******REMOVED***try {
-***REMOVED******REMOVED******REMOVED******REMOVED***if (obj !== "" && obj !== "{}") {
-***REMOVED******REMOVED******REMOVED******REMOVED***runningText += obj;
-***REMOVED******REMOVED******REMOVED******REMOVED***result = JSON.parse(runningText);
-***REMOVED******REMOVED******REMOVED******REMOVED***if (result.choices?.length > 0) {
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***result.choices[0].messages.forEach((msg) => {
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***msg.id = result.id;
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***msg.date = new Date().toISOString();
-***REMOVED******REMOVED******REMOVED******REMOVED***)
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***if (result.choices[0].messages?.some(m => m.role === ASSISTANT)) {
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***setShowLoadingMessage(false);
-***REMOVED******REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***result.choices[0].messages.forEach((resultObj) => {
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***processResultMessage(resultObj, userMessage, conversationId);
-***REMOVED******REMOVED******REMOVED******REMOVED***)
-***REMOVED******REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED******REMOVED***else if (result.error) {
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***throw Error(result.error);
-***REMOVED******REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED******REMOVED***runningText = "";
-***REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED***catch (e) {
-***REMOVED******REMOVED******REMOVED******REMOVED***if (!(e instanceof SyntaxError)) {
-***REMOVED******REMOVED******REMOVED******REMOVED***console.error(e);
-***REMOVED******REMOVED******REMOVED******REMOVED***throw e;
-***REMOVED******REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED******REMOVED***console.log("Incomplete message. Continuing...")
-***REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED***);
+***REMOVED***  var text = new TextDecoder("utf-8").decode(value);
+***REMOVED***  const objects = text.split("\n");
+***REMOVED***  objects.forEach((obj) => {
+***REMOVED******REMOVED***try {
+***REMOVED******REMOVED***  if (obj !== "" && obj !== "{}") {
+***REMOVED******REMOVED***runningText += obj;
+***REMOVED******REMOVED***result = JSON.parse(runningText);
+***REMOVED******REMOVED***if (result.choices?.length > 0) {
+***REMOVED******REMOVED***  result.choices[0].messages.forEach((msg) => {
+***REMOVED******REMOVED******REMOVED***msg.id = result.id;
+***REMOVED******REMOVED******REMOVED***msg.date = new Date().toISOString();
+***REMOVED***  ***REMOVED***)
+***REMOVED******REMOVED***  if (result.choices[0].messages?.some(m => m.role === ASSISTANT)) {
+***REMOVED******REMOVED******REMOVED***setShowLoadingMessage(false);
+***REMOVED***  ***REMOVED***
+***REMOVED******REMOVED***  result.choices[0].messages.forEach((resultObj) => {
+***REMOVED******REMOVED******REMOVED***processResultMessage(resultObj, userMessage, conversationId);
+***REMOVED***  ***REMOVED***)
 ***REMOVED******REMOVED***
-***REMOVED******REMOVED***conversation.messages.push(toolMessage, assistantMessage)
-***REMOVED******REMOVED***appStateContext?.dispatch({ type: 'UPDATE_CURRENT_CHAT', payload: conversation });
-***REMOVED******REMOVED***setMessages([...messages, toolMessage, assistantMessage]);
+***REMOVED******REMOVED***else if (result.error) {
+***REMOVED******REMOVED***  throw Error(result.error);
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***runningText = "";
+  ***REMOVED***
 ***REMOVED***
+***REMOVED******REMOVED***catch (e) {
+***REMOVED******REMOVED***  if (!(e instanceof SyntaxError)) {
+***REMOVED******REMOVED***console.error(e);
+***REMOVED******REMOVED***throw e;
+***REMOVED***  ***REMOVED***
+***REMOVED******REMOVED***console.log("Incomplete message. Continuing...")
+  ***REMOVED***
+***REMOVED***
+  ***REMOVED***);
+***REMOVED***
+***REMOVED***conversation.messages.push(toolMessage, assistantMessage)
+***REMOVED***appStateContext?.dispatch({ type: 'UPDATE_CURRENT_CHAT', payload: conversation });
+***REMOVED***setMessages([...messages, toolMessage, assistantMessage]);
+  ***REMOVED***
 
 ***REMOVED*** catch (e) {
-***REMOVED******REMOVED***if (!abortController.signal.aborted) {
-***REMOVED******REMOVED***let errorMessage = "An error occurred. Please try again. If the problem persists, please contact the site administrator.";
-***REMOVED******REMOVED***if (result.error?.message) {
-***REMOVED******REMOVED******REMOVED***errorMessage = result.error.message;
-***REMOVED******REMOVED***
-***REMOVED******REMOVED***else if (typeof result.error === "string") {
-***REMOVED******REMOVED******REMOVED***errorMessage = result.error;
-***REMOVED******REMOVED***
-
-***REMOVED******REMOVED***errorMessage = parseErrorMessage(errorMessage);
-
-***REMOVED******REMOVED***let errorChatMsg: ChatMessage = {
-***REMOVED******REMOVED******REMOVED***id: uuid(),
-***REMOVED******REMOVED******REMOVED***role: ERROR,
-***REMOVED******REMOVED******REMOVED***content: errorMessage,
-***REMOVED******REMOVED******REMOVED***date: new Date().toISOString()
-***REMOVED******REMOVED***
-***REMOVED******REMOVED***conversation.messages.push(errorChatMsg);
-***REMOVED******REMOVED***appStateContext?.dispatch({ type: 'UPDATE_CURRENT_CHAT', payload: conversation });
-***REMOVED******REMOVED***setMessages([...messages, errorChatMsg]);
-***REMOVED******REMOVED***
-***REMOVED******REMOVED***setMessages([...messages, userMessage])
+***REMOVED***  if (!abortController.signal.aborted) {
+***REMOVED***let errorMessage = "An error occurred. Please try again. If the problem persists, please contact the site administrator.";
+***REMOVED***if (result.error?.message) {
+***REMOVED***  errorMessage = result.error.message;
 ***REMOVED***
+***REMOVED***else if (typeof result.error === "string") {
+***REMOVED***  errorMessage = result.error;
+***REMOVED***
+
+***REMOVED***errorMessage = parseErrorMessage(errorMessage);
+
+***REMOVED***let errorChatMsg: ChatMessage = {
+***REMOVED***  id: uuid(),
+***REMOVED***  role: ERROR,
+***REMOVED***  content: errorMessage,
+***REMOVED***  date: new Date().toISOString()
+***REMOVED***
+***REMOVED***conversation.messages.push(errorChatMsg);
+***REMOVED***appStateContext?.dispatch({ type: 'UPDATE_CURRENT_CHAT', payload: conversation });
+***REMOVED***setMessages([...messages, errorChatMsg]);
+  ***REMOVED***
+***REMOVED***setMessages([...messages, userMessage])
+  ***REMOVED***
 ***REMOVED*** finally {
-***REMOVED******REMOVED***setIsLoading(false);
-***REMOVED******REMOVED***setShowLoadingMessage(false);
-***REMOVED******REMOVED***abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
-***REMOVED******REMOVED***setProcessMessages(messageStatus.Done)
+***REMOVED***  setIsLoading(false);
+***REMOVED***  setShowLoadingMessage(false);
+***REMOVED***  abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
+***REMOVED***  setProcessMessages(messageStatus.Done)
 ***REMOVED***
 
 ***REMOVED***return abortController.abort();
-***REMOVED***;
+  };
 
-***REMOVED***const makeApiRequestWithCosmosDB = async (question: string, conversationId?: string) => {
+  const makeApiRequestWithCosmosDB = async (question: string, conversationId?: string) => {
 ***REMOVED***setIsLoading(true);
 ***REMOVED***setShowLoadingMessage(true);
 ***REMOVED***const abortController = new AbortController();
 ***REMOVED***abortFuncs.current.unshift(abortController);
 
 ***REMOVED***const userMessage: ChatMessage = {
-***REMOVED******REMOVED***id: uuid(),
-***REMOVED******REMOVED***role: "user",
-***REMOVED******REMOVED***content: question,
-***REMOVED******REMOVED***date: new Date().toISOString(),
+***REMOVED***  id: uuid(),
+***REMOVED***  role: "user",
+***REMOVED***  content: question,
+***REMOVED***  date: new Date().toISOString(),
 ***REMOVED***;
 
 ***REMOVED***//api call params set here (generate)
 ***REMOVED***let request: ConversationRequest;
 ***REMOVED***let conversation;
 ***REMOVED***if (conversationId) {
-***REMOVED******REMOVED***conversation = appStateContext?.state?.chatHistory?.find((conv) => conv.id === conversationId)
-***REMOVED******REMOVED***if (!conversation) {
+***REMOVED***  conversation = appStateContext?.state?.chatHistory?.find((conv) => conv.id === conversationId)
+***REMOVED***  if (!conversation) {
+***REMOVED***console.error("Conversation not found.");
+***REMOVED***setIsLoading(false);
+***REMOVED***setShowLoadingMessage(false);
+***REMOVED***abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
+***REMOVED***return;
+  ***REMOVED***
+***REMOVED***conversation.messages.push(userMessage);
+***REMOVED***request = {
+***REMOVED***  messages: [...conversation.messages.filter((answer) => answer.role !== ERROR)]
+***REMOVED***;
+  ***REMOVED***
+***REMOVED***
+***REMOVED***  request = {
+***REMOVED***messages: [userMessage].filter((answer) => answer.role !== ERROR)
+  ***REMOVED***;
+***REMOVED***  setMessages(request.messages)
+***REMOVED***
+***REMOVED***let result = {} as ChatResponse;
+***REMOVED***var errorResponseMessage = "Please try again. If the problem persists, please contact the site administrator.";
+***REMOVED***try {
+***REMOVED***  const response = conversationId ? await historyGenerate(request, abortController.signal, conversationId) : await historyGenerate(request, abortController.signal);
+***REMOVED***  if (!response?.ok) {
+***REMOVED***const responseJson = await response.json();
+***REMOVED***errorResponseMessage = responseJson.error === undefined ? errorResponseMessage : parseErrorMessage(responseJson.error);
+***REMOVED***let errorChatMsg: ChatMessage = {
+***REMOVED***  id: uuid(),
+***REMOVED***  role: ERROR,
+***REMOVED***  content: `There was an error generating a response. Chat history can't be saved at this time. ${errorResponseMessage}`,
+***REMOVED***  date: new Date().toISOString()
+***REMOVED***
+***REMOVED***let resultConversation;
+***REMOVED***if (conversationId) {
+***REMOVED***  resultConversation = appStateContext?.state?.chatHistory?.find((conv) => conv.id === conversationId)
+***REMOVED***  if (!resultConversation) {
 ***REMOVED******REMOVED***console.error("Conversation not found.");
 ***REMOVED******REMOVED***setIsLoading(false);
 ***REMOVED******REMOVED***setShowLoadingMessage(false);
 ***REMOVED******REMOVED***abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
 ***REMOVED******REMOVED***return;
-***REMOVED******REMOVED***
-***REMOVED******REMOVED***conversation.messages.push(userMessage);
-***REMOVED******REMOVED***request = {
-***REMOVED******REMOVED******REMOVED***messages: [...conversation.messages.filter((answer) => answer.role !== ERROR)]
-***REMOVED******REMOVED***;
+  ***REMOVED***
+***REMOVED***  resultConversation.messages.push(errorChatMsg);
 ***REMOVED***
+***REMOVED***  setMessages([...messages, userMessage, errorChatMsg])
+***REMOVED***  setIsLoading(false);
+***REMOVED***  setShowLoadingMessage(false);
+***REMOVED***  abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
+***REMOVED***  return;
 ***REMOVED***
-***REMOVED******REMOVED***request = {
-***REMOVED******REMOVED***messages: [userMessage].filter((answer) => answer.role !== ERROR)
-***REMOVED***;
-***REMOVED******REMOVED***setMessages(request.messages)
-***REMOVED***
-***REMOVED***let result = {} as ChatResponse;
-***REMOVED***var errorResponseMessage = "Please try again. If the problem persists, please contact the site administrator.";
-***REMOVED***try {
-***REMOVED******REMOVED***const response = conversationId ? await historyGenerate(request, abortController.signal, conversationId) : await historyGenerate(request, abortController.signal);
-***REMOVED******REMOVED***if (!response?.ok) {
-***REMOVED******REMOVED***const responseJson = await response.json();
-***REMOVED******REMOVED***errorResponseMessage = responseJson.error === undefined ? errorResponseMessage : parseErrorMessage(responseJson.error);
-***REMOVED******REMOVED***let errorChatMsg: ChatMessage = {
-***REMOVED******REMOVED******REMOVED***id: uuid(),
-***REMOVED******REMOVED******REMOVED***role: ERROR,
-***REMOVED******REMOVED******REMOVED***content: `There was an error generating a response. Chat history can't be saved at this time. ${errorResponseMessage}`,
-***REMOVED******REMOVED******REMOVED***date: new Date().toISOString()
-***REMOVED******REMOVED***
-***REMOVED******REMOVED***let resultConversation;
-***REMOVED******REMOVED***if (conversationId) {
-***REMOVED******REMOVED******REMOVED***resultConversation = appStateContext?.state?.chatHistory?.find((conv) => conv.id === conversationId)
-***REMOVED******REMOVED******REMOVED***if (!resultConversation) {
-***REMOVED******REMOVED******REMOVED***console.error("Conversation not found.");
-***REMOVED******REMOVED******REMOVED***setIsLoading(false);
-***REMOVED******REMOVED******REMOVED***setShowLoadingMessage(false);
-***REMOVED******REMOVED******REMOVED***abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
-***REMOVED******REMOVED******REMOVED***return;
-***REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED***resultConversation.messages.push(errorChatMsg);
-***REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED***setMessages([...messages, userMessage, errorChatMsg])
-***REMOVED******REMOVED******REMOVED***setIsLoading(false);
-***REMOVED******REMOVED******REMOVED***setShowLoadingMessage(false);
-***REMOVED******REMOVED******REMOVED***abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
-***REMOVED******REMOVED******REMOVED***return;
-***REMOVED******REMOVED***
-***REMOVED******REMOVED***appStateContext?.dispatch({ type: 'UPDATE_CURRENT_CHAT', payload: resultConversation });
-***REMOVED******REMOVED***setMessages([...resultConversation.messages]);
-***REMOVED******REMOVED***return;
-***REMOVED***
-***REMOVED******REMOVED***if (response?.body) {
-***REMOVED******REMOVED***const reader = response.body.getReader();
+***REMOVED***appStateContext?.dispatch({ type: 'UPDATE_CURRENT_CHAT', payload: resultConversation });
+***REMOVED***setMessages([...resultConversation.messages]);
+***REMOVED***return;
+  ***REMOVED***
+***REMOVED***  if (response?.body) {
+***REMOVED***const reader = response.body.getReader();
 
-***REMOVED******REMOVED***let runningText = "";
-***REMOVED******REMOVED***while (true) {
-***REMOVED******REMOVED******REMOVED***setProcessMessages(messageStatus.Processing)
-***REMOVED******REMOVED******REMOVED***const { done, value } = await reader.read();
-***REMOVED******REMOVED******REMOVED***if (done) break;
+***REMOVED***let runningText = "";
+***REMOVED***while (true) {
+***REMOVED***  setProcessMessages(messageStatus.Processing)
+***REMOVED***  const { done, value } = await reader.read();
+***REMOVED***  if (done) break;
 
-***REMOVED******REMOVED******REMOVED***var text = new TextDecoder("utf-8").decode(value);
-***REMOVED******REMOVED******REMOVED***const objects = text.split("\n");
-***REMOVED******REMOVED******REMOVED***objects.forEach((obj) => {
-***REMOVED******REMOVED******REMOVED***try {
-***REMOVED******REMOVED******REMOVED******REMOVED***if (obj !== "" && obj !== "{}") {
-***REMOVED******REMOVED******REMOVED******REMOVED***runningText += obj;
-***REMOVED******REMOVED******REMOVED******REMOVED***result = JSON.parse(runningText);
-***REMOVED******REMOVED******REMOVED******REMOVED***if (!result.choices?.[0]?.messages?.[0].content) {
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***errorResponseMessage = NO_CONTENT_ERROR;
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***throw Error();
-***REMOVED******REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED******REMOVED***if (result.choices?.length > 0) {
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***result.choices[0].messages.forEach((msg) => {
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***msg.id = result.id;
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***msg.date = new Date().toISOString();
-***REMOVED******REMOVED******REMOVED******REMOVED***)
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***if (result.choices[0].messages?.some(m => m.role === ASSISTANT)) {
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***setShowLoadingMessage(false);
-***REMOVED******REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***result.choices[0].messages.forEach((resultObj) => {
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***processResultMessage(resultObj, userMessage, conversationId);
-***REMOVED******REMOVED******REMOVED******REMOVED***)
-***REMOVED******REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED******REMOVED***runningText = "";
-***REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED******REMOVED***else if (result.error) {
-***REMOVED******REMOVED******REMOVED******REMOVED***throw Error(result.error);
-***REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED***catch (e) {
-***REMOVED******REMOVED******REMOVED******REMOVED***if (!(e instanceof SyntaxError)) {
-***REMOVED******REMOVED******REMOVED******REMOVED***console.error(e);
-***REMOVED******REMOVED******REMOVED******REMOVED***throw e;
-***REMOVED******REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED******REMOVED***console.log("Incomplete message. Continuing...")
-***REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED*** ***REMOVED***
-***REMOVED******REMOVED***);
+***REMOVED***  var text = new TextDecoder("utf-8").decode(value);
+***REMOVED***  const objects = text.split("\n");
+***REMOVED***  objects.forEach((obj) => {
+***REMOVED******REMOVED***try {
+***REMOVED******REMOVED***  if (obj !== "" && obj !== "{}") {
+***REMOVED******REMOVED***runningText += obj;
+***REMOVED******REMOVED***result = JSON.parse(runningText);
+***REMOVED******REMOVED***if (!result.choices?.[0]?.messages?.[0].content) {
+***REMOVED******REMOVED***  errorResponseMessage = NO_CONTENT_ERROR;
+***REMOVED******REMOVED***  throw Error();
 ***REMOVED******REMOVED***
-
-***REMOVED******REMOVED***let resultConversation;
-***REMOVED******REMOVED***if (conversationId) {
-***REMOVED******REMOVED******REMOVED***resultConversation = appStateContext?.state?.chatHistory?.find((conv) => conv.id === conversationId)
-***REMOVED******REMOVED******REMOVED***if (!resultConversation) {
-***REMOVED******REMOVED******REMOVED***console.error("Conversation not found.");
-***REMOVED******REMOVED******REMOVED***setIsLoading(false);
+***REMOVED******REMOVED***if (result.choices?.length > 0) {
+***REMOVED******REMOVED***  result.choices[0].messages.forEach((msg) => {
+***REMOVED******REMOVED******REMOVED***msg.id = result.id;
+***REMOVED******REMOVED******REMOVED***msg.date = new Date().toISOString();
+***REMOVED***  ***REMOVED***)
+***REMOVED******REMOVED***  if (result.choices[0].messages?.some(m => m.role === ASSISTANT)) {
 ***REMOVED******REMOVED******REMOVED***setShowLoadingMessage(false);
-***REMOVED******REMOVED******REMOVED***abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
-***REMOVED******REMOVED******REMOVED***return;
+***REMOVED***  ***REMOVED***
+***REMOVED******REMOVED***  result.choices[0].messages.forEach((resultObj) => {
+***REMOVED******REMOVED******REMOVED***processResultMessage(resultObj, userMessage, conversationId);
+***REMOVED***  ***REMOVED***)
 ***REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED***isEmpty(toolMessage) ?
-***REMOVED******REMOVED******REMOVED***resultConversation.messages.push(assistantMessage) :
-***REMOVED******REMOVED******REMOVED***resultConversation.messages.push(toolMessage, assistantMessage)
-***REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED***resultConversation = {
-***REMOVED******REMOVED******REMOVED***id: result.history_metadata.conversation_id,
-***REMOVED******REMOVED******REMOVED***title: result.history_metadata.title,
-***REMOVED******REMOVED******REMOVED***messages: [userMessage],
-***REMOVED******REMOVED******REMOVED***date: result.history_metadata.date
-***REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED***isEmpty(toolMessage) ?
-***REMOVED******REMOVED******REMOVED***resultConversation.messages.push(assistantMessage) :
-***REMOVED******REMOVED******REMOVED***resultConversation.messages.push(toolMessage, assistantMessage)
-***REMOVED******REMOVED***
-***REMOVED******REMOVED***if (!resultConversation) {
-***REMOVED******REMOVED******REMOVED***setIsLoading(false);
-***REMOVED******REMOVED******REMOVED***setShowLoadingMessage(false);
-***REMOVED******REMOVED******REMOVED***abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
-***REMOVED******REMOVED******REMOVED***return;
-***REMOVED******REMOVED***
-***REMOVED******REMOVED***appStateContext?.dispatch({ type: 'UPDATE_CURRENT_CHAT', payload: resultConversation });
-***REMOVED******REMOVED***isEmpty(toolMessage) ?
-***REMOVED******REMOVED******REMOVED***setMessages([...messages, assistantMessage]) :
-***REMOVED******REMOVED******REMOVED***setMessages([...messages, toolMessage, assistantMessage]);
+***REMOVED******REMOVED***runningText = "";
+  ***REMOVED***
+***REMOVED******REMOVED***  else if (result.error) {
+***REMOVED******REMOVED***throw Error(result.error);
+  ***REMOVED***
+***REMOVED***
+***REMOVED******REMOVED***catch (e) {
+***REMOVED******REMOVED***  if (!(e instanceof SyntaxError)) {
+***REMOVED******REMOVED***console.error(e);
+***REMOVED******REMOVED***throw e;
+***REMOVED***  ***REMOVED***
+***REMOVED******REMOVED***console.log("Incomplete message. Continuing...")
+  ***REMOVED***
+***REMOVED***
+  ***REMOVED***);
 ***REMOVED***
 
-***REMOVED*** catch (e) {
-***REMOVED******REMOVED***if (!abortController.signal.aborted) {
-***REMOVED******REMOVED***let errorMessage = `An error occurred. ${errorResponseMessage}`;
-***REMOVED******REMOVED***if (result.error?.message) {
-***REMOVED******REMOVED******REMOVED***errorMessage = result.error.message;
-***REMOVED******REMOVED***
-***REMOVED******REMOVED***else if (typeof result.error === "string") {
-***REMOVED******REMOVED******REMOVED***errorMessage = result.error;
-***REMOVED******REMOVED***
-
-***REMOVED******REMOVED***errorMessage = parseErrorMessage(errorMessage);
-
-***REMOVED******REMOVED***let errorChatMsg: ChatMessage = {
-***REMOVED******REMOVED******REMOVED***id: uuid(),
-***REMOVED******REMOVED******REMOVED***role: ERROR,
-***REMOVED******REMOVED******REMOVED***content: errorMessage,
-***REMOVED******REMOVED******REMOVED***date: new Date().toISOString()
-***REMOVED******REMOVED***
-***REMOVED******REMOVED***let resultConversation;
-***REMOVED******REMOVED***if (conversationId) {
-***REMOVED******REMOVED******REMOVED***resultConversation = appStateContext?.state?.chatHistory?.find((conv) => conv.id === conversationId)
-***REMOVED******REMOVED******REMOVED***if (!resultConversation) {
-***REMOVED******REMOVED******REMOVED***console.error("Conversation not found.");
-***REMOVED******REMOVED******REMOVED***setIsLoading(false);
-***REMOVED******REMOVED******REMOVED***setShowLoadingMessage(false);
-***REMOVED******REMOVED******REMOVED***abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
-***REMOVED******REMOVED******REMOVED***return;
-***REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED***resultConversation.messages.push(errorChatMsg);
-***REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED***if (!result.history_metadata) {
-***REMOVED******REMOVED******REMOVED***console.error("Error retrieving data.", result);
-***REMOVED******REMOVED******REMOVED***let errorChatMsg: ChatMessage = {
-***REMOVED******REMOVED******REMOVED******REMOVED***id: uuid(),
-***REMOVED******REMOVED******REMOVED******REMOVED***role: ERROR,
-***REMOVED******REMOVED******REMOVED******REMOVED***content: errorMessage,
-***REMOVED******REMOVED******REMOVED******REMOVED***date: new Date().toISOString()
-***REMOVED******REMOVED******REMOVED*** 
-***REMOVED******REMOVED******REMOVED***setMessages([...messages, userMessage, errorChatMsg])
-***REMOVED******REMOVED******REMOVED***setIsLoading(false);
-***REMOVED******REMOVED******REMOVED***setShowLoadingMessage(false);
-***REMOVED******REMOVED******REMOVED***abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
-***REMOVED******REMOVED******REMOVED***return;
-***REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED***resultConversation = {
-***REMOVED******REMOVED******REMOVED***id: result.history_metadata.conversation_id,
-***REMOVED******REMOVED******REMOVED***title: result.history_metadata.title,
-***REMOVED******REMOVED******REMOVED***messages: [userMessage],
-***REMOVED******REMOVED******REMOVED***date: result.history_metadata.date
-***REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED***resultConversation.messages.push(errorChatMsg);
-***REMOVED******REMOVED***
-***REMOVED******REMOVED***if (!resultConversation) {
-***REMOVED******REMOVED******REMOVED***setIsLoading(false);
-***REMOVED******REMOVED******REMOVED***setShowLoadingMessage(false);
-***REMOVED******REMOVED******REMOVED***abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
-***REMOVED******REMOVED******REMOVED***return;
-***REMOVED******REMOVED***
-***REMOVED******REMOVED***appStateContext?.dispatch({ type: 'UPDATE_CURRENT_CHAT', payload: resultConversation });
-***REMOVED******REMOVED***setMessages([...messages, errorChatMsg]);
-***REMOVED******REMOVED***
-***REMOVED******REMOVED***setMessages([...messages, userMessage])
-***REMOVED***
-***REMOVED*** finally {
+***REMOVED***let resultConversation;
+***REMOVED***if (conversationId) {
+***REMOVED***  resultConversation = appStateContext?.state?.chatHistory?.find((conv) => conv.id === conversationId)
+***REMOVED***  if (!resultConversation) {
+***REMOVED******REMOVED***console.error("Conversation not found.");
 ***REMOVED******REMOVED***setIsLoading(false);
 ***REMOVED******REMOVED***setShowLoadingMessage(false);
 ***REMOVED******REMOVED***abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
-***REMOVED******REMOVED***setProcessMessages(messageStatus.Done)
+***REMOVED******REMOVED***return;
+  ***REMOVED***
+***REMOVED***  isEmpty(toolMessage) ?
+***REMOVED******REMOVED***resultConversation.messages.push(assistantMessage) :
+***REMOVED******REMOVED***resultConversation.messages.push(toolMessage, assistantMessage)
+***REMOVED***
+***REMOVED***  resultConversation = {
+***REMOVED******REMOVED***id: result.history_metadata.conversation_id,
+***REMOVED******REMOVED***title: result.history_metadata.title,
+***REMOVED******REMOVED***messages: [userMessage],
+***REMOVED******REMOVED***date: result.history_metadata.date
+  ***REMOVED***
+***REMOVED***  isEmpty(toolMessage) ?
+***REMOVED******REMOVED***resultConversation.messages.push(assistantMessage) :
+***REMOVED******REMOVED***resultConversation.messages.push(toolMessage, assistantMessage)
+***REMOVED***
+***REMOVED***if (!resultConversation) {
+***REMOVED***  setIsLoading(false);
+***REMOVED***  setShowLoadingMessage(false);
+***REMOVED***  abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
+***REMOVED***  return;
+***REMOVED***
+***REMOVED***appStateContext?.dispatch({ type: 'UPDATE_CURRENT_CHAT', payload: resultConversation });
+***REMOVED***isEmpty(toolMessage) ?
+***REMOVED***  setMessages([...messages, assistantMessage]) :
+***REMOVED***  setMessages([...messages, toolMessage, assistantMessage]);
+  ***REMOVED***
+
+***REMOVED*** catch (e) {
+***REMOVED***  if (!abortController.signal.aborted) {
+***REMOVED***let errorMessage = `An error occurred. ${errorResponseMessage}`;
+***REMOVED***if (result.error?.message) {
+***REMOVED***  errorMessage = result.error.message;
+***REMOVED***
+***REMOVED***else if (typeof result.error === "string") {
+***REMOVED***  errorMessage = result.error;
+***REMOVED***
+
+***REMOVED***errorMessage = parseErrorMessage(errorMessage);
+
+***REMOVED***let errorChatMsg: ChatMessage = {
+***REMOVED***  id: uuid(),
+***REMOVED***  role: ERROR,
+***REMOVED***  content: errorMessage,
+***REMOVED***  date: new Date().toISOString()
+***REMOVED***
+***REMOVED***let resultConversation;
+***REMOVED***if (conversationId) {
+***REMOVED***  resultConversation = appStateContext?.state?.chatHistory?.find((conv) => conv.id === conversationId)
+***REMOVED***  if (!resultConversation) {
+***REMOVED******REMOVED***console.error("Conversation not found.");
+***REMOVED******REMOVED***setIsLoading(false);
+***REMOVED******REMOVED***setShowLoadingMessage(false);
+***REMOVED******REMOVED***abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
+***REMOVED******REMOVED***return;
+  ***REMOVED***
+***REMOVED***  resultConversation.messages.push(errorChatMsg);
+***REMOVED***
+***REMOVED***  if (!result.history_metadata) {
+***REMOVED******REMOVED***console.error("Error retrieving data.", result);
+***REMOVED******REMOVED***let errorChatMsg: ChatMessage = {
+***REMOVED******REMOVED***  id: uuid(),
+***REMOVED******REMOVED***  role: ERROR,
+***REMOVED******REMOVED***  content: errorMessage,
+***REMOVED******REMOVED***  date: new Date().toISOString()
+***REMOVED***
+***REMOVED******REMOVED***setMessages([...messages, userMessage, errorChatMsg])
+***REMOVED******REMOVED***setIsLoading(false);
+***REMOVED******REMOVED***setShowLoadingMessage(false);
+***REMOVED******REMOVED***abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
+***REMOVED******REMOVED***return;
+  ***REMOVED***
+***REMOVED***  resultConversation = {
+***REMOVED******REMOVED***id: result.history_metadata.conversation_id,
+***REMOVED******REMOVED***title: result.history_metadata.title,
+***REMOVED******REMOVED***messages: [userMessage],
+***REMOVED******REMOVED***date: result.history_metadata.date
+  ***REMOVED***
+***REMOVED***  resultConversation.messages.push(errorChatMsg);
+***REMOVED***
+***REMOVED***if (!resultConversation) {
+***REMOVED***  setIsLoading(false);
+***REMOVED***  setShowLoadingMessage(false);
+***REMOVED***  abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
+***REMOVED***  return;
+***REMOVED***
+***REMOVED***appStateContext?.dispatch({ type: 'UPDATE_CURRENT_CHAT', payload: resultConversation });
+***REMOVED***setMessages([...messages, errorChatMsg]);
+  ***REMOVED***
+***REMOVED***setMessages([...messages, userMessage])
+  ***REMOVED***
+***REMOVED*** finally {
+***REMOVED***  setIsLoading(false);
+***REMOVED***  setShowLoadingMessage(false);
+***REMOVED***  abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
+***REMOVED***  setProcessMessages(messageStatus.Done)
 ***REMOVED***
 ***REMOVED***return abortController.abort();
 
-***REMOVED***
+  }
 
-***REMOVED***const clearChat = async () => {
+  const clearChat = async () => {
 ***REMOVED***setClearingChat(true)
 ***REMOVED***if (appStateContext?.state.currentChat?.id && appStateContext?.state.isCosmosDBAvailable.cosmosDB) {
-***REMOVED******REMOVED***let response = await historyClear(appStateContext?.state.currentChat.id)
-***REMOVED******REMOVED***if (!response.ok) {
-***REMOVED******REMOVED***setErrorMsg({
-***REMOVED******REMOVED******REMOVED***title: "Error clearing current chat",
-***REMOVED******REMOVED******REMOVED***subtitle: "Please try again. If the problem persists, please contact the site administrator.",
-***REMOVED******REMOVED***)
-***REMOVED******REMOVED***toggleErrorDialog();
-***REMOVED******REMOVED***
-***REMOVED******REMOVED***appStateContext?.dispatch({ type: 'DELETE_CURRENT_CHAT_MESSAGES', payload: appStateContext?.state.currentChat.id });
-***REMOVED******REMOVED***appStateContext?.dispatch({ type: 'UPDATE_CHAT_HISTORY', payload: appStateContext?.state.currentChat });
-***REMOVED******REMOVED***setActiveCitation(undefined);
-***REMOVED******REMOVED***setIsCitationPanelOpen(false);
-***REMOVED******REMOVED***setMessages([])
-***REMOVED***
+***REMOVED***  let response = await historyClear(appStateContext?.state.currentChat.id)
+***REMOVED***  if (!response.ok) {
+***REMOVED***setErrorMsg({
+***REMOVED***  title: "Error clearing current chat",
+***REMOVED***  subtitle: "Please try again. If the problem persists, please contact the site administrator.",
+***REMOVED***)
+***REMOVED***toggleErrorDialog();
+  ***REMOVED***
+***REMOVED***appStateContext?.dispatch({ type: 'DELETE_CURRENT_CHAT_MESSAGES', payload: appStateContext?.state.currentChat.id });
+***REMOVED***appStateContext?.dispatch({ type: 'UPDATE_CHAT_HISTORY', payload: appStateContext?.state.currentChat });
+***REMOVED***setActiveCitation(undefined);
+***REMOVED***setIsCitationPanelOpen(false);
+***REMOVED***setMessages([])
+  ***REMOVED***
 ***REMOVED***
 ***REMOVED***setClearingChat(false)
-***REMOVED***;
+  };
 
-***REMOVED***const parseErrorMessage = (errorMessage: string) => {
+  const parseErrorMessage = (errorMessage: string) => {
 ***REMOVED***let errorCodeMessage = errorMessage.substring(0, errorMessage.indexOf("-") + 1);
 ***REMOVED***const innerErrorCue = "{\\'error\\': {\\'message\\': ";
-***REMOVED***if (errorMessage.includes(innerErrorCue))
-***REMOVED***{
-***REMOVED******REMOVED***try {
-***REMOVED******REMOVED***let innerErrorString = errorMessage.substring(errorMessage.indexOf(innerErrorCue));
-***REMOVED******REMOVED***if (innerErrorString.endsWith("'}}")) {
-***REMOVED******REMOVED******REMOVED***innerErrorString = innerErrorString.substring(0, innerErrorString.length - 3);
-***REMOVED******REMOVED***
-***REMOVED******REMOVED***innerErrorString = innerErrorString.replaceAll("\\'", "'")
-***REMOVED******REMOVED***let newErrorMessage = errorCodeMessage + " " + innerErrorString;
-***REMOVED******REMOVED***errorMessage = newErrorMessage;
-
-***REMOVED*** catch (e) {
-***REMOVED******REMOVED***console.error("Error parsing inner error message: ", e);
+***REMOVED***if (errorMessage.includes(innerErrorCue)) {
+***REMOVED***  try {
+***REMOVED***let innerErrorString = errorMessage.substring(errorMessage.indexOf(innerErrorCue));
+***REMOVED***if (innerErrorString.endsWith("'}}")) {
+***REMOVED***  innerErrorString = innerErrorString.substring(0, innerErrorString.length - 3);
 ***REMOVED***
+***REMOVED***innerErrorString = innerErrorString.replaceAll("\\'", "'")
+***REMOVED***let newErrorMessage = errorCodeMessage + " " + innerErrorString;
+***REMOVED***errorMessage = newErrorMessage;
+
+  ***REMOVED*** catch (e) {
+***REMOVED***console.error("Error parsing inner error message: ", e);
+  ***REMOVED***
 ***REMOVED***
 ***REMOVED***return errorMessage;
-***REMOVED***;
+  };
 
-***REMOVED***const newChat = () => {
+  const newChat = () => {
 ***REMOVED***setProcessMessages(messageStatus.Processing)
 ***REMOVED***setMessages([])
 ***REMOVED***setIsCitationPanelOpen(false);
 ***REMOVED***setActiveCitation(undefined);
 ***REMOVED***appStateContext?.dispatch({ type: 'UPDATE_CURRENT_CHAT', payload: null });
 ***REMOVED***setProcessMessages(messageStatus.Done)
-***REMOVED***;
+  };
 
-***REMOVED***const stopGenerating = () => {
+  const stopGenerating = () => {
 ***REMOVED***abortFuncs.current.forEach(a => a.abort());
 ***REMOVED***setShowLoadingMessage(false);
 ***REMOVED***setIsLoading(false);
-***REMOVED***
+  }
 
-***REMOVED***useEffect(() => {
+  useEffect(() => {
 ***REMOVED***if (appStateContext?.state.currentChat) {
-***REMOVED******REMOVED***setMessages(appStateContext.state.currentChat.messages)
+***REMOVED***  setMessages(appStateContext.state.currentChat.messages)
 ***REMOVED***
-***REMOVED******REMOVED***setMessages([])
+***REMOVED***  setMessages([])
 ***REMOVED***
-***REMOVED***, [appStateContext?.state.currentChat]);
+  }, [appStateContext?.state.currentChat]);
 
-***REMOVED***useLayoutEffect(() => {
+  useLayoutEffect(() => {
 ***REMOVED***const saveToDB = async (messages: ChatMessage[], id: string) => {
-***REMOVED******REMOVED***const response = await historyUpdate(messages, id)
-***REMOVED******REMOVED***return response
+***REMOVED***  const response = await historyUpdate(messages, id)
+***REMOVED***  return response
 ***REMOVED***
 
 ***REMOVED***if (appStateContext && appStateContext.state.currentChat && processMessages === messageStatus.Done) {
-***REMOVED******REMOVED***if (appStateContext.state.isCosmosDBAvailable.cosmosDB) {
+***REMOVED***  if (appStateContext.state.isCosmosDBAvailable.cosmosDB) {
+***REMOVED***if (!appStateContext?.state.currentChat?.messages) {
+***REMOVED***  console.error("Failure fetching current chat state.")
+***REMOVED***  return
+***REMOVED***
+***REMOVED***const noContentError = appStateContext.state.currentChat.messages.find(m => m.role === ERROR)
+
+***REMOVED***if (!noContentError?.content.includes(NO_CONTENT_ERROR)) {
+***REMOVED***  saveToDB(appStateContext.state.currentChat.messages, appStateContext.state.currentChat.id)
+***REMOVED******REMOVED***.then((res) => {
+***REMOVED******REMOVED***  if (!res.ok) {
+***REMOVED******REMOVED***let errorMessage = "An error occurred. Answers can't be saved at this time. If the problem persists, please contact the site administrator.";
+***REMOVED******REMOVED***let errorChatMsg: ChatMessage = {
+***REMOVED******REMOVED***  id: uuid(),
+***REMOVED******REMOVED***  role: ERROR,
+***REMOVED******REMOVED***  content: errorMessage,
+***REMOVED******REMOVED***  date: new Date().toISOString()
+***REMOVED******REMOVED***
 ***REMOVED******REMOVED***if (!appStateContext?.state.currentChat?.messages) {
-***REMOVED******REMOVED******REMOVED***console.error("Failure fetching current chat state.")
-***REMOVED******REMOVED******REMOVED***return
+***REMOVED******REMOVED***  let err: Error = {
+***REMOVED******REMOVED******REMOVED***...new Error,
+***REMOVED******REMOVED******REMOVED***message: "Failure fetching current chat state."
+***REMOVED***  ***REMOVED***
+***REMOVED******REMOVED***  throw err
 ***REMOVED******REMOVED***
-***REMOVED******REMOVED***const noContentError = appStateContext.state.currentChat.messages.find(m => m.role === ERROR)
-***REMOVED******REMOVED***
-***REMOVED******REMOVED***if (!noContentError?.content.includes(NO_CONTENT_ERROR)) {
-***REMOVED******REMOVED******REMOVED***saveToDB(appStateContext.state.currentChat.messages, appStateContext.state.currentChat.id)
-***REMOVED******REMOVED******REMOVED***.then((res) => {
-***REMOVED******REMOVED******REMOVED******REMOVED***if (!res.ok) {
-***REMOVED******REMOVED******REMOVED******REMOVED***let errorMessage = "An error occurred. Answers can't be saved at this time. If the problem persists, please contact the site administrator.";
-***REMOVED******REMOVED******REMOVED******REMOVED***let errorChatMsg: ChatMessage = {
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***id: uuid(),
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***role: ERROR,
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***content: errorMessage,
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***date: new Date().toISOString()
-***REMOVED******REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED******REMOVED***if (!appStateContext?.state.currentChat?.messages) {
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***let err: Error = {
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***...new Error,
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***message: "Failure fetching current chat state."
-***REMOVED******REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***throw err
-***REMOVED******REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED******REMOVED***setMessages([...appStateContext?.state.currentChat?.messages, errorChatMsg])
-***REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED******REMOVED***return res as Response
-***REMOVED******REMOVED******REMOVED***)
-***REMOVED******REMOVED******REMOVED***.catch((err) => {
-***REMOVED******REMOVED******REMOVED******REMOVED***console.error("Error: ", err)
-***REMOVED******REMOVED******REMOVED******REMOVED***let errRes: Response = {
-***REMOVED******REMOVED******REMOVED******REMOVED***...new Response,
-***REMOVED******REMOVED******REMOVED******REMOVED***ok: false,
-***REMOVED******REMOVED******REMOVED******REMOVED***status: 500,
-***REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED******REMOVED***return errRes;
-***REMOVED******REMOVED******REMOVED***)
-***REMOVED******REMOVED***
-***REMOVED******REMOVED***
+***REMOVED******REMOVED***setMessages([...appStateContext?.state.currentChat?.messages, errorChatMsg])
+  ***REMOVED***
+***REMOVED******REMOVED***  return res as Response
+***REMOVED***)
+***REMOVED******REMOVED***.catch((err) => {
+***REMOVED******REMOVED***  console.error("Error: ", err)
+***REMOVED******REMOVED***  let errRes: Response = {
+***REMOVED******REMOVED***...new Response,
+***REMOVED******REMOVED***ok: false,
+***REMOVED******REMOVED***status: 500,
+  ***REMOVED***
+***REMOVED******REMOVED***  return errRes;
+***REMOVED***)
 ***REMOVED***
-***REMOVED******REMOVED***appStateContext?.dispatch({ type: 'UPDATE_CHAT_HISTORY', payload: appStateContext.state.currentChat });
-***REMOVED******REMOVED***setMessages(appStateContext.state.currentChat.messages)
-***REMOVED******REMOVED***setProcessMessages(messageStatus.NotRunning)
+  ***REMOVED***
+  ***REMOVED***
+***REMOVED***  appStateContext?.dispatch({ type: 'UPDATE_CHAT_HISTORY', payload: appStateContext.state.currentChat });
+***REMOVED***  setMessages(appStateContext.state.currentChat.messages)
+***REMOVED***  setProcessMessages(messageStatus.NotRunning)
 ***REMOVED***
-***REMOVED***, [processMessages]);
+  }, [processMessages]);
 
-***REMOVED***useEffect(() => {
+  useEffect(() => {
 ***REMOVED***if (AUTH_ENABLED !== undefined) getUserInfoList();
-***REMOVED***, [AUTH_ENABLED]);
+  }, [AUTH_ENABLED]);
 
-***REMOVED***useLayoutEffect(() => {
+  useLayoutEffect(() => {
 ***REMOVED***chatMessageStreamEnd.current?.scrollIntoView({ behavior: "smooth" })
-***REMOVED***, [showLoadingMessage, processMessages]);
+  }, [showLoadingMessage, processMessages]);
 
-***REMOVED***const onShowCitation = (citation: Citation) => {
+  const onShowCitation = (citation: Citation) => {
 ***REMOVED***setActiveCitation(citation);
 ***REMOVED***setIsCitationPanelOpen(true);
-***REMOVED***;
+  };
 
-***REMOVED***const onViewSource = (citation: Citation) => {
+  const onViewSource = (citation: Citation) => {
 ***REMOVED***if (citation.url && !citation.url.includes("blob.core")) {
-***REMOVED******REMOVED***window.open(citation.url, "_blank");
+***REMOVED***  window.open(citation.url, "_blank");
 ***REMOVED***
-***REMOVED***;
+  };
 
-***REMOVED***const parseCitationFromMessage = (message: ChatMessage) => {
+  const parseCitationFromMessage = (message: ChatMessage) => {
 ***REMOVED***if (message?.role && message?.role === "tool") {
-***REMOVED******REMOVED***try {
-***REMOVED******REMOVED***const toolMessage = JSON.parse(message.content) as ToolMessageContent;
-***REMOVED******REMOVED***return toolMessage.citations;
-***REMOVED***
-***REMOVED******REMOVED***catch {
-***REMOVED******REMOVED***return [];
-***REMOVED***
+***REMOVED***  try {
+***REMOVED***const toolMessage = JSON.parse(message.content) as ToolMessageContent;
+***REMOVED***return toolMessage.citations;
+  ***REMOVED***
+***REMOVED***  catch {
+***REMOVED***return [];
+  ***REMOVED***
 ***REMOVED***
 ***REMOVED***return [];
-***REMOVED***
+  }
 
-***REMOVED***const disabledButton = () => {
+  const disabledButton = () => {
 ***REMOVED***return isLoading || (messages && messages.length === 0) || clearingChat || appStateContext?.state.chatHistoryLoadingState === ChatHistoryLoadingState.Loading
-***REMOVED***
+  }
 
-***REMOVED***return (
+  return (
 ***REMOVED***<div className={styles.container} role="main">
-***REMOVED******REMOVED***{showAuthMessage ? (
-***REMOVED******REMOVED***<Stack className={styles.chatEmptyState}>
-***REMOVED******REMOVED******REMOVED***<ShieldLockRegular className={styles.chatIcon} style={{ color: 'darkorange', height: "200px", width: "200px" }} />
-***REMOVED******REMOVED******REMOVED***<h1 className={styles.chatEmptyStateTitle}>Authentication Not Configured</h1>
-***REMOVED******REMOVED******REMOVED***<h2 className={styles.chatEmptyStateSubtitle}>
-***REMOVED******REMOVED******REMOVED***This app does not have authentication configured. Please add an identity provider by finding your app in the <a href="https://portal.azure.com/" target="_blank">Azure Portal</a> 
-***REMOVED******REMOVED******REMOVED***and following <a href="https://learn.microsoft.com/en-us/azure/app-service/scenario-secure-app-authentication-app-service#3-configure-authentication-and-authorization" target="_blank">these instructions</a>.
-***REMOVED******REMOVED******REMOVED***</h2>
-***REMOVED******REMOVED******REMOVED***<h2 className={styles.chatEmptyStateSubtitle} style={{ fontSize: "20px" }}><strong>Authentication configuration takes a few minutes to apply. </strong></h2>
-***REMOVED******REMOVED******REMOVED***<h2 className={styles.chatEmptyStateSubtitle} style={{ fontSize: "20px" }}><strong>If you deployed in the last 10 minutes, please wait and reload the page after 10 minutes.</strong></h2>
-***REMOVED******REMOVED***</Stack>
+***REMOVED***  {showAuthMessage ? (
+***REMOVED***<Stack className={styles.chatEmptyState}>
+***REMOVED***  <ShieldLockRegular className={styles.chatIcon} style={{ color: 'darkorange', height: "200px", width: "200px" }} />
+***REMOVED***  <h1 className={styles.chatEmptyStateTitle}>Authentication Not Configured</h1>
+***REMOVED***  <h2 className={styles.chatEmptyStateSubtitle}>
+***REMOVED******REMOVED***This app does not have authentication configured. Please add an identity provider by finding your app in the <a href="https://portal.azure.com/" target="_blank">Azure Portal</a>
+***REMOVED******REMOVED***and following <a href="https://learn.microsoft.com/en-us/azure/app-service/scenario-secure-app-authentication-app-service#3-configure-authentication-and-authorization" target="_blank">these instructions</a>.
+***REMOVED***  </h2>
+***REMOVED***  <h2 className={styles.chatEmptyStateSubtitle} style={{ fontSize: "20px" }}><strong>Authentication configuration takes a few minutes to apply. </strong></h2>
+***REMOVED***  <h2 className={styles.chatEmptyStateSubtitle} style={{ fontSize: "20px" }}><strong>If you deployed in the last 10 minutes, please wait and reload the page after 10 minutes.</strong></h2>
+***REMOVED***</Stack>
+***REMOVED***  ) : (
+***REMOVED***<Stack horizontal className={styles.chatRoot}>
+***REMOVED***  <div className={styles.chatContainer}>
+***REMOVED******REMOVED***{!messages || messages.length < 1 ? (
+***REMOVED******REMOVED***  <Stack className={styles.chatEmptyState}>
+***REMOVED******REMOVED***<img
+***REMOVED******REMOVED***  src={ui?.chat_logo ? ui.chat_logo : Contoso}
+***REMOVED******REMOVED***  className={styles.chatIcon}
+***REMOVED******REMOVED***  aria-hidden="true"
+***REMOVED******REMOVED***/>
+***REMOVED******REMOVED***<h1 className={styles.chatEmptyStateTitle}>{ui?.chat_title}</h1>
+***REMOVED******REMOVED***<h2 className={styles.chatEmptyStateSubtitle}>{ui?.chat_description}</h2>
+***REMOVED******REMOVED***  </Stack>
 ***REMOVED******REMOVED***) : (
-***REMOVED******REMOVED***<Stack horizontal className={styles.chatRoot}>
-***REMOVED******REMOVED******REMOVED***<div className={styles.chatContainer}>
-***REMOVED******REMOVED******REMOVED***{!messages || messages.length < 1 ? (
-***REMOVED******REMOVED******REMOVED******REMOVED***<Stack className={styles.chatEmptyState}>
-***REMOVED******REMOVED******REMOVED******REMOVED***<img
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***src={ui?.chat_logo ? ui.chat_logo : Contoso}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***className={styles.chatIcon}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***aria-hidden="true"
-***REMOVED******REMOVED******REMOVED******REMOVED***/>
-***REMOVED******REMOVED******REMOVED******REMOVED***<h1 className={styles.chatEmptyStateTitle}>{ui?.chat_title}</h1>
-***REMOVED******REMOVED******REMOVED******REMOVED***<h2 className={styles.chatEmptyStateSubtitle}>{ui?.chat_description}</h2>
-***REMOVED******REMOVED******REMOVED******REMOVED***</Stack>
+***REMOVED******REMOVED***  <div className={styles.chatMessageStream} style={{ marginBottom: isLoading ? "40px" : "0px" }} role="log">
+***REMOVED******REMOVED***{messages.map((answer, index) => (
+***REMOVED******REMOVED***  <>
+***REMOVED******REMOVED******REMOVED***{answer.role === "user" ? (
+***REMOVED******REMOVED******REMOVED***  <div className={styles.chatMessageUser} tabIndex={0}>
+***REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageUserMessage}>{answer.content}</div>
+***REMOVED******REMOVED******REMOVED***  </div>
 ***REMOVED******REMOVED******REMOVED***) : (
-***REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageStream} style={{ marginBottom: isLoading ? "40px" : "0px" }} role="log">
-***REMOVED******REMOVED******REMOVED******REMOVED***{messages.map((answer, index) => (
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***{answer.role === "user" ? (
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageUser} tabIndex={0}>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageUserMessage}>{answer.content}</div>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***</div>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***) : (
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***answer.role === "assistant" ? <div className={styles.chatMessageGpt}>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<Answer
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***answer={{
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***answer: answer.content,
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***citations: parseCitationFromMessage(messages[index - 1]),
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***message_id: answer.id,
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***feedback: answer.feedback
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onCitationClicked={c => onShowCitation(c)}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***/>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***</div> : answer.role === ERROR ? <div className={styles.chatMessageError}>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<Stack horizontal className={styles.chatMessageErrorContent}>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<ErrorCircleRegular className={styles.errorIcon} style={{ color: "rgba(182, 52, 67, 1)" }} />
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<span>Error</span>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***</Stack>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<span className={styles.chatMessageErrorContent}>{answer.content}</span>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***</div> : null
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***)}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***</>
-***REMOVED******REMOVED******REMOVED******REMOVED***))}
-***REMOVED******REMOVED******REMOVED******REMOVED***{showLoadingMessage && (
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageGpt}>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<Answer
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***answer={{
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***answer: "Generating answer...",
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***citations: []
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onCitationClicked={() => null}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***/>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***</div>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***</>
-***REMOVED******REMOVED******REMOVED******REMOVED***)}
-***REMOVED******REMOVED******REMOVED******REMOVED***<div ref={chatMessageStreamEnd} />
-***REMOVED******REMOVED******REMOVED******REMOVED***</div>
-***REMOVED******REMOVED******REMOVED***)}
-
-***REMOVED******REMOVED******REMOVED***<Stack horizontal className={styles.chatInput}>
-***REMOVED******REMOVED******REMOVED******REMOVED***{isLoading && (
-***REMOVED******REMOVED******REMOVED******REMOVED***<Stack
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***horizontal
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***className={styles.stopGeneratingContainer}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***role="button"
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***aria-label="Stop generating"
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***tabIndex={0}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onClick={stopGenerating}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onKeyDown={e => e.key === "Enter" || e.key === " " ? stopGenerating() : null}
-***REMOVED******REMOVED******REMOVED******REMOVED***>
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<SquareRegular className={styles.stopGeneratingIcon} aria-hidden="true" />
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***<span className={styles.stopGeneratingText} aria-hidden="true">Stop generating</span>
-***REMOVED******REMOVED******REMOVED******REMOVED***</Stack>
-***REMOVED******REMOVED******REMOVED******REMOVED***)}
-***REMOVED******REMOVED******REMOVED******REMOVED***<Stack>
-***REMOVED******REMOVED******REMOVED******REMOVED***{appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && <CommandBarButton
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***role="button"
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***styles={{
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***icon: {
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***color: '#FFFFFF',
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***,
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***iconDisabled: {
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***color: "#BDBDBD !important"
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***,
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***root: {
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***color: '#FFFFFF',
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***background: "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #0F6CBD 33.63%, #2D87C3 70.31%, #8DDDD8 100%)"
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***,
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***rootDisabled: {
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***background: "#F0F0F0"
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED******REMOVED***}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***className={styles.newChatIcon}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***iconProps={{ iconName: 'Add' }}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onClick={newChat}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***disabled={disabledButton()}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***aria-label="start a new chat button"
-***REMOVED******REMOVED******REMOVED******REMOVED***/>}
-***REMOVED******REMOVED******REMOVED******REMOVED***<CommandBarButton
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***role="button"
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***styles={{
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***icon: {
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***color: '#FFFFFF',
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***,
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***iconDisabled: {
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***color: "#BDBDBD !important",
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***,
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***root: {
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***color: '#FFFFFF',
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***background: "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #0F6CBD 33.63%, #2D87C3 70.31%, #8DDDD8 100%)",
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***,
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***rootDisabled: {
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***background: "#F0F0F0"
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***
-***REMOVED******REMOVED******REMOVED******REMOVED***}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***className={appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured ? styles.clearChatBroom : styles.clearChatBroomNoCosmos}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***iconProps={{ iconName: 'Broom' }}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onClick={appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured ? clearChat : newChat}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***disabled={disabledButton()}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***aria-label="clear chat button"
-***REMOVED******REMOVED******REMOVED******REMOVED***/>
-***REMOVED******REMOVED******REMOVED******REMOVED***<Dialog
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***hidden={hideErrorDialog}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***onDismiss={handleErrorDialogClose}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***dialogContentProps={errorDialogContentProps}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***modalProps={modalProps}
-***REMOVED******REMOVED******REMOVED******REMOVED***>
-***REMOVED******REMOVED******REMOVED******REMOVED***</Dialog>
-***REMOVED******REMOVED******REMOVED******REMOVED***</Stack>
-***REMOVED******REMOVED******REMOVED******REMOVED***<QuestionInput
-***REMOVED******REMOVED******REMOVED******REMOVED***clearOnSend
-***REMOVED******REMOVED******REMOVED******REMOVED***placeholder="Type a new question..."
-***REMOVED******REMOVED******REMOVED******REMOVED***disabled={isLoading}
-***REMOVED******REMOVED******REMOVED******REMOVED***onSend={(question, id) => {
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***appStateContext?.state.isCosmosDBAvailable?.cosmosDB ? makeApiRequestWithCosmosDB(question, id) : makeApiRequestWithoutCosmosDB(question, id)
-***REMOVED******REMOVED******REMOVED******REMOVED***}
-***REMOVED******REMOVED******REMOVED******REMOVED***conversationId={appStateContext?.state.currentChat?.id ? appStateContext?.state.currentChat?.id : undefined}
-***REMOVED******REMOVED******REMOVED******REMOVED***/>
+***REMOVED******REMOVED******REMOVED***  answer.role === "assistant" ? <div className={styles.chatMessageGpt}>
+***REMOVED******REMOVED******REMOVED***<Answer
+***REMOVED******REMOVED******REMOVED***  answer={{
+***REMOVED******REMOVED******REMOVED******REMOVED***answer: answer.content,
+***REMOVED******REMOVED******REMOVED******REMOVED***citations: parseCitationFromMessage(messages[index - 1]),
+***REMOVED******REMOVED******REMOVED******REMOVED***message_id: answer.id,
+***REMOVED******REMOVED******REMOVED******REMOVED***feedback: answer.feedback
+***REMOVED******REMOVED***  ***REMOVED***}
+***REMOVED******REMOVED******REMOVED***  onCitationClicked={c => onShowCitation(c)}
+***REMOVED******REMOVED******REMOVED***/>
+***REMOVED******REMOVED******REMOVED***  </div> : answer.role === ERROR ? <div className={styles.chatMessageError}>
+***REMOVED******REMOVED******REMOVED***<Stack horizontal className={styles.chatMessageErrorContent}>
+***REMOVED******REMOVED******REMOVED***  <ErrorCircleRegular className={styles.errorIcon} style={{ color: "rgba(182, 52, 67, 1)" }} />
+***REMOVED******REMOVED******REMOVED***  <span>Error</span>
 ***REMOVED******REMOVED******REMOVED***</Stack>
-***REMOVED******REMOVED******REMOVED***</div>
-***REMOVED******REMOVED******REMOVED***{/* Citation Panel */}
-***REMOVED******REMOVED******REMOVED***{messages && messages.length > 0 && isCitationPanelOpen && activeCitation && (
-***REMOVED******REMOVED******REMOVED***<Stack.Item className={styles.citationPanel} tabIndex={0} role="tabpanel" aria-label="Citations Panel">
-***REMOVED******REMOVED******REMOVED******REMOVED***<Stack aria-label="Citations Panel Header Container" horizontal className={styles.citationPanelHeaderContainer} horizontalAlign="space-between" verticalAlign="center">
-***REMOVED******REMOVED******REMOVED******REMOVED***<span aria-label="Citations" className={styles.citationPanelHeader}>Citations</span>
-***REMOVED******REMOVED******REMOVED******REMOVED***<IconButton iconProps={{ iconName: 'Cancel' }} aria-label="Close citations panel" onClick={() => setIsCitationPanelOpen(false)} />
-***REMOVED******REMOVED******REMOVED******REMOVED***</Stack>
-***REMOVED******REMOVED******REMOVED******REMOVED***<h5 className={styles.citationPanelTitle} tabIndex={0} title={activeCitation.url && !activeCitation.url.includes("blob.core") ? activeCitation.url : activeCitation.title ?? ""} onClick={() => onViewSource(activeCitation)}>{activeCitation.title}</h5>
-***REMOVED******REMOVED******REMOVED******REMOVED***<div tabIndex={0}>
-***REMOVED******REMOVED******REMOVED******REMOVED***<ReactMarkdown
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***linkTarget="_blank"
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***className={styles.citationPanelContent}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***children={DOMPurify.sanitize(activeCitation.content, {ALLOWED_TAGS: XSSAllowTags})}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***remarkPlugins={[remarkGfm]}
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***rehypePlugins={[rehypeRaw]}
-***REMOVED******REMOVED******REMOVED******REMOVED***/>
-***REMOVED******REMOVED******REMOVED******REMOVED***</div>
-***REMOVED******REMOVED******REMOVED***</Stack.Item>
+***REMOVED******REMOVED******REMOVED***<span className={styles.chatMessageErrorContent}>{answer.content}</span>
+***REMOVED******REMOVED******REMOVED***  </div> : null
 ***REMOVED******REMOVED******REMOVED***)}
-***REMOVED******REMOVED******REMOVED***{(appStateContext?.state.isChatHistoryOpen && appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured) && <ChatHistoryPanel />}
-***REMOVED******REMOVED***</Stack>
+***REMOVED******REMOVED***  </>
+***REMOVED******REMOVED***))}
+***REMOVED******REMOVED***{showLoadingMessage && (
+***REMOVED******REMOVED***  <>
+***REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageGpt}>
+***REMOVED******REMOVED******REMOVED***  <Answer
+***REMOVED******REMOVED******REMOVED***answer={{
+***REMOVED******REMOVED******REMOVED***  answer: "Generating answer...",
+***REMOVED******REMOVED******REMOVED***  citations: []
+***REMOVED******REMOVED******REMOVED***}
+***REMOVED******REMOVED******REMOVED***onCitationClicked={() => null}
+***REMOVED******REMOVED******REMOVED***  />
+***REMOVED******REMOVED******REMOVED***</div>
+***REMOVED******REMOVED***  </>
 ***REMOVED******REMOVED***)}
+***REMOVED******REMOVED***<div ref={chatMessageStreamEnd} />
+***REMOVED******REMOVED***  </div>
+***REMOVED******REMOVED***)}
+
+***REMOVED******REMOVED***<Stack horizontal className={styles.chatInput}>
+***REMOVED******REMOVED***  {isLoading && (
+***REMOVED******REMOVED***<Stack
+***REMOVED******REMOVED***  horizontal
+***REMOVED******REMOVED***  className={styles.stopGeneratingContainer}
+***REMOVED******REMOVED***  role="button"
+***REMOVED******REMOVED***  aria-label="Stop generating"
+***REMOVED******REMOVED***  tabIndex={0}
+***REMOVED******REMOVED***  onClick={stopGenerating}
+***REMOVED******REMOVED***  onKeyDown={e => e.key === "Enter" || e.key === " " ? stopGenerating() : null}
+***REMOVED******REMOVED***>
+***REMOVED******REMOVED***  <SquareRegular className={styles.stopGeneratingIcon} aria-hidden="true" />
+***REMOVED******REMOVED***  <span className={styles.stopGeneratingText} aria-hidden="true">Stop generating</span>
+***REMOVED******REMOVED***</Stack>
+***REMOVED******REMOVED***  )}
+***REMOVED******REMOVED***  <Stack>
+***REMOVED******REMOVED***{appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && <CommandBarButton
+***REMOVED******REMOVED***  role="button"
+***REMOVED******REMOVED***  styles={{
+***REMOVED******REMOVED******REMOVED***icon: {
+***REMOVED******REMOVED******REMOVED***  color: '#FFFFFF',
+***REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***iconDisabled: {
+***REMOVED******REMOVED******REMOVED***  color: "#BDBDBD !important"
+***REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***root: {
+***REMOVED******REMOVED******REMOVED***  color: '#FFFFFF',
+***REMOVED******REMOVED******REMOVED***  background: "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #0F6CBD 33.63%, #2D87C3 70.31%, #8DDDD8 100%)"
+***REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***rootDisabled: {
+***REMOVED******REMOVED******REMOVED***  background: "#F0F0F0"
+***REMOVED******REMOVED***
+***REMOVED***  ***REMOVED***}
+***REMOVED******REMOVED***  className={styles.newChatIcon}
+***REMOVED******REMOVED***  iconProps={{ iconName: 'Add' }}
+***REMOVED******REMOVED***  onClick={newChat}
+***REMOVED******REMOVED***  disabled={disabledButton()}
+***REMOVED******REMOVED***  aria-label="start a new chat button"
+***REMOVED******REMOVED***/>}
+***REMOVED******REMOVED***<CommandBarButton
+***REMOVED******REMOVED***  role="button"
+***REMOVED******REMOVED***  styles={{
+***REMOVED******REMOVED******REMOVED***icon: {
+***REMOVED******REMOVED******REMOVED***  color: '#FFFFFF',
+***REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***iconDisabled: {
+***REMOVED******REMOVED******REMOVED***  color: "#BDBDBD !important",
+***REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***root: {
+***REMOVED******REMOVED******REMOVED***  color: '#FFFFFF',
+***REMOVED******REMOVED******REMOVED***  background: "radial-gradient(109.81% 107.82% at 100.1% 90.19%, #0F6CBD 33.63%, #2D87C3 70.31%, #8DDDD8 100%)",
+***REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***rootDisabled: {
+***REMOVED******REMOVED******REMOVED***  background: "#F0F0F0"
+***REMOVED******REMOVED***
+***REMOVED***  ***REMOVED***}
+***REMOVED******REMOVED***  className={appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured ? styles.clearChatBroom : styles.clearChatBroomNoCosmos}
+***REMOVED******REMOVED***  iconProps={{ iconName: 'Broom' }}
+***REMOVED******REMOVED***  onClick={appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured ? clearChat : newChat}
+***REMOVED******REMOVED***  disabled={disabledButton()}
+***REMOVED******REMOVED***  aria-label="clear chat button"
+***REMOVED******REMOVED***/>
+***REMOVED******REMOVED***<Dialog
+***REMOVED******REMOVED***  hidden={hideErrorDialog}
+***REMOVED******REMOVED***  onDismiss={handleErrorDialogClose}
+***REMOVED******REMOVED***  dialogContentProps={errorDialogContentProps}
+***REMOVED******REMOVED***  modalProps={modalProps}
+***REMOVED******REMOVED***>
+***REMOVED******REMOVED***</Dialog>
+***REMOVED******REMOVED***  </Stack>
+***REMOVED******REMOVED***  <QuestionInput
+***REMOVED******REMOVED***clearOnSend
+***REMOVED******REMOVED***placeholder="Type a new question..."
+***REMOVED******REMOVED***disabled={isLoading}
+***REMOVED******REMOVED***onSend={(question, id) => {
+***REMOVED******REMOVED***  appStateContext?.state.isCosmosDBAvailable?.cosmosDB ? makeApiRequestWithCosmosDB(question, id) : makeApiRequestWithoutCosmosDB(question, id)
+***REMOVED******REMOVED***}
+***REMOVED******REMOVED***conversationId={appStateContext?.state.currentChat?.id ? appStateContext?.state.currentChat?.id : undefined}
+***REMOVED******REMOVED***  />
+***REMOVED******REMOVED***</Stack>
+***REMOVED***  </div>
+***REMOVED***  {/* Citation Panel */}
+***REMOVED***  {messages && messages.length > 0 && isCitationPanelOpen && activeCitation && (
+***REMOVED******REMOVED***<Stack.Item className={styles.citationPanel} tabIndex={0} role="tabpanel" aria-label="Citations Panel">
+***REMOVED******REMOVED***  <Stack aria-label="Citations Panel Header Container" horizontal className={styles.citationPanelHeaderContainer} horizontalAlign="space-between" verticalAlign="center">
+***REMOVED******REMOVED***<span aria-label="Citations" className={styles.citationPanelHeader}>Citations</span>
+***REMOVED******REMOVED***<IconButton iconProps={{ iconName: 'Cancel' }} aria-label="Close citations panel" onClick={() => setIsCitationPanelOpen(false)} />
+***REMOVED******REMOVED***  </Stack>
+***REMOVED******REMOVED***  <h5 className={styles.citationPanelTitle} tabIndex={0} title={activeCitation.url && !activeCitation.url.includes("blob.core") ? activeCitation.url : activeCitation.title ?? ""} onClick={() => onViewSource(activeCitation)}>{activeCitation.title}</h5>
+***REMOVED******REMOVED***  <div tabIndex={0}>
+***REMOVED******REMOVED***<ReactMarkdown
+***REMOVED******REMOVED***  linkTarget="_blank"
+***REMOVED******REMOVED***  className={styles.citationPanelContent}
+***REMOVED******REMOVED***  children={DOMPurify.sanitize(activeCitation.content, { ALLOWED_TAGS: XSSAllowTags })}
+***REMOVED******REMOVED***  remarkPlugins={[remarkGfm]}
+***REMOVED******REMOVED***  rehypePlugins={[rehypeRaw]}
+***REMOVED******REMOVED***/>
+***REMOVED******REMOVED***  </div>
+***REMOVED******REMOVED***</Stack.Item>
+***REMOVED***  )}
+***REMOVED***  {(appStateContext?.state.isChatHistoryOpen && appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured) && <ChatHistoryPanel />}
+***REMOVED***</Stack>
+***REMOVED***  )}
 ***REMOVED***</div>
-***REMOVED***);
+  );
 };
 
 export default Chat;

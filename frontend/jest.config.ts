@@ -1,11 +1,11 @@
-import type {Config} from '@jest/types';
+import type { Config } from '@jest/types'
 
 const config: Config.InitialOptions = {
   verbose: true,
   transform: {
-***REMOVED***'^.+\\.tsx?$': 'ts-jest',
+***REMOVED***'^.+\\.tsx?$': 'ts-jest'
   },
-  setupFilesAfterEnv: ['<rootDir>/polyfills.js'],
-};
+  setupFilesAfterEnv: ['<rootDir>/polyfills.js']
+}
 
-export default config;
+export default config

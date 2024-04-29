@@ -1,0 +1,13 @@
+{
+***REMOVED***"semi": false,
+***REMOVED***"singleQuote": true,
+***REMOVED***"arrowParens": "avoid",
+***REMOVED***"trailingComma": "none",
+***REMOVED***"endOfLine": "auto",
+***REMOVED***"tabWidth": 2,
+***REMOVED***"printWidth": 120,
+***REMOVED***"bracketSpacing": true,
+***REMOVED***"bracketSameLine": true,
+***REMOVED***"jsxSingleQuote": false,
+***REMOVED***"quoteProps": "as-needed"
+}
