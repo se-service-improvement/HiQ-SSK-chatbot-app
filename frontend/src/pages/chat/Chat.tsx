@@ -524,24 +524,59 @@ const Chat = () => {
 ***REMOVED***setClearingChat(false)
   };
 
+  const tryGetRaiPrettyError = (errorMessage: string) => {
+***REMOVED***try {
+***REMOVED***  // Using a regex to extract the JSON part that contains "innererror"
+***REMOVED***  const match = errorMessage.match(/'innererror': ({.*})\}\}/)
+***REMOVED***  if (match) {
+***REMOVED***// Replacing single quotes with double quotes and converting Python-like booleans to JSON booleans
+***REMOVED***const fixedJson = match[1]
+***REMOVED***  .replace(/'/g, '"')
+***REMOVED***  .replace(/\bTrue\b/g, 'true')
+***REMOVED***  .replace(/\bFalse\b/g, 'false')
+***REMOVED***const innerErrorJson = JSON.parse(fixedJson)
+***REMOVED***let reason = ''
+***REMOVED***// Check if jailbreak content filter is the reason of the error
+***REMOVED***const jailbreak = innerErrorJson.content_filter_result.jailbreak
+***REMOVED***if (jailbreak.filtered === true) {
+***REMOVED***  reason = 'Jailbreak'
+***REMOVED***
+
+***REMOVED***// Returning the prettified error message
+***REMOVED***if (reason !== '') {
+***REMOVED***  return (
+***REMOVED******REMOVED***'The prompt was filtered due to triggering Azure OpenAI’s content filtering system.\n' +
+***REMOVED******REMOVED***'Reason: This prompt contains content flagged as ' +
+***REMOVED******REMOVED***reason +
+***REMOVED******REMOVED***'\n\n' +
+***REMOVED******REMOVED***'Please modify your prompt and retry. Learn more: https://go.microsoft.com/fwlink/?linkid=2198766'
+***REMOVED***  )
+***REMOVED***
+  ***REMOVED***
+***REMOVED*** catch (e) {
+***REMOVED***  console.error('Failed to parse the error:', e)
+***REMOVED***
+***REMOVED***return errorMessage
+  };
+
   const parseErrorMessage = (errorMessage: string) => {
-***REMOVED***let errorCodeMessage = errorMessage.substring(0, errorMessage.indexOf("-") + 1);
-***REMOVED***const innerErrorCue = "{\\'error\\': {\\'message\\': ";
+***REMOVED***let errorCodeMessage = errorMessage.substring(0, errorMessage.indexOf('-') + 1)
+***REMOVED***const innerErrorCue = "{\\'error\\': {\\'message\\': "
 ***REMOVED***if (errorMessage.includes(innerErrorCue)) {
 ***REMOVED***  try {
-***REMOVED***let innerErrorString = errorMessage.substring(errorMessage.indexOf(innerErrorCue));
+***REMOVED***let innerErrorString = errorMessage.substring(errorMessage.indexOf(innerErrorCue))
 ***REMOVED***if (innerErrorString.endsWith("'}}")) {
-***REMOVED***  innerErrorString = innerErrorString.substring(0, innerErrorString.length - 3);
+***REMOVED***  innerErrorString = innerErrorString.substring(0, innerErrorString.length - 3)
 ***REMOVED***
 ***REMOVED***innerErrorString = innerErrorString.replaceAll("\\'", "'")
-***REMOVED***let newErrorMessage = errorCodeMessage + " " + innerErrorString;
-***REMOVED***errorMessage = newErrorMessage;
-
+***REMOVED***let newErrorMessage = errorCodeMessage + ' ' + innerErrorString
+***REMOVED***errorMessage = newErrorMessage
   ***REMOVED*** catch (e) {
-***REMOVED***console.error("Error parsing inner error message: ", e);
+***REMOVED***console.error('Error parsing inner error message: ', e)
   ***REMOVED***
 ***REMOVED***
-***REMOVED***return errorMessage;
+
+***REMOVED***return tryGetRaiPrettyError(errorMessage)
   };
 
   const newChat = () => {
