@@ -17,7 +17,7 @@ from quart import (
 
 from openai import AsyncAzureOpenAI
 from azure.identity.aio import DefaultAzureCredential, get_bearer_token_provider
-from backend.auth.auth_utils import get_authenticated_user_details
+from backend.auth.auth_utils import get_authenticated_user_details, get_tenantid
 from backend.history.cosmosdbservice import CosmosConversationClient
 
 from backend.utils import (
@@ -267,7 +267,8 @@ frontend_settings = {
 ***REMOVED***,
 ***REMOVED***"sanitize_answer": SANITIZE_ANSWER,
 }
-
+# Enable Microsoft Defender for Cloud Integration
+MS_DEFENDER_ENABLED = os.environ.get("MS_DEFENDER_ENABLED", "false").lower() == "true"
 
 def should_use_data():
 ***REMOVED***global DATASOURCE_TYPE
@@ -723,7 +724,7 @@ def get_configured_data_source():
 ***REMOVED***return data_source
 
 
-def prepare_model_args(request_body):
+def prepare_model_args(request_body, request_headers):
 ***REMOVED***request_messages = request_body.get("messages", [])
 ***REMOVED***messages = []
 ***REMOVED***if not SHOULD_USE_DATA:
@@ -732,6 +733,20 @@ def prepare_model_args(request_body):
 ***REMOVED***for message in request_messages:
 ***REMOVED***if message:
 ***REMOVED******REMOVED***messages.append({"role": message["role"], "content": message["content"]})
+
+***REMOVED***user_json = None
+***REMOVED***if (MS_DEFENDER_ENABLED):
+***REMOVED***authenticated_user_details = get_authenticated_user_details(request_headers)
+***REMOVED***tenantId = get_tenantid(authenticated_user_details.get("client_principal_b64"))
+***REMOVED***conversation_id = request_body.get("conversation_id", None)***REMOVED***
+***REMOVED***user_args = {
+***REMOVED******REMOVED***"EndUserId": authenticated_user_details.get('user_principal_id'),
+***REMOVED******REMOVED***"EndUserIdType": 'Entra',
+***REMOVED******REMOVED***"EndUserTenantId": tenantId,
+***REMOVED******REMOVED***"ConversationId": conversation_id,
+***REMOVED******REMOVED***"SourceIp": request_headers.get('X-Forwarded-For', request_headers.get('Remote-Addr', '')),
+***REMOVED***
+***REMOVED***user_json = json.dumps(user_args)
 
 ***REMOVED***model_args = {
 ***REMOVED***"messages": messages,
@@ -745,6 +760,7 @@ def prepare_model_args(request_body):
 ***REMOVED***),
 ***REMOVED***"stream": SHOULD_STREAM,
 ***REMOVED***"model": AZURE_OPENAI_MODEL,
+***REMOVED***"user": user_json,
 ***REMOVED***
 
 ***REMOVED***if SHOULD_USE_DATA:
@@ -822,15 +838,15 @@ async def promptflow_request(request):
 ***REMOVED***logging.error(f"An error occurred while making promptflow_request: {e}")
 
 
-async def send_chat_request(request):
+async def send_chat_request(request_body, request_headers):
 ***REMOVED***filtered_messages = []
-***REMOVED***messages = request.get("messages", [])
+***REMOVED***messages = request_body.get("messages", [])
 ***REMOVED***for message in messages:
 ***REMOVED***if message.get("role") != 'tool':
 ***REMOVED******REMOVED***filtered_messages.append(message)
 ***REMOVED******REMOVED***
-***REMOVED***request['messages'] = filtered_messages
-***REMOVED***model_args = prepare_model_args(request)
+***REMOVED***request_body['messages'] = filtered_messages
+***REMOVED***model_args = prepare_model_args(request_body, request_headers)
 
 ***REMOVED***try:
 ***REMOVED***azure_openai_client = init_openai_client()
@@ -844,7 +860,7 @@ async def send_chat_request(request):
 ***REMOVED***return response, apim_request_id
 
 
-async def complete_chat_request(request_body):
+async def complete_chat_request(request_body, request_headers):
 ***REMOVED***if USE_PROMPTFLOW and PROMPTFLOW_ENDPOINT and PROMPTFLOW_API_KEY:
 ***REMOVED***response = await promptflow_request(request_body)
 ***REMOVED***history_metadata = request_body.get("history_metadata", {})
@@ -852,13 +868,13 @@ async def complete_chat_request(request_body):
 ***REMOVED******REMOVED***response, history_metadata, PROMPTFLOW_RESPONSE_FIELD_NAME, PROMPTFLOW_CITATIONS_FIELD_NAME
 ***REMOVED***)
 ***REMOVED***else:
-***REMOVED***response, apim_request_id = await send_chat_request(request_body)
+***REMOVED***response, apim_request_id = await send_chat_request(request_body, request_headers)
 ***REMOVED***history_metadata = request_body.get("history_metadata", {})
 ***REMOVED***return format_non_streaming_response(response, history_metadata, apim_request_id)
 
 
-async def stream_chat_request(request_body):
-***REMOVED***response, apim_request_id = await send_chat_request(request_body)
+async def stream_chat_request(request_body, request_headers):
+***REMOVED***response, apim_request_id = await send_chat_request(request_body, request_headers)
 ***REMOVED***history_metadata = request_body.get("history_metadata", {})
 ***REMOVED***
 ***REMOVED***async def generate():
@@ -868,16 +884,16 @@ async def stream_chat_request(request_body):
 ***REMOVED***return generate()
 
 
-async def conversation_internal(request_body):
+async def conversation_internal(request_body, request_headers):
 ***REMOVED***try:
 ***REMOVED***if SHOULD_STREAM:
-***REMOVED******REMOVED***result = await stream_chat_request(request_body)
+***REMOVED******REMOVED***result = await stream_chat_request(request_body, request_headers)
 ***REMOVED******REMOVED***response = await make_response(format_as_ndjson(result))
 ***REMOVED******REMOVED***response.timeout = None
 ***REMOVED******REMOVED***response.mimetype = "application/json-lines"
 ***REMOVED******REMOVED***return response
 ***REMOVED***else:
-***REMOVED******REMOVED***result = await complete_chat_request(request_body)
+***REMOVED******REMOVED***result = await complete_chat_request(request_body, request_headers)
 ***REMOVED******REMOVED***return jsonify(result)
 
 ***REMOVED***except Exception as ex:
@@ -894,7 +910,7 @@ async def conversation():
 ***REMOVED***return jsonify({"error": "request must be json"}), 415
 ***REMOVED***request_json = await request.get_json()
 
-***REMOVED***return await conversation_internal(request_json)
+***REMOVED***return await conversation_internal(request_json, request.headers)
 
 
 @bp.route("/frontend_settings", methods=["GET"])
@@ -958,7 +974,7 @@ async def add_conversation():
 ***REMOVED***request_body = await request.get_json()
 ***REMOVED***history_metadata["conversation_id"] = conversation_id
 ***REMOVED***request_body["history_metadata"] = history_metadata
-***REMOVED***return await conversation_internal(request_body)
+***REMOVED***return await conversation_internal(request_body, request.headers)
 
 ***REMOVED***except Exception as e:
 ***REMOVED***logging.exception("Exception in /history/generate")
