@@ -4,16 +4,20 @@ import dataclasses
 import json
 import os
 import subprocess
+import time
 
 import requests
-import time
 from azure.ai.formrecognizer import DocumentAnalysisClient
 from azure.core.credentials import AzureKeyCredential
 from azure.identity import AzureCliCredential
 from azure.search.documents import SearchClient
+from dotenv import load_dotenv
 from tqdm import tqdm
 
 from data_utils import chunk_directory, chunk_blob_container
+
+# Configure environment variables  
+load_dotenv() # take environment variables from .env.
 
 SUPPORTED_LANGUAGE_CODES = {
 ***REMOVED***"ar": "Arabic",
@@ -228,7 +232,7 @@ def create_or_update_search_index(
 ***REMOVED******REMOVED***"type": "Collection(Edm.Single)",
 ***REMOVED******REMOVED***"searchable": True,
 ***REMOVED******REMOVED***"retrievable": True,
-***REMOVED******REMOVED***"dimensions": 1536,
+***REMOVED******REMOVED***"dimensions": os.getenv("VECTOR_DIMENSION", 1536),
 ***REMOVED******REMOVED***"vectorSearchConfiguration": vector_config_name
 ***REMOVED***)
 

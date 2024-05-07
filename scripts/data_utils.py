@@ -4,28 +4,32 @@ import html
 import json
 import os
 import re
-import requests
-from openai import AzureOpenAI
-import re
+import ssl
+import subprocess
 import tempfile
 import time
+import urllib.request
 from abc import ABC, abstractmethod
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
 from functools import partial
-from typing import Callable, List, Dict, Optional, Generator, Tuple, Union
+from typing import Any, Callable, Dict, Generator, List, Optional, Tuple, Union
 
 import markdown
+import requests
 import tiktoken
-from azure.identity import DefaultAzureCredential
 from azure.ai.formrecognizer import DocumentAnalysisClient
 from azure.core.credentials import AzureKeyCredential
+from azure.identity import DefaultAzureCredential
 from azure.storage.blob import ContainerClient
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
 from langchain.text_splitter import TextSplitter, MarkdownTextSplitter, RecursiveCharacterTextSplitter, PythonCodeTextSplitter
+from openai import AzureOpenAI
 from tqdm import tqdm
-from typing import Any
 
+# Configure environment variables  
+load_dotenv() # take environment variables from .env.
 
 FILE_FORMAT_DICT = {
 ***REMOVED***"md": "markdown",
@@ -632,7 +636,59 @@ def merge_chunks_serially(chunked_content_list: List[str], num_tokens: int, url_
 ***REMOVED***if total_size > 0:
 ***REMOVED***yield current_chunk, total_size
 
+def get_payload_and_headers_cohere(
+***REMOVED***text, aad_token) -> Tuple[Dict, Dict]:
+***REMOVED***oai_headers =  {
+***REMOVED***"Content-Type": "application/json",
+***REMOVED***"Authorization": f"Bearer {aad_token}",
+***REMOVED***
 
+***REMOVED***cohere_body = { "texts": [text], "input_type": "search_document" }
+***REMOVED***return cohere_body, oai_headers
+***REMOVED***
+def get_embedding(text, embedding_model_endpoint=None, embedding_model_key=None, azure_credential=None):
+***REMOVED***endpoint = embedding_model_endpoint if embedding_model_endpoint else os.environ.get("EMBEDDING_MODEL_ENDPOINT")
+***REMOVED***
+***REMOVED***FLAG_EMBEDDING_MODEL = os.getenv("FLAG_EMBEDDING_MODEL", "AOAI")
+***REMOVED***FLAG_COHERE = os.getenv("FLAG_COHERE", "ENGLISH")
+
+***REMOVED***if azure_credential is None and (endpoint is None or key is None):
+***REMOVED***raise Exception("EMBEDDING_MODEL_ENDPOINT and EMBEDDING_MODEL_KEY are required for embedding")
+
+***REMOVED***try:
+***REMOVED***if FLAG_EMBEDDING_MODEL == "AOAI":
+***REMOVED******REMOVED***endpoint_parts = endpoint.split("/openai/deployments/")
+***REMOVED******REMOVED***base_url = endpoint_parts[0]
+***REMOVED******REMOVED***deployment_id = endpoint_parts[1].split("/embeddings")[0]
+***REMOVED******REMOVED***api_version = endpoint_parts[1].split("api-version=")[1].split("&")[0]
+***REMOVED******REMOVED***if azure_credential is not None:
+***REMOVED******REMOVED***api_key = azure_credential.get_token("https://cognitiveservices.azure.com/.default").token
+***REMOVED******REMOVED***else:
+***REMOVED******REMOVED***api_key = embedding_model_key if embedding_model_key else os.getenv("AZURE_OPENAI_API_KEY")
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***client = AzureOpenAI(api_version=api_version, azure_endpoint=base_url, azure_ad_token=api_key)
+***REMOVED******REMOVED***embeddings = client.embeddings.create(model=deployment_id, input=text)
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***return embeddings.dict()['data'][0]['embedding']
+***REMOVED***
+***REMOVED***if FLAG_EMBEDDING_MODEL == "COHERE":
+***REMOVED******REMOVED***if FLAG_COHERE == "MULTILINGUAL":
+***REMOVED******REMOVED***key = embedding_model_key if embedding_model_key else os.getenv("COHERE_MULTILINGUAL_API_KEY")
+***REMOVED******REMOVED***elif FLAG_COHERE == "ENGLISH":
+***REMOVED******REMOVED***key = embedding_model_key if embedding_model_key else os.getenv("COHERE_ENGLISH_API_KEY")
+***REMOVED******REMOVED***data, headers = get_payload_and_headers_cohere(text, key)
+
+***REMOVED******REMOVED***body = str.encode(json.dumps(data))
+***REMOVED******REMOVED***req = urllib.request.Request(endpoint, body, headers)
+***REMOVED******REMOVED***response = urllib.request.urlopen(req)
+***REMOVED******REMOVED***result = response.read()
+***REMOVED******REMOVED***result_content = json.loads(result.decode('utf-8'))
+***REMOVED******REMOVED******REMOVED***
+***REMOVED******REMOVED***return result_content["embeddings"][0]   
+***REMOVED***
+
+***REMOVED***except Exception as e:
+***REMOVED***raise Exception(f"Error getting embeddings with endpoint={endpoint} with error={e}")
 def get_embedding(text, embedding_model_endpoint=None, embedding_model_key=None, azure_credential=None):
 ***REMOVED***endpoint = embedding_model_endpoint if embedding_model_endpoint else os.environ.get("EMBEDDING_MODEL_ENDPOINT")
 ***REMOVED***key = embedding_model_key if embedding_model_key else os.environ.get("EMBEDDING_MODEL_KEY")
