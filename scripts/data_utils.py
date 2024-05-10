@@ -689,31 +689,6 @@ def get_embedding(text, embedding_model_endpoint=None, embedding_model_key=None,
 
 ***REMOVED***except Exception as e:
 ***REMOVED***raise Exception(f"Error getting embeddings with endpoint={endpoint} with error={e}")
-def get_embedding(text, embedding_model_endpoint=None, embedding_model_key=None, azure_credential=None):
-***REMOVED***endpoint = embedding_model_endpoint if embedding_model_endpoint else os.environ.get("EMBEDDING_MODEL_ENDPOINT")
-***REMOVED***key = embedding_model_key if embedding_model_key else os.environ.get("EMBEDDING_MODEL_KEY")
-***REMOVED***
-***REMOVED***if azure_credential is None and (endpoint is None or key is None):
-***REMOVED***raise Exception("EMBEDDING_MODEL_ENDPOINT and EMBEDDING_MODEL_KEY are required for embedding")
-
-***REMOVED***try:
-***REMOVED***endpoint_parts = endpoint.split("/openai/deployments/")
-***REMOVED***base_url = endpoint_parts[0]
-***REMOVED***deployment_id = endpoint_parts[1].split("/embeddings")[0]
-
-***REMOVED***api_version = endpoint_parts[1].split("api-version=")[1].split("&")[0]
-
-***REMOVED***if azure_credential is not None:
-***REMOVED******REMOVED***api_key = azure_credential.get_token("https://cognitiveservices.azure.com/.default").token
-***REMOVED***else:
-***REMOVED******REMOVED***api_key = key
-
-***REMOVED***client = AzureOpenAI(api_version=api_version, azure_endpoint=base_url, azure_ad_token=api_key)
-***REMOVED***embeddings = client.embeddings.create(model=deployment_id, input=text)
-***REMOVED***return embeddings.dict()['data'][0]['embedding']
-
-***REMOVED***except Exception as e:
-***REMOVED***raise Exception(f"Error getting embeddings with endpoint={endpoint} with error={e}")
 
 
 def chunk_content_helper(
