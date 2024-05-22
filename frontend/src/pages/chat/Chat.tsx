@@ -19,6 +19,7 @@ import {
   conversationApi,
   Citation,
   ToolMessageContent,
+  AzureSqlServerExecResults,
   ChatResponse,
   getUserInfo,
   Conversation,
@@ -27,13 +28,14 @@ import {
   historyClear,
   ChatHistoryLoadingState,
   CosmosDBStatus,
-  ErrorMessage
-} from '../../api'
-import { Answer } from '../../components/Answer'
-import { QuestionInput } from '../../components/QuestionInput'
-import { ChatHistoryPanel } from '../../components/ChatHistory/ChatHistoryPanel'
-import { AppStateContext } from '../../state/AppProvider'
-import { useBoolean } from '@fluentui/react-hooks'
+  ErrorMessage,
+  AzureSqlServerCodeExecResult
+} from "../../api";
+import { Answer } from "../../components/Answer";
+import { QuestionInput } from "../../components/QuestionInput";
+import { ChatHistoryPanel } from "../../components/ChatHistory/ChatHistoryPanel";
+import { AppStateContext } from "../../state/AppProvider";
+import { useBoolean } from "@fluentui/react-hooks";
 
 const enum messageStatus {
   NotRunning = 'Not Running',
@@ -687,6 +689,25 @@ const Chat = () => {
 ***REMOVED***return []
   }
 
+  const parsePlotFromMessage = (message: ChatMessage) => {
+***REMOVED***if (message?.role && message?.role === "tool") {
+***REMOVED***  try {
+***REMOVED***const execResults = JSON.parse(message.content) as AzureSqlServerExecResults;
+***REMOVED***const codeExecResult = execResults.all_exec_results.at(-1)?.code_exec_result;
+***REMOVED***if (codeExecResult === undefined) {
+***REMOVED***  return null;
+***REMOVED***
+***REMOVED***return codeExecResult;
+  ***REMOVED***
+***REMOVED***  catch {
+***REMOVED***return null;
+  ***REMOVED***
+***REMOVED***  // const execResults = JSON.parse(message.content) as AzureSqlServerExecResults;
+***REMOVED***  // return execResults.all_exec_results.at(-1)?.code_exec_result;
+***REMOVED***
+***REMOVED***return null;
+  }
+
   const disabledButton = () => {
 ***REMOVED***return (
 ***REMOVED***  isLoading ||
@@ -748,6 +769,7 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED***  answer={{
 ***REMOVED******REMOVED******REMOVED******REMOVED***answer: answer.content,
 ***REMOVED******REMOVED******REMOVED******REMOVED***citations: parseCitationFromMessage(messages[index - 1]),
+***REMOVED******REMOVED******REMOVED******REMOVED***plotly_data: parsePlotFromMessage(messages[index - 1]),
 ***REMOVED******REMOVED******REMOVED******REMOVED***message_id: answer.id,
 ***REMOVED******REMOVED******REMOVED******REMOVED***feedback: answer.feedback
 ***REMOVED******REMOVED***  ***REMOVED***}
@@ -770,8 +792,9 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageGpt}>
 ***REMOVED******REMOVED******REMOVED***  <Answer
 ***REMOVED******REMOVED******REMOVED***answer={{
-***REMOVED******REMOVED******REMOVED***  answer: 'Generating answer...',
-***REMOVED******REMOVED******REMOVED***  citations: []
+***REMOVED******REMOVED******REMOVED***  answer: "Generating answer...",
+***REMOVED******REMOVED******REMOVED***  citations: [],
+***REMOVED******REMOVED******REMOVED***  plotly_data: null
 ***REMOVED******REMOVED******REMOVED***}
 ***REMOVED******REMOVED******REMOVED***onCitationClicked={() => null}
 ***REMOVED******REMOVED******REMOVED***  />

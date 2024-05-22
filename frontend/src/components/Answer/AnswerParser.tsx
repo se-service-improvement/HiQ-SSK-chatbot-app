@@ -1,10 +1,11 @@
 import { cloneDeep } from 'lodash'
 
-import { AskResponse, Citation } from '../../api'
+import { AskResponse, Citation, AzureSqlServerCodeExecResult } from '../../api'
 
 export type ParsedAnswer = {
   citations: Citation[]
-  markdownFormatText: string
+  markdownFormatText: string,
+  plotly_data: AzureSqlServerCodeExecResult | null
 }
 
 export const enumerateCitations = (citations: Citation[]) => {
@@ -45,6 +46,7 @@ export function parseAnswer(answer: AskResponse): ParsedAnswer {
 
   return {
 ***REMOVED***citations: filteredCitations,
-***REMOVED***markdownFormatText: answerText
+***REMOVED***markdownFormatText: answerText,
+***REMOVED***plotly_data: answer.plotly_data
   }
 }

@@ -237,6 +237,7 @@ class _AzureSearchSettings(BaseSettings, DatasourcePayloadConstructor):
 ***REMOVED***extra="ignore",
 ***REMOVED***env_ignore_empty=True
 ***REMOVED***)
+***REMOVED***_type: Literal["azure_search"] = PrivateAttr(default="azure_search")
 ***REMOVED***service: str = Field(exclude=True)
 ***REMOVED***endpoint_suffix: str = Field(default="search.windows.net", exclude=True)
 ***REMOVED***index: str = Field(serialization_alias="index_name")
@@ -327,7 +328,7 @@ class _AzureSearchSettings(BaseSettings, DatasourcePayloadConstructor):
 ***REMOVED***parameters.update(self._settings.search.model_dump(exclude_none=True, by_alias=True))
 ***REMOVED***
 ***REMOVED***return {
-***REMOVED******REMOVED***"type": "azure_search",
+***REMOVED******REMOVED***"type": self._type,
 ***REMOVED******REMOVED***"parameters": parameters
 ***REMOVED***
 
@@ -342,6 +343,7 @@ class _AzureCosmosDbMongoVcoreSettings(
 ***REMOVED***extra="ignore",
 ***REMOVED***env_ignore_empty=True
 ***REMOVED***)
+***REMOVED***_type: Literal["azure_cosmosdb"] = PrivateAttr(default="azure_cosmosdb")
 ***REMOVED***query_type: Literal['vector'] = "vector"
 ***REMOVED***connection_string: str = Field(exclude=True)
 ***REMOVED***index: str = Field(serialization_alias="index_name")
@@ -395,7 +397,7 @@ class _AzureCosmosDbMongoVcoreSettings(
 ***REMOVED***parameters = self.model_dump(exclude_none=True, by_alias=True)
 ***REMOVED***parameters.update(self._settings.search.model_dump(exclude_none=True, by_alias=True))
 ***REMOVED***return {
-***REMOVED******REMOVED***"type": "azure_cosmos_db",
+***REMOVED******REMOVED***"type": self._type,
 ***REMOVED******REMOVED***"parameters": parameters
 ***REMOVED***
 
@@ -407,6 +409,7 @@ class _ElasticsearchSettings(BaseSettings, DatasourcePayloadConstructor):
 ***REMOVED***extra="ignore",
 ***REMOVED***env_ignore_empty=True
 ***REMOVED***)
+***REMOVED***_type: Literal["elasticsearch"] = PrivateAttr(default="elasticsearch")
 ***REMOVED***endpoint: str
 ***REMOVED***encoded_api_key: str = Field(exclude=True)
 ***REMOVED***index: str = Field(serialization_alias="index_name")
@@ -464,7 +467,7 @@ class _ElasticsearchSettings(BaseSettings, DatasourcePayloadConstructor):
 ***REMOVED***parameters.update(self._settings.search.model_dump(exclude_none=True, by_alias=True))
 ***REMOVED******REMOVED***
 ***REMOVED***return {
-***REMOVED******REMOVED***"type": "elasticsearch",
+***REMOVED******REMOVED***"type": self._type,
 ***REMOVED******REMOVED***"parameters": parameters
 ***REMOVED***
 
@@ -476,6 +479,7 @@ class _PineconeSettings(BaseSettings, DatasourcePayloadConstructor):
 ***REMOVED***extra="ignore",
 ***REMOVED***env_ignore_empty=True
 ***REMOVED***)
+***REMOVED***_type: Literal["pinecone"] = PrivateAttr(default="pinecone")
 ***REMOVED***environment: str
 ***REMOVED***api_key: str = Field(exclude=True)
 ***REMOVED***index_name: str
@@ -530,7 +534,7 @@ class _PineconeSettings(BaseSettings, DatasourcePayloadConstructor):
 ***REMOVED***parameters.update(self._settings.search.model_dump(exclude_none=True, by_alias=True))
 ***REMOVED***
 ***REMOVED***return {
-***REMOVED******REMOVED***"type": "pinecone",
+***REMOVED******REMOVED***"type": self._type,
 ***REMOVED******REMOVED***"parameters": parameters
 ***REMOVED***
 
@@ -542,6 +546,7 @@ class _AzureMLIndexSettings(BaseSettings, DatasourcePayloadConstructor):
 ***REMOVED***extra="ignore",
 ***REMOVED***env_ignore_empty=True
 ***REMOVED***)
+***REMOVED***_type: Literal["azure_ml_index"] = PrivateAttr(default="azure_ml_index")
 ***REMOVED***name: str
 ***REMOVED***version: str
 ***REMOVED***project_resource_id: str = Field(validation_alias="AZURE_ML_PROJECT_RESOURCE_ID")
@@ -582,11 +587,49 @@ class _AzureMLIndexSettings(BaseSettings, DatasourcePayloadConstructor):
 ***REMOVED***parameters.update(self._settings.search.model_dump(exclude_none=True, by_alias=True))
 ***REMOVED***
 ***REMOVED***return {
-***REMOVED******REMOVED***"type": "azure_ml_index",
+***REMOVED******REMOVED***"type": self._type,
 ***REMOVED******REMOVED***"parameters": parameters
 ***REMOVED***
 
 
+class _AzureSqlServerSettings(BaseSettings, DatasourcePayloadConstructor):
+***REMOVED***model_config = SettingsConfigDict(
+***REMOVED***env_prefix="AZURE_SQL_SERVER_",
+***REMOVED***env_file=DOTENV_PATH,
+***REMOVED***extra="ignore"
+***REMOVED***)
+***REMOVED***_type: Literal["azure_sql_server"] = PrivateAttr(default="azure_sql_server")
+***REMOVED***
+***REMOVED***connection_string: str = Field(exclude=True)
+***REMOVED***table_schema: str
+***REMOVED***schema_max_row: Optional[int] = None
+***REMOVED***top_n_results: Optional[int] = None
+***REMOVED***
+***REMOVED***# Constructed fields
+***REMOVED***authentication: Optional[dict] = None
+***REMOVED***
+***REMOVED***@model_validator(mode="after")
+***REMOVED***def construct_authentication(self) -> Self:
+***REMOVED***self.authentication = {
+***REMOVED******REMOVED***"type": "connection_string",
+***REMOVED******REMOVED***"connection_string": self.connection_string
+***REMOVED***
+***REMOVED***return self
+***REMOVED***
+***REMOVED***def construct_payload_configuration(
+***REMOVED***self,
+***REMOVED****args,
+***REMOVED*****kwargs
+***REMOVED***):
+***REMOVED***parameters = self.model_dump(exclude_none=True, by_alias=True)
+***REMOVED***#parameters.update(self._settings.search.model_dump(exclude_none=True, by_alias=True))
+***REMOVED***
+***REMOVED***return {
+***REMOVED******REMOVED***"type": self._type,
+***REMOVED******REMOVED***"parameters": parameters
+***REMOVED***
+***REMOVED***
+***REMOVED***
 class _BaseSettings(BaseSettings):
 ***REMOVED***model_config = SettingsConfigDict(
 ***REMOVED***env_file=DOTENV_PATH,
@@ -652,6 +695,10 @@ class _AppSettings(BaseModel):
 ***REMOVED***elif self.base_settings.datasource_type == "AzureMLIndex":
 ***REMOVED******REMOVED***self.datasource = _AzureMLIndexSettings(settings=self, _env_file=DOTENV_PATH)
 ***REMOVED******REMOVED***logging.debug("Using Azure ML Index")
+***REMOVED***
+***REMOVED***elif self.base_settings.datasource_type == "AzureSqlServer":
+***REMOVED******REMOVED***self.datasource = _AzureSqlServerSettings(settings=self, _env_file=DOTENV_PATH)
+***REMOVED******REMOVED***logging.debug("Using SQL Server")
 ***REMOVED******REMOVED***
 ***REMOVED***else:
 ***REMOVED******REMOVED***self.datasource = None

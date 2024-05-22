@@ -24,7 +24,9 @@
 ***REMOVED***  "type": "chrome",
 ***REMOVED***  "request": "launch",
 ***REMOVED***  "name": "Frontend: Launch Chrome debugger",
-***REMOVED***  "url": "http://127.0.0.1:50505"
+***REMOVED***  "url": "http://127.0.0.1:50505",
+***REMOVED***  "webRoot": "${workspaceFolder}/frontend",
+***REMOVED***  "smartStep": true
 ***REMOVED***
   ]
 }
