@@ -18,8 +18,13 @@
 ***REMOVED***  "-p 50505"
 ***REMOVED***  ],
 ***REMOVED***  "console": "integratedTerminal",
-***REMOVED***  "justMyCode": false,
-***REMOVED***  "envFile": "${workspaceFolder}/.env",
-  }
+***REMOVED***  "justMyCode": false
+***REMOVED***,
+***REMOVED***{
+***REMOVED***  "type": "chrome",
+***REMOVED***  "request": "launch",
+***REMOVED***  "name": "Frontend: Launch Chrome debugger",
+***REMOVED***  "url": "http://127.0.0.1:50505"
+***REMOVED***
   ]
 }

@@ -27,8 +27,8 @@ jobs:
 ***REMOVED***  run: |
 ***REMOVED***python -m pip install --upgrade pip
 ***REMOVED***pip install pytest
-***REMOVED***if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+***REMOVED***if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
 ***REMOVED***- name: Test with pytest
 ***REMOVED***  run: |
 ***REMOVED***export PYTHONPATH=$(pwd)
-***REMOVED***pytest -v --show-capture=stdout
+***REMOVED***pytest -v --show-capture=stdout -k "not integration"

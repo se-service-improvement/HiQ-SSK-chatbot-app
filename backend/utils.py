@@ -4,6 +4,8 @@ import logging
 import requests
 import dataclasses
 
+from typing import List
+
 DEBUG = os.environ.get("DEBUG", "false")
 if DEBUG.lower() == "true":
 ***REMOVED***logging.basicConfig(level=logging.DEBUG)
@@ -202,3 +204,11 @@ def convert_to_pf_format(input_json, request_field_name, response_field_name):
 ***REMOVED******REMOVED***output_json[-1]["outputs"][response_field_name] = message["content"]
 ***REMOVED***logging.debug(f"PF formatted response: {output_json}")
 ***REMOVED***return output_json
+
+
+def comma_separated_string_to_list(s: str) -> List[str]:
+***REMOVED***'''
+***REMOVED***Split comma-separated values into a list.
+***REMOVED***'''
+***REMOVED***return s.strip().replace(' ', '').split(',')
+
