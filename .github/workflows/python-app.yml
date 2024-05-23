@@ -13,10 +13,9 @@ permissions:
   contents: read
 
 jobs:
-  build:
-
-***REMOVED***runs-on: ubuntu-latest
-
+  test_linux:
+***REMOVED***runs-on:
+***REMOVED***- ubuntu-latest
 ***REMOVED***steps:
 ***REMOVED***- uses: actions/checkout@v3
 ***REMOVED***- name: Set up Python 3.11
@@ -26,9 +25,26 @@ jobs:
 ***REMOVED***- name: Install dependencies
 ***REMOVED***  run: |
 ***REMOVED***python -m pip install --upgrade pip
-***REMOVED***pip install pytest
-***REMOVED***if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+***REMOVED***pip install -r requirements-dev.txt
 ***REMOVED***- name: Test with pytest
 ***REMOVED***  run: |
 ***REMOVED***export PYTHONPATH=$(pwd)
+***REMOVED***pytest -v --show-capture=stdout -k "not integration"
+
+  test_windows:
+***REMOVED***runs-on:
+***REMOVED***- windows-latest
+***REMOVED***steps:
+***REMOVED***- uses: actions/checkout@v3
+***REMOVED***- name: Set up Python 3.11
+***REMOVED***  uses: actions/setup-python@v3
+***REMOVED***  with:
+***REMOVED***python-version: "3.11"
+***REMOVED***- name: Install dependencies
+***REMOVED***  run: |
+***REMOVED***python -m pip install --upgrade pip
+***REMOVED***pip install -r requirements-dev.txt
+***REMOVED***- name: Test with pytest
+***REMOVED***  run: |
+***REMOVED***$env:PYTHONPATH=$pwd
 ***REMOVED***pytest -v --show-capture=stdout -k "not integration"
