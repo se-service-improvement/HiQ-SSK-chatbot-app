@@ -651,6 +651,7 @@ def get_embedding(text, embedding_model_endpoint=None, embedding_model_key=None,
 ***REMOVED***
 ***REMOVED***FLAG_EMBEDDING_MODEL = os.getenv("FLAG_EMBEDDING_MODEL", "AOAI")
 ***REMOVED***FLAG_COHERE = os.getenv("FLAG_COHERE", "ENGLISH")
+***REMOVED***FLAG_AOAI = os.getenv("FLAG_AOAI", "V3")
 
 ***REMOVED***if azure_credential is None and (endpoint is None or key is None):
 ***REMOVED***raise Exception("EMBEDDING_MODEL_ENDPOINT and EMBEDDING_MODEL_KEY are required for embedding")
@@ -666,8 +667,13 @@ def get_embedding(text, embedding_model_endpoint=None, embedding_model_key=None,
 ***REMOVED******REMOVED***else:
 ***REMOVED******REMOVED***api_key = embedding_model_key if embedding_model_key else os.getenv("AZURE_OPENAI_API_KEY")
 ***REMOVED******REMOVED***
-***REMOVED******REMOVED***client = AzureOpenAI(api_version=api_version, azure_endpoint=base_url, azure_ad_token=api_key)
+***REMOVED******REMOVED***client = AzureOpenAI(api_version=api_version, azure_endpoint=base_url, api_key=api_key)
+***REMOVED******REMOVED***if FLAG_AOAI == "V2":
 ***REMOVED******REMOVED***embeddings = client.embeddings.create(model=deployment_id, input=text)
+***REMOVED******REMOVED***elif FLAG_AOAI == "V3":   
+***REMOVED******REMOVED***embeddings = client.embeddings.create(model=deployment_id, 
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***  input=text, 
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***  dimensions=int(os.getenv("VECTOR_DIMENSION", 1536)))
 ***REMOVED******REMOVED***
 ***REMOVED******REMOVED***return embeddings.dict()['data'][0]['embedding']
 ***REMOVED***

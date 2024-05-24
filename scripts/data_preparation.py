@@ -232,7 +232,7 @@ def create_or_update_search_index(
 ***REMOVED******REMOVED***"type": "Collection(Edm.Single)",
 ***REMOVED******REMOVED***"searchable": True,
 ***REMOVED******REMOVED***"retrievable": True,
-***REMOVED******REMOVED***"dimensions": os.getenv("VECTOR_DIMENSION", 1536),
+***REMOVED******REMOVED***"dimensions": int(os.getenv("VECTOR_DIMENSION", 1536)),
 ***REMOVED******REMOVED***"vectorSearchConfiguration": vector_config_name
 ***REMOVED***)
 
