@@ -683,35 +683,39 @@ class _AppSettings(BaseModel):
 ***REMOVED***
 ***REMOVED***@model_validator(mode="after")
 ***REMOVED***def set_datasource_settings(self) -> Self:
-***REMOVED***if self.base_settings.datasource_type == "AzureCognitiveSearch":
+***REMOVED***try:
+***REMOVED******REMOVED***if self.base_settings.datasource_type == "AzureCognitiveSearch":
 ***REMOVED******REMOVED***self.datasource = _AzureSearchSettings(settings=self, _env_file=DOTENV_PATH)
 ***REMOVED******REMOVED***logging.debug("Using Azure Cognitive Search")
-***REMOVED***   
-***REMOVED***elif self.base_settings.datasource_type == "AzureCosmosDB":
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***elif self.base_settings.datasource_type == "AzureCosmosDB":
 ***REMOVED******REMOVED***self.datasource = _AzureCosmosDbMongoVcoreSettings(settings=self, _env_file=DOTENV_PATH)
 ***REMOVED******REMOVED***logging.debug("Using Azure CosmosDB Mongo vcore")
-***REMOVED***   
-***REMOVED***elif self.base_settings.datasource_type == "Elasticsearch":
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***elif self.base_settings.datasource_type == "Elasticsearch":
 ***REMOVED******REMOVED***self.datasource = _ElasticsearchSettings(settings=self, _env_file=DOTENV_PATH)
 ***REMOVED******REMOVED***logging.debug("Using Elasticsearch")
-***REMOVED***   
-***REMOVED***elif self.base_settings.datasource_type == "Pinecone":
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***elif self.base_settings.datasource_type == "Pinecone":
 ***REMOVED******REMOVED***self.datasource = _PineconeSettings(settings=self, _env_file=DOTENV_PATH)
 ***REMOVED******REMOVED***logging.debug("Using Pinecone")
-***REMOVED***
-***REMOVED***elif self.base_settings.datasource_type == "AzureMLIndex":
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***elif self.base_settings.datasource_type == "AzureMLIndex":
 ***REMOVED******REMOVED***self.datasource = _AzureMLIndexSettings(settings=self, _env_file=DOTENV_PATH)
 ***REMOVED******REMOVED***logging.debug("Using Azure ML Index")
-***REMOVED***
-***REMOVED***elif self.base_settings.datasource_type == "AzureSqlServer":
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***elif self.base_settings.datasource_type == "AzureSqlServer":
 ***REMOVED******REMOVED***self.datasource = _AzureSqlServerSettings(settings=self, _env_file=DOTENV_PATH)
 ***REMOVED******REMOVED***logging.debug("Using SQL Server")
 ***REMOVED******REMOVED***
-***REMOVED***else:
+***REMOVED******REMOVED***else:
 ***REMOVED******REMOVED***self.datasource = None
 ***REMOVED******REMOVED***logging.warning("No datasource configuration found in the environment -- calls will be made to Azure OpenAI without grounding data.")
 ***REMOVED******REMOVED***
-***REMOVED***return self
+***REMOVED******REMOVED***return self
+
+***REMOVED***except ValidationError:
+***REMOVED******REMOVED***logging.warning("No datasource configuration found in the environment -- calls will be made to Azure OpenAI without grounding data.")
 
 
 app_settings = _AppSettings()
