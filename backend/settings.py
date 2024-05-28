@@ -195,9 +195,6 @@ class _SearchCommonSettings(BaseSettings):
 ***REMOVED***extra="ignore",
 ***REMOVED***env_ignore_empty=True
 ***REMOVED***)
-***REMOVED***top_k: int = Field(default=5, serialization_alias="top_n_documents")
-***REMOVED***strictness: int = 3
-***REMOVED***enable_in_domain: bool = Field(default=True, serialization_alias="in_scope")
 ***REMOVED***max_search_queries: Optional[int] = None
 ***REMOVED***allow_partial_result: bool = False
 ***REMOVED***include_contexts: Optional[List[str]] = ["citations", "intent"]
@@ -239,6 +236,9 @@ class _AzureSearchSettings(BaseSettings, DatasourcePayloadConstructor):
 ***REMOVED***env_ignore_empty=True
 ***REMOVED***)
 ***REMOVED***_type: Literal["azure_search"] = PrivateAttr(default="azure_search")
+***REMOVED***top_k: int = Field(default=5, serialization_alias="top_n_documents")
+***REMOVED***strictness: int = 3
+***REMOVED***enable_in_domain: bool = Field(default=True, serialization_alias="in_scope")
 ***REMOVED***service: str = Field(exclude=True)
 ***REMOVED***endpoint_suffix: str = Field(default="search.windows.net", exclude=True)
 ***REMOVED***index: str = Field(serialization_alias="index_name")
@@ -266,7 +266,7 @@ class _AzureSearchSettings(BaseSettings, DatasourcePayloadConstructor):
 ***REMOVED***authentication: Optional[dict] = None
 ***REMOVED***embedding_dependency: Optional[dict] = None
 ***REMOVED***fields_mapping: Optional[dict] = None
-***REMOVED***filter: Optional[str] = None
+***REMOVED***filter: Optional[str] = Field(default=None, exclude=True)
 ***REMOVED***
 ***REMOVED***@field_validator('content_columns', 'vector_columns', mode="before")
 ***REMOVED***@classmethod
@@ -351,6 +351,9 @@ class _AzureCosmosDbMongoVcoreSettings(
 ***REMOVED***env_ignore_empty=True
 ***REMOVED***)
 ***REMOVED***_type: Literal["azure_cosmosdb"] = PrivateAttr(default="azure_cosmosdb")
+***REMOVED***top_k: int = Field(default=5, serialization_alias="top_n_documents")
+***REMOVED***strictness: int = 3
+***REMOVED***enable_in_domain: bool = Field(default=True, serialization_alias="in_scope")
 ***REMOVED***query_type: Literal['vector'] = "vector"
 ***REMOVED***connection_string: str = Field(exclude=True)
 ***REMOVED***index: str = Field(serialization_alias="index_name")
@@ -417,6 +420,9 @@ class _ElasticsearchSettings(BaseSettings, DatasourcePayloadConstructor):
 ***REMOVED***env_ignore_empty=True
 ***REMOVED***)
 ***REMOVED***_type: Literal["elasticsearch"] = PrivateAttr(default="elasticsearch")
+***REMOVED***top_k: int = Field(default=5, serialization_alias="top_n_documents")
+***REMOVED***strictness: int = 3
+***REMOVED***enable_in_domain: bool = Field(default=True, serialization_alias="in_scope")
 ***REMOVED***endpoint: str
 ***REMOVED***encoded_api_key: str = Field(exclude=True)
 ***REMOVED***index: str = Field(serialization_alias="index_name")
@@ -487,6 +493,9 @@ class _PineconeSettings(BaseSettings, DatasourcePayloadConstructor):
 ***REMOVED***env_ignore_empty=True
 ***REMOVED***)
 ***REMOVED***_type: Literal["pinecone"] = PrivateAttr(default="pinecone")
+***REMOVED***top_k: int = Field(default=5, serialization_alias="top_n_documents")
+***REMOVED***strictness: int = 3
+***REMOVED***enable_in_domain: bool = Field(default=True, serialization_alias="in_scope")
 ***REMOVED***environment: str
 ***REMOVED***api_key: str = Field(exclude=True)
 ***REMOVED***index_name: str
@@ -554,6 +563,9 @@ class _AzureMLIndexSettings(BaseSettings, DatasourcePayloadConstructor):
 ***REMOVED***env_ignore_empty=True
 ***REMOVED***)
 ***REMOVED***_type: Literal["azure_ml_index"] = PrivateAttr(default="azure_ml_index")
+***REMOVED***top_k: int = Field(default=5, serialization_alias="top_n_documents")
+***REMOVED***strictness: int = 3
+***REMOVED***enable_in_domain: bool = Field(default=True, serialization_alias="in_scope")
 ***REMOVED***name: str
 ***REMOVED***version: str
 ***REMOVED***project_resource_id: str = Field(validation_alias="AZURE_ML_PROJECT_RESOURCE_ID")
