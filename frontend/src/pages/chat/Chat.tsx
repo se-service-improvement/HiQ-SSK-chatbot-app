@@ -29,6 +29,7 @@ import {
   ChatHistoryLoadingState,
   CosmosDBStatus,
   ErrorMessage,
+  ExecResults,
   AzureSqlServerCodeExecResult
 } from "../../api";
 import { Answer } from "../../components/Answer";
@@ -52,9 +53,11 @@ const Chat = () => {
   const [showLoadingMessage, setShowLoadingMessage] = useState<boolean>(false)
   const [activeCitation, setActiveCitation] = useState<Citation>()
   const [isCitationPanelOpen, setIsCitationPanelOpen] = useState<boolean>(false)
+  const [isIntentsPanelOpen, setIsIntentsPanelOpen] = useState<boolean>(false)
   const abortFuncs = useRef([] as AbortController[])
   const [showAuthMessage, setShowAuthMessage] = useState<boolean | undefined>()
   const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [execResults, setExecResults] = useState<ExecResults[]>([])
   const [processMessages, setProcessMessages] = useState<messageStatus>(messageStatus.NotRunning)
   const [clearingChat, setClearingChat] = useState<boolean>(false)
   const [hideErrorDialog, { toggle: toggleErrorDialog }] = useBoolean(true)
@@ -122,6 +125,11 @@ const Chat = () => {
   let assistantContent = ''
 
   const processResultMessage = (resultMessage: ChatMessage, userMessage: ChatMessage, conversationId?: string) => {
+***REMOVED***if (resultMessage.content.includes('all_exec_results')) {
+***REMOVED***  const parsedExecResults = JSON.parse(resultMessage.content) as AzureSqlServerExecResults
+***REMOVED***  setExecResults(parsedExecResults.all_exec_results)
+***REMOVED***
+
 ***REMOVED***if (resultMessage.role === ASSISTANT) {
 ***REMOVED***  assistantContent += resultMessage.content
 ***REMOVED***  assistantMessage = resultMessage
@@ -519,6 +527,7 @@ const Chat = () => {
 ***REMOVED***appStateContext?.dispatch({ type: 'UPDATE_CHAT_HISTORY', payload: appStateContext?.state.currentChat })
 ***REMOVED***setActiveCitation(undefined)
 ***REMOVED***setIsCitationPanelOpen(false)
+***REMOVED***setIsIntentsPanelOpen(false)
 ***REMOVED***setMessages([])
   ***REMOVED***
 ***REMOVED***
@@ -584,6 +593,7 @@ const Chat = () => {
 ***REMOVED***setProcessMessages(messageStatus.Processing)
 ***REMOVED***setMessages([])
 ***REMOVED***setIsCitationPanelOpen(false)
+***REMOVED***setIsIntentsPanelOpen(false)
 ***REMOVED***setActiveCitation(undefined)
 ***REMOVED***appStateContext?.dispatch({ type: 'UPDATE_CURRENT_CHAT', payload: null })
 ***REMOVED***setProcessMessages(messageStatus.Done)
@@ -669,6 +679,10 @@ const Chat = () => {
   const onShowCitation = (citation: Citation) => {
 ***REMOVED***setActiveCitation(citation)
 ***REMOVED***setIsCitationPanelOpen(true)
+  }
+
+  const onShowExecResult = () => {
+***REMOVED***setIsIntentsPanelOpen(true)
   }
 
   const onViewSource = (citation: Citation) => {
@@ -771,9 +785,11 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED******REMOVED***citations: parseCitationFromMessage(messages[index - 1]),
 ***REMOVED******REMOVED******REMOVED******REMOVED***plotly_data: parsePlotFromMessage(messages[index - 1]),
 ***REMOVED******REMOVED******REMOVED******REMOVED***message_id: answer.id,
-***REMOVED******REMOVED******REMOVED******REMOVED***feedback: answer.feedback
+***REMOVED******REMOVED******REMOVED******REMOVED***feedback: answer.feedback,
+***REMOVED******REMOVED******REMOVED******REMOVED***exec_results: execResults
 ***REMOVED******REMOVED***  ***REMOVED***}
 ***REMOVED******REMOVED******REMOVED***  onCitationClicked={c => onShowCitation(c)}
+***REMOVED******REMOVED******REMOVED***  onExectResultClicked={() => onShowExecResult()}
 ***REMOVED******REMOVED******REMOVED***/>
 ***REMOVED******REMOVED******REMOVED***  </div>
 ***REMOVED******REMOVED******REMOVED***) : answer.role === ERROR ? (
@@ -797,6 +813,7 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED***  plotly_data: null
 ***REMOVED******REMOVED******REMOVED***}
 ***REMOVED******REMOVED******REMOVED***onCitationClicked={() => null}
+***REMOVED******REMOVED******REMOVED***onExectResultClicked={() => null}
 ***REMOVED******REMOVED******REMOVED***  />
 ***REMOVED******REMOVED******REMOVED***</div>
 ***REMOVED******REMOVED***  </>
@@ -939,6 +956,36 @@ const Chat = () => {
 ***REMOVED******REMOVED***  rehypePlugins={[rehypeRaw]}
 ***REMOVED******REMOVED***/>
 ***REMOVED******REMOVED***  </div>
+***REMOVED******REMOVED***</Stack.Item>
+***REMOVED***  )}
+***REMOVED***  {messages && messages.length > 0 && isIntentsPanelOpen && (
+***REMOVED******REMOVED***<Stack.Item className={styles.citationPanel} tabIndex={0} role="tabpanel" aria-label="Exec Results Panel">
+***REMOVED******REMOVED***  <Stack
+***REMOVED******REMOVED***aria-label="Intents Panel Header Container"
+***REMOVED******REMOVED***horizontal
+***REMOVED******REMOVED***className={styles.citationPanelHeaderContainer}
+***REMOVED******REMOVED***horizontalAlign="space-between"
+***REMOVED******REMOVED***verticalAlign="center">
+***REMOVED******REMOVED***<span aria-label="Intents" className={styles.citationPanelHeader}>
+***REMOVED******REMOVED***  Exec Results
+***REMOVED******REMOVED***</span>
+***REMOVED******REMOVED***<IconButton
+***REMOVED******REMOVED***  iconProps={{ iconName: 'Cancel' }}
+***REMOVED******REMOVED***  aria-label="Close intents panel"
+***REMOVED******REMOVED***  onClick={() => setIsIntentsPanelOpen(false)}
+***REMOVED******REMOVED***/>
+***REMOVED******REMOVED***  </Stack>
+***REMOVED******REMOVED***  <Stack horizontalAlign="space-between">
+***REMOVED******REMOVED***{execResults.map((execResult) => {
+***REMOVED******REMOVED***  return (
+***REMOVED******REMOVED******REMOVED***<Stack className={styles.exectResultList} verticalAlign="space-between">
+***REMOVED******REMOVED******REMOVED***  <p><span>Intent:</span> {execResult.intent}</p>
+***REMOVED******REMOVED******REMOVED***  {execResult.search_query && <p><span>Search Query:</span> {execResult.search_query}</p>}
+***REMOVED******REMOVED******REMOVED***  {execResult.search_result && <p><span>Search Result:</span> {execResult.search_result}</p>}
+***REMOVED******REMOVED******REMOVED***</Stack>
+***REMOVED******REMOVED***  )
+***REMOVED******REMOVED***)}
+***REMOVED******REMOVED***  </Stack>
 ***REMOVED******REMOVED***</Stack.Item>
 ***REMOVED***  )}
 ***REMOVED***  {appStateContext?.state.isChatHistoryOpen &&

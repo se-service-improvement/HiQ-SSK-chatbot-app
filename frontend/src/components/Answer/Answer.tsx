@@ -20,9 +20,10 @@ import styles from './Answer.module.css'
 interface Props {
   answer: AskResponse
   onCitationClicked: (citedDocument: Citation) => void
+  onExectResultClicked: () => void
 }
 
-export const Answer = ({ answer, onCitationClicked }: Props) => {
+export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Props) => {
   const initializeAnswerFeedback = (answer: AskResponse) => {
 ***REMOVED***if (answer.message_id == undefined) return undefined
 ***REMOVED***if (answer.feedback == undefined) return undefined
@@ -227,7 +228,7 @@ export const Answer = ({ answer, onCitationClicked }: Props) => {
   }
 
   const components = {
-***REMOVED***code({ node, ...props }: { node: any; [key: string]: any }) {
+***REMOVED***code({ node, ...props }: { node: any;[key: string]: any }) {
 ***REMOVED***  let language
 ***REMOVED***  if (props.className) {
 ***REMOVED***const match = props.className.match(/language-(\w+)/)
@@ -268,7 +269,7 @@ export const Answer = ({ answer, onCitationClicked }: Props) => {
 ***REMOVED******REMOVED******REMOVED***onClick={() => onLikeResponseClicked()}
 ***REMOVED******REMOVED******REMOVED***style={
 ***REMOVED******REMOVED******REMOVED***  feedbackState === Feedback.Positive ||
-***REMOVED******REMOVED******REMOVED***  appStateContext?.state.feedbackState[answer.message_id] === Feedback.Positive
+***REMOVED******REMOVED******REMOVED***appStateContext?.state.feedbackState[answer.message_id] === Feedback.Positive
 ***REMOVED******REMOVED******REMOVED***? { color: 'darkgreen', cursor: 'pointer' }
 ***REMOVED******REMOVED******REMOVED***: { color: 'slategray', cursor: 'pointer' }
 ***REMOVED******REMOVED***
@@ -279,8 +280,8 @@ export const Answer = ({ answer, onCitationClicked }: Props) => {
 ***REMOVED******REMOVED******REMOVED***onClick={() => onDislikeResponseClicked()}
 ***REMOVED******REMOVED******REMOVED***style={
 ***REMOVED******REMOVED******REMOVED***  feedbackState !== Feedback.Positive &&
-***REMOVED******REMOVED******REMOVED***  feedbackState !== Feedback.Neutral &&
-***REMOVED******REMOVED******REMOVED***  feedbackState !== undefined
+***REMOVED******REMOVED******REMOVED***feedbackState !== Feedback.Neutral &&
+***REMOVED******REMOVED******REMOVED***feedbackState !== undefined
 ***REMOVED******REMOVED******REMOVED***? { color: 'darkred', cursor: 'pointer' }
 ***REMOVED******REMOVED******REMOVED***: { color: 'slategray', cursor: 'pointer' }
 ***REMOVED******REMOVED***
@@ -326,6 +327,29 @@ export const Answer = ({ answer, onCitationClicked }: Props) => {
 ***REMOVED***  <Stack.Item className={styles.answerDisclaimerContainer}>
 ***REMOVED******REMOVED***<span className={styles.answerDisclaimer}>AI-generated content may be incorrect</span>
 ***REMOVED***  </Stack.Item>
+***REMOVED***  {!!answer.exec_results?.length && (
+***REMOVED******REMOVED***<Stack.Item onKeyDown={e => (e.key === 'Enter' || e.key === ' ' ? toggleIsRefAccordionOpen() : null)}>
+***REMOVED******REMOVED***  <Stack style={{ width: '100%' }}>
+***REMOVED******REMOVED***<Stack horizontal horizontalAlign="start" verticalAlign="center">
+***REMOVED******REMOVED***  <Text
+***REMOVED******REMOVED******REMOVED***className={styles.accordionTitle}
+***REMOVED******REMOVED******REMOVED***onClick={() => onExectResultClicked()}
+***REMOVED******REMOVED******REMOVED***aria-label="Open exec results"
+***REMOVED******REMOVED******REMOVED***tabIndex={0}
+***REMOVED******REMOVED******REMOVED***role="button">
+***REMOVED******REMOVED******REMOVED***<span>
+***REMOVED******REMOVED******REMOVED***  Show Exec Results
+***REMOVED******REMOVED******REMOVED***</span>
+***REMOVED******REMOVED***  </Text>
+***REMOVED******REMOVED***  <FontIcon
+***REMOVED******REMOVED******REMOVED***className={styles.accordionIcon}
+***REMOVED******REMOVED******REMOVED***onClick={handleChevronClick}
+***REMOVED******REMOVED******REMOVED***iconName={'ChevronRight'}
+***REMOVED******REMOVED***  />
+***REMOVED******REMOVED***</Stack>
+***REMOVED******REMOVED***  </Stack>
+***REMOVED******REMOVED***</Stack.Item>
+***REMOVED***  )}
 ***REMOVED***</Stack>
 ***REMOVED***{chevronIsExpanded && (
 ***REMOVED***  <div className={styles.citationWrapper}>
