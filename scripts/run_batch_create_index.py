@@ -1,6 +1,7 @@
 import copy
 import json
 import os
+from pathlib import Path
 import subprocess
 import tqdm
 from openai import AzureOpenAI
@@ -29,8 +30,9 @@ run_config_by_data_path_3_small_512_512 = {
 ***REMOVED***
 }
 
+# change path and embedding models
+Path("logs").mkdir(exist_ok=True)
 for key, cfg in tqdm.tqdm(run_config_by_data_path_3_small_512_512.items()):
-***REMOVED***# folder is where data is saved
 ***REMOVED***folder = os.path.join("/index_data", key)
 ***REMOVED***
 ***REMOVED***if isinstance(cfg, str):
@@ -66,14 +68,5 @@ for key, cfg in tqdm.tqdm(run_config_by_data_path_3_small_512_512.items()):
 ***REMOVED***"--njobs=8",
 ***REMOVED***]
 ***REMOVED***str_command = " ".join(command)
-***REMOVED***proc = subprocess.run(str_command, capture_output=True)
-***REMOVED***if proc.returncode != 0:
-***REMOVED***print("Error running", command)
-***REMOVED***print(proc.stderr)
-***REMOVED***print(proc.stdout)
-
-
-
-
-
-
+***REMOVED***with open(f"logs/stdout.{key}.txt", "w") as f_stdout, open(f"logs/stderr.{key}.txt", "w") as f_stderr:
+***REMOVED***subprocess.run(str_command, stdout=f_stdout, stderr=f_stderr)
