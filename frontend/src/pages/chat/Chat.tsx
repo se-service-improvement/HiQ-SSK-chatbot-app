@@ -8,6 +8,8 @@ import rehypeRaw from 'rehype-raw'
 import uuid from 'react-uuid'
 import { isEmpty } from 'lodash'
 import DOMPurify from 'dompurify'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { nord } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
 import styles from './Chat.module.css'
 import Contoso from '../../assets/Contoso.svg'
@@ -959,7 +961,7 @@ const Chat = () => {
 ***REMOVED******REMOVED***</Stack.Item>
 ***REMOVED***  )}
 ***REMOVED***  {messages && messages.length > 0 && isIntentsPanelOpen && (
-***REMOVED******REMOVED***<Stack.Item className={styles.citationPanel} tabIndex={0} role="tabpanel" aria-label="Exec Results Panel">
+***REMOVED******REMOVED***<Stack.Item className={styles.citationPanel} tabIndex={0} role="tabpanel" aria-label="Intents Panel">
 ***REMOVED******REMOVED***  <Stack
 ***REMOVED******REMOVED***aria-label="Intents Panel Header Container"
 ***REMOVED******REMOVED***horizontal
@@ -967,7 +969,7 @@ const Chat = () => {
 ***REMOVED******REMOVED***horizontalAlign="space-between"
 ***REMOVED******REMOVED***verticalAlign="center">
 ***REMOVED******REMOVED***<span aria-label="Intents" className={styles.citationPanelHeader}>
-***REMOVED******REMOVED***  Exec Results
+***REMOVED******REMOVED***  Intents
 ***REMOVED******REMOVED***</span>
 ***REMOVED******REMOVED***<IconButton
 ***REMOVED******REMOVED***  iconProps={{ iconName: 'Cancel' }}
@@ -979,9 +981,27 @@ const Chat = () => {
 ***REMOVED******REMOVED***{execResults.map((execResult) => {
 ***REMOVED******REMOVED***  return (
 ***REMOVED******REMOVED******REMOVED***<Stack className={styles.exectResultList} verticalAlign="space-between">
-***REMOVED******REMOVED******REMOVED***  <p><span>Intent:</span> {execResult.intent}</p>
-***REMOVED******REMOVED******REMOVED***  {execResult.search_query && <p><span>Search Query:</span> {execResult.search_query}</p>}
-***REMOVED******REMOVED******REMOVED***  {execResult.search_result && <p><span>Search Result:</span> {execResult.search_result}</p>}
+***REMOVED******REMOVED******REMOVED***  <><span>Intent:</span> <p>{execResult.intent}</p></>
+***REMOVED******REMOVED******REMOVED***  {execResult.search_query && <><span>Search Query:</span>
+***REMOVED******REMOVED******REMOVED***<SyntaxHighlighter
+***REMOVED******REMOVED******REMOVED***  style={nord}
+***REMOVED******REMOVED******REMOVED***  wrapLines={true}
+***REMOVED******REMOVED******REMOVED***  lineProps={{ style: { wordBreak: 'break-all', whiteSpace: 'pre-wrap' } }}
+***REMOVED******REMOVED******REMOVED***  language="sql"
+***REMOVED******REMOVED******REMOVED***  PreTag="p">
+***REMOVED******REMOVED******REMOVED***  {execResult.search_query}
+***REMOVED******REMOVED******REMOVED***</SyntaxHighlighter></>}
+***REMOVED******REMOVED******REMOVED***  {execResult.search_result && <><span>Search Result:</span> <p>{execResult.search_result}</p></>}
+***REMOVED******REMOVED******REMOVED***  {execResult.code_generated && <><span>Code Generated:</span>
+***REMOVED******REMOVED******REMOVED***<SyntaxHighlighter
+***REMOVED******REMOVED******REMOVED***  style={nord}
+***REMOVED******REMOVED******REMOVED***  wrapLines={true}
+***REMOVED******REMOVED******REMOVED***  lineProps={{ style: { wordBreak: 'break-all', whiteSpace: 'pre-wrap' } }}
+***REMOVED******REMOVED******REMOVED***  language="python"
+***REMOVED******REMOVED******REMOVED***  PreTag="p">
+***REMOVED******REMOVED******REMOVED***  {execResult.code_generated}
+***REMOVED******REMOVED******REMOVED***</SyntaxHighlighter>
+***REMOVED******REMOVED******REMOVED***  </>}
 ***REMOVED******REMOVED******REMOVED***</Stack>
 ***REMOVED******REMOVED***  )
 ***REMOVED******REMOVED***)}

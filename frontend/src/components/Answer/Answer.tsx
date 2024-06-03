@@ -334,11 +334,11 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
 ***REMOVED******REMOVED***  <Text
 ***REMOVED******REMOVED******REMOVED***className={styles.accordionTitle}
 ***REMOVED******REMOVED******REMOVED***onClick={() => onExectResultClicked()}
-***REMOVED******REMOVED******REMOVED***aria-label="Open exec results"
+***REMOVED******REMOVED******REMOVED***aria-label="Open Intents"
 ***REMOVED******REMOVED******REMOVED***tabIndex={0}
 ***REMOVED******REMOVED******REMOVED***role="button">
 ***REMOVED******REMOVED******REMOVED***<span>
-***REMOVED******REMOVED******REMOVED***  Show Exec Results
+***REMOVED******REMOVED******REMOVED***  Show Intents
 ***REMOVED******REMOVED******REMOVED***</span>
 ***REMOVED******REMOVED***  </Text>
 ***REMOVED******REMOVED***  <FontIcon
