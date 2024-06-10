@@ -75,7 +75,7 @@ def check_if_search_service_exists(search_service_name: str,
 ***REMOVED***url = (
 ***REMOVED***f"https://management.azure.com/subscriptions/{subscription_id}"
 ***REMOVED***f"/resourceGroups/{resource_group}/providers/Microsoft.Search/searchServices"
-***REMOVED***f"/{search_service_name}?api-version=2021-04-01-preview"
+***REMOVED***f"/{search_service_name}?api-version=2024-03-01-Preview"
 ***REMOVED***)
 
 ***REMOVED***headers = {
@@ -112,7 +112,7 @@ def create_search_service(
 ***REMOVED***url = (
 ***REMOVED***f"https://management.azure.com/subscriptions/{subscription_id}"
 ***REMOVED***f"/resourceGroups/{resource_group}/providers/Microsoft.Search/searchServices"
-***REMOVED***f"/{search_service_name}?api-version=2021-04-01-preview"
+***REMOVED***f"/{search_service_name}?api-version=2024-03-01-Preview"
 ***REMOVED***)
 
 ***REMOVED***payload = {
@@ -159,7 +159,7 @@ def create_or_update_search_index(
 ***REMOVED******REMOVED***).stdout
 ***REMOVED***)["primaryKey"]
 
-***REMOVED***url = f"https://{service_name}.search.windows.net/indexes/{index_name}?api-version=2023-07-01-Preview"
+***REMOVED***url = f"https://{service_name}.search.windows.net/indexes/{index_name}?api-version=2024-03-01-Preview"
 ***REMOVED***headers = {
 ***REMOVED***"Content-Type": "application/json",
 ***REMOVED***"api-key": admin_key,
@@ -232,17 +232,30 @@ def create_or_update_search_index(
 ***REMOVED******REMOVED***"type": "Collection(Edm.Single)",
 ***REMOVED******REMOVED***"searchable": True,
 ***REMOVED******REMOVED***"retrievable": True,
+***REMOVED******REMOVED***"stored": True,
 ***REMOVED******REMOVED***"dimensions": int(os.getenv("VECTOR_DIMENSION", 1536)),
-***REMOVED******REMOVED***"vectorSearchConfiguration": vector_config_name
+***REMOVED******REMOVED***"vectorSearchProfile": vector_config_name
 ***REMOVED***)
 
 ***REMOVED***body["vectorSearch"] = {
-***REMOVED******REMOVED***"algorithmConfigurations": [
+***REMOVED***"algorithms": [
 ***REMOVED******REMOVED***{
-***REMOVED******REMOVED******REMOVED***"name": vector_config_name,
-***REMOVED******REMOVED******REMOVED***"kind": "hnsw"
+***REMOVED******REMOVED***"name": "my-hnsw-config-1",
+***REMOVED******REMOVED***"kind": "hnsw",
+***REMOVED******REMOVED***"hnswParameters": {
+***REMOVED******REMOVED******REMOVED***"m": 4,
+***REMOVED******REMOVED******REMOVED***"efConstruction": 400,
+***REMOVED******REMOVED******REMOVED***"efSearch": 500,
+***REMOVED******REMOVED******REMOVED***"metric": "cosine"
 ***REMOVED******REMOVED***
-***REMOVED******REMOVED***]
+***REMOVED***
+***REMOVED***],
+***REMOVED***"profiles": [
+***REMOVED******REMOVED***{
+***REMOVED******REMOVED***"name": vector_config_name,
+***REMOVED******REMOVED***"algorithm": "my-hnsw-config-1"
+***REMOVED***
+***REMOVED***]
 ***REMOVED***
 
 ***REMOVED***response = requests.put(url, json=body, headers=headers)
@@ -304,7 +317,7 @@ def upload_documents_to_index(service_name, subscription_id, resource_group, ind
 ***REMOVED******REMOVED******REMOVED******REMOVED***f"To Debug: PLEASE CHECK chunk_size and upload_batch_size. \n Error Messages: {list(errors)}")
 
 def validate_index(service_name, subscription_id, resource_group, index_name):
-***REMOVED***api_version = "2021-04-30-Preview"
+***REMOVED***api_version = "2024-03-01-Preview"
 ***REMOVED***admin_key = json.loads(
 ***REMOVED***subprocess.run(
 ***REMOVED******REMOVED***f"az search admin-key show --subscription {subscription_id} --resource-group {resource_group} --service-name {service_name}",
@@ -432,7 +445,7 @@ if __name__ == "__main__":
 ***REMOVED***parser.add_argument("--form-rec-key", type=str, help="Key for your Form Recognizer resource to use for PDF cracking.")
 ***REMOVED***parser.add_argument("--form-rec-use-layout", default=False, action='store_true', help="Whether to use Layout model for PDF cracking, if False will use Read model.")
 ***REMOVED***parser.add_argument("--njobs", type=valid_range, default=4, help="Number of jobs to run (between 1 and 32). Default=4")
-***REMOVED***parser.add_argument("--embedding-model-endpoint", type=str, help="Endpoint for the embedding model to use for vector search. Format: 'https://<AOAI resource name>.openai.azure.com/openai/deployments/<Ada deployment name>/embeddings?api-version=2023-03-15-preview'")
+***REMOVED***parser.add_argument("--embedding-model-endpoint", type=str, help="Endpoint for the embedding model to use for vector search. Format: 'https://<AOAI resource name>.openai.azure.com/openai/deployments/<Ada deployment name>/embeddings?api-version=2024-03-01-Preview'")
 ***REMOVED***parser.add_argument("--embedding-model-key", type=str, help="Key for the embedding model to use for vector search.")
 ***REMOVED***parser.add_argument("--search-admin-key", type=str, help="Admin key for the search service. If not provided, will use Azure CLI to get the key.")
 ***REMOVED***args = parser.parse_args()
