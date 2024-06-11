@@ -33,7 +33,6 @@ class CosmosConversationClient():
 ***REMOVED***async def ensure(self):
 ***REMOVED***if not self.cosmosdb_client or not self.database_client or not self.container_client:
 ***REMOVED******REMOVED***return False, "CosmosDB client not initialized correctly"
-***REMOVED******REMOVED***
 ***REMOVED***try:
 ***REMOVED******REMOVED***database_info = await self.database_client.read()
 ***REMOVED***except:

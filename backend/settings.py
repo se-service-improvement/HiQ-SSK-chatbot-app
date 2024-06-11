@@ -60,7 +60,7 @@ class _ChatHistorySettings(BaseSettings):
 
 ***REMOVED***database: str
 ***REMOVED***account: str
-***REMOVED***account_key: str
+***REMOVED***account_key: Optional[str] = None
 ***REMOVED***conversations_container: str
 ***REMOVED***enable_feedback: bool = False
 
@@ -101,7 +101,7 @@ class _AzureOpenAISettings(BaseSettings):
 ***REMOVED***)
 ***REMOVED***
 ***REMOVED***model: str
-***REMOVED***key: str
+***REMOVED***key: Optional[str] = None
 ***REMOVED***resource: Optional[str] = None
 ***REMOVED***endpoint: Optional[str] = None
 ***REMOVED***temperature: float = 0
@@ -200,6 +200,7 @@ class _SearchCommonSettings(BaseSettings):
 ***REMOVED***include_contexts: Optional[List[str]] = ["citations", "intent"]
 ***REMOVED***vectorization_dimensions: Optional[int] = None
 ***REMOVED***role_information: str = Field(
+***REMOVED***default="You are an AI assistant that helps people find information.",
 ***REMOVED***validation_alias="AZURE_OPENAI_SYSTEM_MESSAGE"
 ***REMOVED***)
 
