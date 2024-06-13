@@ -825,7 +825,7 @@ const Chat = () => {
 ***REMOVED******REMOVED***)}
 
 ***REMOVED******REMOVED***<Stack horizontal className={styles.chatInput}>
-***REMOVED******REMOVED***  {isLoading && (
+***REMOVED******REMOVED***  {isLoading && messages.length > 0 && (
 ***REMOVED******REMOVED***<Stack
 ***REMOVED******REMOVED***  horizontal
 ***REMOVED******REMOVED***  className={styles.stopGeneratingContainer}
