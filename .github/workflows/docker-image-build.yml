@@ -13,7 +13,7 @@ jobs:
 
 ***REMOVED***steps:
 ***REMOVED***- name: Azure Container Registry Login
-***REMOVED***  uses: Azure/docker-login@v1
+***REMOVED***  uses: Azure/docker-login@v2
 ***REMOVED***  with:
 ***REMOVED***# Container registry username
 ***REMOVED***username: ${{ secrets.SAMPLEAPP_ACR_USERNAME }}
