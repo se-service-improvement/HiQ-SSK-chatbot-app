@@ -207,7 +207,8 @@ def prepare_model_args(request_body, request_headers):
 ***REMOVED***user_json = None
 ***REMOVED***if (MS_DEFENDER_ENABLED):
 ***REMOVED***authenticated_user_details = get_authenticated_user_details(request_headers)
-***REMOVED***user_json = get_msdefender_user_json(authenticated_user_details, request_headers)
+***REMOVED***conversation_id = request_body.get("conversation_id", None)***REMOVED***
+***REMOVED***user_json = get_msdefender_user_json(authenticated_user_details, request_headers, conversation_id)
 
 ***REMOVED***model_args = {
 ***REMOVED***"messages": messages,
