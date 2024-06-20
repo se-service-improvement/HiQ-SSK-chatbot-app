@@ -10,7 +10,7 @@ import remarkGfm from 'remark-gfm'
 import supersub from 'remark-supersub'
 import Plot from 'react-plotly.js'
 import { AskResponse, Citation, Feedback, historyMessageFeedback } from '../../api'
-import { XSSAllowTags } from '../../constants/xssAllowTags'
+import { XSSAllowTags, XSSAllowAttributes } from '../../constants/sanatizeAllowables'
 import { AppStateContext } from '../../state/AppProvider'
 
 import { parseAnswer } from './AnswerParser'
@@ -253,7 +253,7 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
 ***REMOVED******REMOVED***remarkPlugins={[remarkGfm, supersub]}
 ***REMOVED******REMOVED***children={
 ***REMOVED******REMOVED***  SANITIZE_ANSWER
-***REMOVED******REMOVED******REMOVED***? DOMPurify.sanitize(parsedAnswer.markdownFormatText, { ALLOWED_TAGS: XSSAllowTags })
+***REMOVED******REMOVED******REMOVED***? DOMPurify.sanitize(parsedAnswer.markdownFormatText, { ALLOWED_TAGS: XSSAllowTags, ALLOWED_ATTR: XSSAllowAttributes })
 ***REMOVED******REMOVED******REMOVED***: parsedAnswer.markdownFormatText
 ***REMOVED******REMOVED***
 ***REMOVED******REMOVED***className={styles.answerText}
