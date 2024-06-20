@@ -126,7 +126,7 @@ def init_openai_client():
 ***REMOVED***aoai_api_key = app_settings.azure_openai.key
 ***REMOVED***ad_token_provider = None
 ***REMOVED***if not aoai_api_key:
-***REMOVED******REMOVED***logging.debug("No AZURE_OPENAI_KEY found, using Azure AD auth")
+***REMOVED******REMOVED***logging.debug("No AZURE_OPENAI_KEY found, using Azure Entra ID auth")
 ***REMOVED******REMOVED***ad_token_provider = get_bearer_token_provider(
 ***REMOVED******REMOVED***DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
 ***REMOVED******REMOVED***)
