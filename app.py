@@ -836,9 +836,9 @@ async def ensure_cosmos():
 ***REMOVED******REMOVED***return jsonify({"error": "CosmosDB is not working"}), 500
 
 
-async def generate_title(conversation_messages):
+async def generate_title(conversation_messages) -> str:
 ***REMOVED***## make sure the messages are sorted by _ts descending
-***REMOVED***title_prompt = 'Summarize the conversation so far into a 4-word or less title. Do not use any quotation marks or punctuation. Respond with a json object in the format {{"title": string}}. Do not include any other commentary or description.'
+***REMOVED***title_prompt = "Summarize the conversation so far into a 4-word or less title. Do not use any quotation marks or punctuation. Do not include any other commentary or description."
 
 ***REMOVED***messages = [
 ***REMOVED***{"role": msg["role"], "content": msg["content"]}
@@ -847,14 +847,15 @@ async def generate_title(conversation_messages):
 ***REMOVED***messages.append({"role": "user", "content": title_prompt})
 
 ***REMOVED***try:
-***REMOVED***azure_openai_client = init_openai_client(use_data=False)
+***REMOVED***azure_openai_client = init_openai_client()
 ***REMOVED***response = await azure_openai_client.chat.completions.create(
 ***REMOVED******REMOVED***model=app_settings.azure_openai.model, messages=messages, temperature=1, max_tokens=64
 ***REMOVED***)
 
-***REMOVED***title = json.loads(response.choices[0].message.content)["title"]
+***REMOVED***title = response.choices[0].message.content
 ***REMOVED***return title
 ***REMOVED***except Exception as e:
+***REMOVED***logging.exception("Exception while generating title", e)
 ***REMOVED***return messages[-2]["content"]
 
 
