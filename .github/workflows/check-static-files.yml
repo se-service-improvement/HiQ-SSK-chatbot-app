@@ -1,0 +1,51 @@
+name: Check changes to static files
+
+on:
+  pull_request:
+***REMOVED***branches:
+***REMOVED***  - main
+
+jobs:
+  changed_files:
+***REMOVED***runs-on: ubuntu-latest
+***REMOVED***steps:
+***REMOVED***  - uses: actions/checkout@v4
+
+***REMOVED***  - name: List changed frontend source files
+***REMOVED***uses: tj-actions/changed-files@v44
+***REMOVED***id: changed-frontend-src-files
+***REMOVED***with:
+***REMOVED***  files: |
+***REMOVED******REMOVED*** frontend/src/**/*.tsx
+***REMOVED******REMOVED*** frontend/src/**/*.css
+
+***REMOVED***  - name: List changed frontend static files
+***REMOVED***id: changed-frontend-static-files
+***REMOVED***if: steps.changed-frontend-src-files.outputs.files_changed == 'true'
+***REMOVED***uses: tj-actions/changed-files@v44
+***REMOVED***with:
+***REMOVED***  files: |
+***REMOVED******REMOVED***static
+
+***REMOVED***  - name: Check changed static files
+***REMOVED***if: steps.changed-frontend-src-files.outputs.files_changed == 'true' && steps.changed-frontend-static-files.outputs.files_changed == 'false'
+***REMOVED***run: echo "There were changes to the frontend code, but no corresponding changes to static files.  Please build the project locally, commit the static file changes and push the changes to try again." && exit 1
+
+***REMOVED***  - name: List logo customizations
+***REMOVED***uses: tj-actions/changed-files@v44
+***REMOVED***id: changed-logo-files
+***REMOVED***with:
+***REMOVED***  files: |
+***REMOVED******REMOVED*** frontend/public/favicon.ico
+***REMOVED******REMOVED*** frontend/src/assets
+
+***REMOVED***  - name: Comment on logo customizations
+***REMOVED***if: steps.changed-logo-files.outputs.any_changed == 'true'
+***REMOVED***uses: mshick/add-pr-comment@v2
+***REMOVED***with:
+***REMOVED***  message: |
+***REMOVED******REMOVED***"Hello contributor, it appears that your pull request contains some customizations to branding. We are unable to approve your PR at this time. If you believe this message to be in error, please correct these unsupported changes and try again, or reach out to one of the maintainers of the repo to discuss the changes."
+***REMOVED***
+***REMOVED***  - name: Fail on logo customizations
+***REMOVED***if: steps.changed-logo-files.outputs.any_changed == 'true'
+***REMOVED***run: echo "Logos are customized, which is not a supported change." && exit 1
