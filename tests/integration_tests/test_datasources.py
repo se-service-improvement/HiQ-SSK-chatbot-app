@@ -83,25 +83,25 @@ def dotenv_rendered_template_path(
 ***REMOVED***)
 
 ***REMOVED***if datasource != "none":
-***REMOVED***dotenv_template_params["datasourceType"] = datasource
+***REMOVED***dotenv_template_params["DATASOURCE_TYPE"] = datasource
 ***REMOVED***
 ***REMOVED***if datasource != "Elasticsearch" and use_elasticsearch_embeddings:
 ***REMOVED***pytest.skip("Elasticsearch embeddings not supported for test.")
 ***REMOVED***
 ***REMOVED***if datasource == "Elasticsearch":
-***REMOVED***dotenv_template_params["useElasticsearchEmbeddings"] = use_elasticsearch_embeddings
+***REMOVED***dotenv_template_params["USE_ELASTICSEARCH_EMBEDDINGS"] = use_elasticsearch_embeddings
 ***REMOVED***
-***REMOVED***dotenv_template_params["useAoaiEmbeddings"] = use_aoai_embeddings
+***REMOVED***dotenv_template_params["USE_AOAI_EMBEDDINGS"] = use_aoai_embeddings
 ***REMOVED***
 ***REMOVED***if use_aoai_embeddings or use_elasticsearch_embeddings:
-***REMOVED***dotenv_template_params["azureSearchQueryType"] = "vector"
-***REMOVED***dotenv_template_params["elasticsearchQueryType"] = "vector"
+***REMOVED***dotenv_template_params["AZURE_SEARCH_QUERY_TYPE"] = "vector"
+***REMOVED***dotenv_template_params["ELASTICSEARCH_QUERY_TYPE"] = "vector"
 ***REMOVED***else:
-***REMOVED***dotenv_template_params["azureSearchQueryType"] = "simple"
-***REMOVED***dotenv_template_params["elasticsearchQueryType"] = "simple"
+***REMOVED***dotenv_template_params["AZURE_SEARCH_QUERY_TYPE"] = "simple"
+***REMOVED***dotenv_template_params["ELASTICSEARCH_QUERY_TYPE"] = "simple"
 ***REMOVED***
-***REMOVED***dotenv_template_params["enableChatHistory"] = enable_chat_history
-***REMOVED***dotenv_template_params["azureOpenaiStream"] = stream
+***REMOVED***dotenv_template_params["ENABLE_CHAT_HISTORY"] = enable_chat_history
+***REMOVED***dotenv_template_params["AZURE_OPENAI_STREAM"] = stream
 ***REMOVED***
 ***REMOVED***return render_template_to_tempfile(
 ***REMOVED***rendered_template_name,
@@ -122,11 +122,11 @@ def test_app(dotenv_rendered_template_path) -> Quart:
 
 @pytest.mark.asyncio
 async def test_dotenv(test_app: Quart, dotenv_template_params: dict[str, str]):
-***REMOVED***if dotenv_template_params["datasourceType"] == "AzureCognitiveSearch":
-***REMOVED***message_content = dotenv_template_params["azureSearchQuery"]
+***REMOVED***if dotenv_template_params["DATASOURCE_TYPE"] == "AzureCognitiveSearch":
+***REMOVED***message_content = dotenv_template_params["AZURE_SEARCH_QUERY"]
 ***REMOVED***
-***REMOVED***elif dotenv_template_params["datasourceType"] == "Elasticsearch":
-***REMOVED***message_content = dotenv_template_params["elasticsearchQuery"]
+***REMOVED***elif dotenv_template_params["DATASOURCE_TYPE"] == "Elasticsearch":
+***REMOVED***message_content = dotenv_template_params["ELASTICSEARCH_QUERY"]
 ***REMOVED***
 ***REMOVED***else:
 ***REMOVED***message_content = "What is Contoso?"

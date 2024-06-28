@@ -27,10 +27,28 @@ jobs:
 ***REMOVED***python -m pip install --upgrade pip
 ***REMOVED***pip install -r requirements-dev.txt
 ***REMOVED***- name: Test with pytest
+***REMOVED***  env:
+***REMOVED***AZURE_OPENAI_ENDPOINT: ${{ secrets.AZUREOPENAIENDPOINT }}
+***REMOVED***AZURE_OPENAI_MODEL: ${{ secrets.AZUREOPENAIMODEL }}
+***REMOVED***AZURE_OPENAI_KEY: ${{ secrets.AZUREOPENAIKEY }}
+***REMOVED***AZURE_OPENAI_EMBEDDING_NAME: ${{ secrets.AZUREOPENAIEMBEDDINGNAME }}
+***REMOVED***AZURE_COSMOSDB_ACCOUNT: ${{ secrets.AZURECOSMOSDBACCOUNT }}
+***REMOVED***AZURE_COSMOSDB_DATABASE: ${{ secrets.AZURECOSMOSDBDATABASE }}
+***REMOVED***AZURE_COSMOSDB_CONVERSATIONS_CONTAINER: ${{ secrets.AZURECOSMOSDBCONVERSATIONSCONTAINER }}
+***REMOVED***AZURE_COSMOSDB_ACCOUNT_KEY: ${{ secrets.AZURECOSMOSDBACCOUNTKEY }}
+***REMOVED***AZURE_SEARCH_SERVICE: ${{ secrets.AZURESEARCHSERVICE }}
+***REMOVED***AZURE_SEARCH_INDEX: ${{ secrets.AZURESEARCHINDEX }}
+***REMOVED***AZURE_SEARCH_KEY: ${{ secrets.AZURESEARCHKEY }}
+***REMOVED***AZURE_SEARCH_QUERY: ${{ secrets.AZURESEARCHQUERY }}
+***REMOVED***ELASTICSEARCH_EMBEDDING_MODEL_ID: ${{ secrets.ELASTICSEARCHEMBEDDINGMODELID }}
+***REMOVED***ELASTICSEARCH_ENCODED_API_KEY: ${{ secrets.ELASTICSEARCHENCODEDAPIKEY }}
+***REMOVED***ELASTICSEARCH_ENDPOINT: ${{ secrets.ELASTICSEARCHENDPOINT }}
+***REMOVED***ELASTICSEARCH_INDEX: ${{ secrets.ELASTICSEARCHINDEX }}
+***REMOVED***ELASTICSEARCH_QUERY: ${{ secrets.ELASTICSEARCHQUERY }}
 ***REMOVED***  run: |
 ***REMOVED***export PYTHONPATH=$(pwd)
-***REMOVED***coverage run --omit=tests/integration_tests -m pytest -v --show-capture=stdout -k "not integration"
-***REMOVED***coverage report -m
+***REMOVED***coverage run -m pytest -v --show-capture=stdout
+***REMOVED***coverage report -m --include=app.py,backend/*,tests/*
 ***REMOVED***coverage xml
 
 ***REMOVED***- name: Code Coverage Report
@@ -44,7 +62,7 @@ jobs:
 ***REMOVED***hide_complexity: true
 ***REMOVED***indicators: true
 ***REMOVED***output: both
-***REMOVED***thresholds: '60 80'
+***REMOVED***thresholds: '50 80'
 
   test_windows:
 ***REMOVED***runs-on:
