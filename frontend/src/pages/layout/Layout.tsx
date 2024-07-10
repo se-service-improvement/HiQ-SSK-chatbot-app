@@ -45,7 +45,7 @@ const Layout = () => {
 ***REMOVED***
   }, [copyClicked])
 
-  useEffect(() => {}, [appStateContext?.state.isCosmosDBAvailable.status])
+  useEffect(() => { }, [appStateContext?.state.isCosmosDBAvailable.status])
 
   useEffect(() => {
 ***REMOVED***const handleResize = () => {
@@ -77,7 +77,7 @@ const Layout = () => {
 ***REMOVED******REMOVED***</Link>
 ***REMOVED***  </Stack>
 ***REMOVED***  <Stack horizontal tokens={{ childrenGap: 4 }} className={styles.shareButtonContainer}>
-***REMOVED******REMOVED***{appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && (
+***REMOVED******REMOVED***{appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && ui?.show_chat_history_button !== false && (
 ***REMOVED******REMOVED***  <HistoryButton
 ***REMOVED******REMOVED***onClick={handleHistoryClick}
 ***REMOVED******REMOVED***text={appStateContext?.state?.isChatHistoryOpen ? hideHistoryLabel : showHistoryLabel}

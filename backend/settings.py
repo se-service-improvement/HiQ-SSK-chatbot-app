@@ -48,6 +48,7 @@ class _UiSettings(BaseSettings):
 ***REMOVED***chat_description: str = "This chatbot is configured to answer your questions"
 ***REMOVED***favicon: str = "/favicon.ico"
 ***REMOVED***show_share_button: bool = True
+***REMOVED***show_chat_history_button: bool = True
 
 
 class _ChatHistorySettings(BaseSettings):

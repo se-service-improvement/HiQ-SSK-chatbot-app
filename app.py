@@ -85,6 +85,7 @@ frontend_settings = {
 ***REMOVED***"chat_title": app_settings.ui.chat_title,
 ***REMOVED***"chat_description": app_settings.ui.chat_description,
 ***REMOVED***"show_share_button": app_settings.ui.show_share_button,
+***REMOVED***"show_chat_history_button": app_settings.ui.show_chat_history_button,
 ***REMOVED***,
 ***REMOVED***"sanitize_answer": app_settings.base_settings.sanitize_answer,
 }
