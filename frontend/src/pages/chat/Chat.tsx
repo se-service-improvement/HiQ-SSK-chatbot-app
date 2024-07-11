@@ -63,6 +63,7 @@ const Chat = () => {
   const [clearingChat, setClearingChat] = useState<boolean>(false)
   const [hideErrorDialog, { toggle: toggleErrorDialog }] = useBoolean(true)
   const [errorMsg, setErrorMsg] = useState<ErrorMessage | null>()
+  const [logo, setLogo] = useState('')
 
   const errorDialogContentProps = {
 ***REMOVED***type: DialogType.close,
@@ -103,6 +104,12 @@ const Chat = () => {
 ***REMOVED***  setErrorMsg(null)
 ***REMOVED***, 500)
   }
+
+  useEffect(() => {
+***REMOVED***if (!appStateContext?.state.isLoading) {
+***REMOVED***  setLogo(ui?.chat_logo || ui?.logo || Contoso)
+***REMOVED***
+  }, [appStateContext?.state.isLoading])
 
   useEffect(() => {
 ***REMOVED***setIsLoading(appStateContext?.state.chatHistoryLoadingState === ChatHistoryLoadingState.Loading)
@@ -766,7 +773,7 @@ const Chat = () => {
 ***REMOVED***  <div className={styles.chatContainer}>
 ***REMOVED******REMOVED***{!messages || messages.length < 1 ? (
 ***REMOVED******REMOVED***  <Stack className={styles.chatEmptyState}>
-***REMOVED******REMOVED***<img src={ui?.chat_logo ? ui.chat_logo : Contoso} className={styles.chatIcon} aria-hidden="true" />
+***REMOVED******REMOVED***<img src={logo} className={styles.chatIcon} aria-hidden="true" />
 ***REMOVED******REMOVED***<h1 className={styles.chatEmptyStateTitle}>{ui?.chat_title}</h1>
 ***REMOVED******REMOVED***<h2 className={styles.chatEmptyStateSubtitle}>{ui?.chat_description}</h2>
 ***REMOVED******REMOVED***  </Stack>

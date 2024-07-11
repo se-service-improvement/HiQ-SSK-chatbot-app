@@ -65,7 +65,7 @@ export const appStateReducer = (state: AppState, action: Action): AppState => {
 ***REMOVED***case 'SET_COSMOSDB_STATUS':
 ***REMOVED***  return { ...state, isCosmosDBAvailable: action.payload }
 ***REMOVED***case 'FETCH_FRONTEND_SETTINGS':
-***REMOVED***  return { ...state, frontendSettings: action.payload }
+***REMOVED***  return { ...state, isLoading: false, frontendSettings: action.payload }
 ***REMOVED***case 'SET_FEEDBACK_STATE':
 ***REMOVED***  return {
 ***REMOVED***...state,

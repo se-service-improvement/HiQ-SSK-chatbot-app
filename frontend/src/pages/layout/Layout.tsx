@@ -17,6 +17,7 @@ const Layout = () => {
   const [shareLabel, setShareLabel] = useState<string | undefined>('Share')
   const [hideHistoryLabel, setHideHistoryLabel] = useState<string>('Hide chat history')
   const [showHistoryLabel, setShowHistoryLabel] = useState<string>('Show chat history')
+  const [logo, setLogo] = useState('')
   const appStateContext = useContext(AppStateContext)
   const ui = appStateContext?.state.frontendSettings?.ui
 
@@ -38,6 +39,12 @@ const Layout = () => {
   const handleHistoryClick = () => {
 ***REMOVED***appStateContext?.dispatch({ type: 'TOGGLE_CHAT_HISTORY' })
   }
+
+  useEffect(() => {
+***REMOVED***if (!appStateContext?.state.isLoading) {
+***REMOVED***  setLogo(ui?.logo || Contoso)
+***REMOVED***
+  }, [appStateContext?.state.isLoading])
 
   useEffect(() => {
 ***REMOVED***if (copyClicked) {
@@ -71,7 +78,7 @@ const Layout = () => {
 ***REMOVED***  <header className={styles.header} role={'banner'}>
 ***REMOVED***<Stack horizontal verticalAlign="center" horizontalAlign="space-between">
 ***REMOVED***  <Stack horizontal verticalAlign="center">
-***REMOVED******REMOVED***<img src={ui?.logo ? ui.logo : Contoso} className={styles.headerIcon} aria-hidden="true" alt="" />
+***REMOVED******REMOVED***<img src={logo} className={styles.headerIcon} aria-hidden="true" alt="" />
 ***REMOVED******REMOVED***<Link to="/" className={styles.headerTitleContainer}>
 ***REMOVED******REMOVED***  <h1 className={styles.headerTitle}>{ui?.title}</h1>
 ***REMOVED******REMOVED***</Link>
