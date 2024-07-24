@@ -175,10 +175,10 @@ def format_pf_non_streaming_response(
 ***REMOVED******REMOVED***"model": "",
 ***REMOVED******REMOVED***"created": "",
 ***REMOVED******REMOVED***"object": "",
+***REMOVED******REMOVED***"history_metadata": history_metadata,
 ***REMOVED******REMOVED***"choices": [
 ***REMOVED******REMOVED***{
 ***REMOVED******REMOVED******REMOVED***"messages": messages,
-***REMOVED******REMOVED******REMOVED***"history_metadata": history_metadata,
 ***REMOVED******REMOVED***
 ***REMOVED******REMOVED***]
 ***REMOVED***
