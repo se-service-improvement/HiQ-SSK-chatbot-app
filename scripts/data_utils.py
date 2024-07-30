@@ -14,11 +14,15 @@ from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
 from functools import partial
 from typing import Any, Callable, Dict, Generator, List, Optional, Tuple, Union
+from azure.ai.documentintelligence.models import AnalyzeDocumentRequest
+import fitz
+import requests
+import base64
 
 import markdown
 import requests
 import tiktoken
-from azure.ai.formrecognizer import DocumentAnalysisClient
+from azure.ai.documentintelligence import DocumentIntelligenceClient
 from azure.core.credentials import AzureKeyCredential
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import ContainerClient
@@ -40,7 +44,12 @@ FILE_FORMAT_DICT = {
 ***REMOVED***"py": "python",
 ***REMOVED***"pdf": "pdf",
 ***REMOVED***"docx": "docx",
-***REMOVED***"pptx": "pptx"
+***REMOVED***"pptx": "pptx",
+***REMOVED***"png": "png",
+***REMOVED***"jpg": "jpg",
+***REMOVED***"jpeg": "jpeg",
+***REMOVED***"gif": "gif",
+***REMOVED***"webp": "webp"
 ***REMOVED***
 
 RETRY_COUNT = 5
@@ -108,23 +117,35 @@ class PdfTextSplitter(TextSplitter):
 
 ***REMOVED***return caption
 ***REMOVED***
-***REMOVED***def mask_urls(self, text) -> Tuple[Dict[str, str], str]:
+***REMOVED***def mask_urls_and_imgs(self, text) -> Tuple[Dict[str, str], str]:
 
 ***REMOVED***def find_urls(string):
 ***REMOVED******REMOVED***regex = r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^()\s<>]+|\(([^()\s<>]+|(\([^()\s<>]+\)))*\))+(?:\(([^()\s<>]+|(\([^()\s<>]+\)))*\)|[^()\s`!()\[\]{};:'\".,<>?«»“”‘’]))"
 ***REMOVED******REMOVED***urls = re.findall(regex, string)
 ***REMOVED******REMOVED***return [x[0] for x in urls]
-***REMOVED***url_dict = {}
+***REMOVED***
+***REMOVED***def find_imgs(string):
+***REMOVED******REMOVED***regex = r'(<img\s+src="[^"]+"[^>]*>.*?</img>)'
+***REMOVED******REMOVED***imgs = re.findall(regex, string, re.DOTALL)
+***REMOVED******REMOVED***return imgs
+***REMOVED***
+***REMOVED***content_dict = {}
 ***REMOVED***masked_text = text
 ***REMOVED***urls = set(find_urls(text))
 
 ***REMOVED***for i, url in enumerate(urls):
 ***REMOVED******REMOVED***masked_text = masked_text.replace(url, f"##URL{i}##")
-***REMOVED******REMOVED***url_dict[f"##URL{i}##"] = url
-***REMOVED***return url_dict, masked_text
+***REMOVED******REMOVED***content_dict[f"##URL{i}##"] = url
+
+***REMOVED***imgs = set(find_imgs(text))
+***REMOVED***for i, img in enumerate(imgs):
+***REMOVED******REMOVED***masked_text = masked_text.replace(img, f"##IMG{i}##")
+***REMOVED******REMOVED***content_dict[f"##IMG{i}##"] = img
+
+***REMOVED***return content_dict, masked_text
 
 ***REMOVED***def split_text(self, text: str) -> List[str]:
-***REMOVED***url_dict, masked_text = self.mask_urls(text)
+***REMOVED***content_dict, masked_text = self.mask_urls_and_imgs(text)
 ***REMOVED***start_tag = self._table_tags["table_open"]
 ***REMOVED***end_tag = self._table_tags["table_close"]
 ***REMOVED***splits = masked_text.split(start_tag)
@@ -148,7 +169,7 @@ class PdfTextSplitter(TextSplitter):
 ***REMOVED******REMOVED***table_caption_prefix = ""
 ***REMOVED******REMOVED***
 
-***REMOVED***final_final_chunks = [chunk for chunk, chunk_size in merge_chunks_serially(final_chunks, self._chunk_size, url_dict)]
+***REMOVED***final_final_chunks = [chunk for chunk, chunk_size in merge_chunks_serially(final_chunks, self._chunk_size, content_dict)]
 
 ***REMOVED***return final_final_chunks
 
@@ -244,6 +265,7 @@ class Document(object):
 ***REMOVED***url: Optional[str] = None
 ***REMOVED***metadata: Optional[Dict] = None
 ***REMOVED***contentVector: Optional[List[float]] = None
+***REMOVED***image_mapping: Optional[Dict] = None
 
 def cleanup_content(content: str) -> str:
 ***REMOVED***"""Cleans up the given content using regexes
@@ -429,13 +451,22 @@ class PythonParser(BaseParser):
 ***REMOVED***def __init__(self) -> None:
 ***REMOVED***super().__init__()
 
+class ImageParser(BaseParser):
+***REMOVED***def parse(self, content: str, file_name: Optional[str] = None) -> Document:
+***REMOVED***return Document(content=content, title=file_name)
+
 class ParserFactory:
 ***REMOVED***def __init__(self):
 ***REMOVED***self._parsers = {
 ***REMOVED******REMOVED***"html": HTMLParser(),
 ***REMOVED******REMOVED***"text": TextParser(),
 ***REMOVED******REMOVED***"markdown": MarkdownParser(),
-***REMOVED******REMOVED***"python": PythonParser()
+***REMOVED******REMOVED***"python": PythonParser(),
+***REMOVED******REMOVED***"png": ImageParser(),
+***REMOVED******REMOVED***"jpg": ImageParser(),
+***REMOVED******REMOVED***"jpeg": ImageParser(),
+***REMOVED******REMOVED***"gif": ImageParser(),
+***REMOVED******REMOVED***"webp": ImageParser()
 ***REMOVED***
 
 ***REMOVED***@property
@@ -545,19 +576,27 @@ def table_to_html(table):
 ***REMOVED***for cell in row_cells:
 ***REMOVED******REMOVED***tag = "th" if (cell.kind == "columnHeader" or cell.kind == "rowHeader") else "td"
 ***REMOVED******REMOVED***cell_spans = ""
-***REMOVED******REMOVED***if cell.column_span > 1: cell_spans += f" colSpan={cell.column_span}"
-***REMOVED******REMOVED***if cell.row_span > 1: cell_spans += f" rowSpan={cell.row_span}"
+***REMOVED******REMOVED***if cell.column_span and cell.column_span > 1: cell_spans += f" colSpan={cell.column_span}"
+***REMOVED******REMOVED***if cell.row_span and cell.row_span > 1: cell_spans += f" rowSpan={cell.row_span}"
 ***REMOVED******REMOVED***table_html += f"<{tag}{cell_spans}>{html.escape(cell.content)}</{tag}>"
 ***REMOVED***table_html +="</tr>"
 ***REMOVED***table_html += "</table>"
 ***REMOVED***return table_html
 
+def polygon_to_bbox(polygon, dpi=72):
+***REMOVED***x_coords = polygon[0::2]
+***REMOVED***y_coords = polygon[1::2]
+***REMOVED***x0, y0 = min(x_coords)*dpi, min(y_coords)*dpi
+***REMOVED***x1, y1 = max(x_coords)*dpi, max(y_coords)*dpi
+***REMOVED***return x0, y0, x1, y1
+
 def extract_pdf_content(file_path, form_recognizer_client, use_layout=False): 
 ***REMOVED***offset = 0
 ***REMOVED***page_map = []
 ***REMOVED***model = "prebuilt-layout" if use_layout else "prebuilt-read"
-***REMOVED***with open(file_path, "rb") as f:
-***REMOVED***poller = form_recognizer_client.begin_analyze_document(model, document = f)
+***REMOVED***
+***REMOVED***base64file = base64.b64encode(open(file_path, "rb").read()).decode()
+***REMOVED***poller = form_recognizer_client.begin_analyze_document(model, AnalyzeDocumentRequest(bytes_source=base64file))
 ***REMOVED***form_recognizer_results = poller.result()
 
 ***REMOVED***# (if using layout) mark all the positions of headers
@@ -571,11 +610,20 @@ def extract_pdf_content(file_path, form_recognizer_client, use_layout=False):
 ***REMOVED******REMOVED***roles_end[para_end] = paragraph.role
 
 ***REMOVED***for page_num, page in enumerate(form_recognizer_results.pages):
-***REMOVED***tables_on_page = [table for table in form_recognizer_results.tables if table.bounding_regions[0].page_number == page_num + 1]
-
-***REMOVED***# (if using layout) mark all positions of the table spans in the page
 ***REMOVED***page_offset = page.spans[0].offset
 ***REMOVED***page_length = page.spans[0].length
+
+***REMOVED***if use_layout:
+***REMOVED******REMOVED***tables_on_page = []
+***REMOVED******REMOVED***for table in form_recognizer_results.tables:
+***REMOVED******REMOVED***table_offset = table.spans[0].offset
+***REMOVED******REMOVED***table_length = table.spans[0].length
+***REMOVED******REMOVED***if page_offset <= table_offset and table_offset + table_length < page_offset + page_length:
+***REMOVED******REMOVED******REMOVED***tables_on_page.append(table)
+***REMOVED***else:
+***REMOVED******REMOVED***tables_on_page = []
+
+***REMOVED***# (if using layout) mark all positions of the table spans in the page
 ***REMOVED***table_chars = [-1]*page_length
 ***REMOVED***for table_id, table in enumerate(tables_on_page):
 ***REMOVED******REMOVED***for span in table.spans:
@@ -611,19 +659,58 @@ def extract_pdf_content(file_path, form_recognizer_client, use_layout=False):
 ***REMOVED***offset += len(page_text)
 
 ***REMOVED***full_text = "".join([page_text for _, _, page_text in page_map])
-***REMOVED***return full_text
 
-def merge_chunks_serially(chunked_content_list: List[str], num_tokens: int, url_dict: Dict[str, str]={}) -> Generator[Tuple[str, int], None, None]:
-***REMOVED***def unmask_urls(text, url_dict={}):
-***REMOVED***if "##URL" in text:
-***REMOVED******REMOVED***for key, value in url_dict.items():
+***REMOVED***# Extract any images
+***REMOVED***image_mapping = {}
+
+***REMOVED***if "figures" in form_recognizer_results.keys() and file_path.endswith(".pdf"):
+***REMOVED***document = fitz.open(file_path)
+
+***REMOVED***for figure in form_recognizer_results["figures"]:
+***REMOVED******REMOVED***bounding_box = figure.bounding_regions[0]
+
+***REMOVED******REMOVED***page_number = bounding_box['pageNumber'] - 1  # Page numbers in PyMuPDF start from 0
+***REMOVED******REMOVED***x0, y0, x1, y1 = polygon_to_bbox(bounding_box['polygon'])
+
+***REMOVED******REMOVED***# Select the figure and upscale it by 200% for higher resolution
+***REMOVED******REMOVED***page = document.load_page(page_number)
+***REMOVED******REMOVED***bbox = fitz.Rect(x0, y0, x1, y1)
+
+***REMOVED******REMOVED***zoom = 2.0 
+***REMOVED******REMOVED***mat = fitz.Matrix(zoom, zoom)
+***REMOVED******REMOVED***image = page.get_pixmap(matrix=mat, clip=bbox)
+
+***REMOVED******REMOVED***# Save the extracted image to a base64 string
+***REMOVED******REMOVED***image_data = image.tobytes(output='jpg')
+***REMOVED******REMOVED***image_base64 = base64.b64encode(image_data).decode("utf-8")
+***REMOVED******REMOVED***image_base64 = f"data:image/jpg;base64,{image_base64}"
+
+***REMOVED******REMOVED***# Add the image tag to the full text
+***REMOVED******REMOVED***replace_start = figure["spans"][0]["offset"]
+***REMOVED******REMOVED***replace_end = figure["spans"][0]["offset"] + figure["spans"][0]["length"]
+***REMOVED******REMOVED***original_text = form_recognizer_results.content[replace_start:replace_end]
+
+***REMOVED******REMOVED***if original_text not in full_text:
+***REMOVED******REMOVED***continue
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***img_tag = image_content_to_tag(original_text)
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***full_text = full_text.replace(original_text, img_tag)
+***REMOVED******REMOVED***image_mapping[img_tag] = image_base64
+
+***REMOVED***return full_text, image_mapping
+
+def merge_chunks_serially(chunked_content_list: List[str], num_tokens: int, content_dict: Dict[str, str]={}) -> Generator[Tuple[str, int], None, None]:
+***REMOVED***def unmask_urls_and_imgs(text, content_dict={}):
+***REMOVED***if "##URL" in text or "##IMG" in text:
+***REMOVED******REMOVED***for key, value in content_dict.items():
 ***REMOVED******REMOVED***text = text.replace(key, value)
 ***REMOVED***return text
 ***REMOVED***# TODO: solve for token overlap
 ***REMOVED***current_chunk = ""
 ***REMOVED***total_size = 0
 ***REMOVED***for chunked_content in chunked_content_list:
-***REMOVED***chunked_content = unmask_urls(chunked_content, url_dict)
+***REMOVED***chunked_content = unmask_urls_and_imgs(chunked_content, content_dict)
 ***REMOVED***chunk_size = TOKEN_ESTIMATOR.estimate_tokens(chunked_content)
 ***REMOVED***if total_size > 0:
 ***REMOVED******REMOVED***new_size = total_size + chunk_size
@@ -675,7 +762,7 @@ def get_embedding(text, embedding_model_endpoint=None, embedding_model_key=None,
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***  input=text, 
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***  dimensions=int(os.getenv("VECTOR_DIMENSION", 1536)))
 ***REMOVED******REMOVED***
-***REMOVED******REMOVED***return embeddings.dict()['data'][0]['embedding']
+***REMOVED******REMOVED***return embeddings.model_dump()['data'][0]['embedding']
 ***REMOVED***
 ***REMOVED***if FLAG_EMBEDDING_MODEL == "COHERE":
 ***REMOVED******REMOVED***if FLAG_COHERE == "MULTILINGUAL":
@@ -709,7 +796,7 @@ def chunk_content_helper(
 ***REMOVED***doc = parser.parse(content, file_name=file_name)
 ***REMOVED***# if the original doc after parsing is < num_tokens return as it is
 ***REMOVED***doc_content_size = TOKEN_ESTIMATOR.estimate_tokens(doc.content)
-***REMOVED***if doc_content_size < num_tokens:
+***REMOVED***if doc_content_size < num_tokens or file_format in ["png", "jpg", "jpeg", "gif", "webp"]:
 ***REMOVED***yield doc.content, doc_content_size, doc
 ***REMOVED***else:
 ***REMOVED***if file_format == "markdown":
@@ -750,7 +837,8 @@ def chunk_content(
 ***REMOVED***use_layout = False,
 ***REMOVED***add_embeddings = False,
 ***REMOVED***azure_credential = None,
-***REMOVED***embedding_endpoint = None
+***REMOVED***embedding_endpoint = None,
+***REMOVED***image_mapping = {}
 ) -> ChunkingResult:
 ***REMOVED***"""Chunks the given content. If ignore_errors is true, returns None
 ***REMOVED***in case of an error
@@ -799,13 +887,18 @@ def chunk_content(
 ***REMOVED******REMOVED******REMOVED***if doc.contentVector is None:
 ***REMOVED******REMOVED******REMOVED***raise Exception(f"Error getting embedding for chunk={chunk}")
 ***REMOVED******REMOVED******REMOVED***
-
+***REMOVED******REMOVED***doc.image_mapping = {}
+***REMOVED******REMOVED***for key, value in image_mapping.items():
+***REMOVED******REMOVED******REMOVED***if key in chunk:
+***REMOVED******REMOVED******REMOVED***doc.image_mapping[key] = value
 ***REMOVED******REMOVED***chunks.append(
 ***REMOVED******REMOVED******REMOVED***Document(
 ***REMOVED******REMOVED******REMOVED***content=chunk,
 ***REMOVED******REMOVED******REMOVED***title=doc.title,
 ***REMOVED******REMOVED******REMOVED***url=url,
-***REMOVED******REMOVED******REMOVED***contentVector=doc.contentVector
+***REMOVED******REMOVED******REMOVED***contentVector=doc.contentVector,
+***REMOVED******REMOVED******REMOVED***metadata=doc.metadata,
+***REMOVED******REMOVED******REMOVED***image_mapping=doc.image_mapping
 ***REMOVED******REMOVED******REMOVED***)
 ***REMOVED******REMOVED***)
 ***REMOVED******REMOVED***else:
@@ -829,6 +922,69 @@ def chunk_content(
 ***REMOVED***skipped_chunks=skipped_chunks,
 ***REMOVED***)
 
+def image_content_to_tag(image_content: str) -> str:
+***REMOVED***# We encode the images in an XML-like format to make the replacement very unlikely to conflict with other text
+***REMOVED***# This also lets us preserve the content with minimal escaping, just escaping the <img> tags
+***REMOVED***random_id = str(time.time()).replace(".", "")[-4:]
+***REMOVED***img_tag = f'<img src="IMG_{random_id}.jpg">{image_content.replace("<img>", "&lt;img&gt;").replace("</img>", "&lt;/img&gt;")}</img>'
+***REMOVED***return img_tag
+
+def get_caption(image_path, captioning_model_endpoint, captioning_model_key):
+***REMOVED***encoded_image = base64.b64encode(open(image_path, 'rb').read()).decode('ascii')
+***REMOVED***file_ext = image_path.split(".")[-1]
+***REMOVED***headers = {
+***REMOVED***"Content-Type": "application/json",
+***REMOVED***"api-key": captioning_model_key,
+***REMOVED***
+
+***REMOVED***payload = {
+***REMOVED***"messages": [
+***REMOVED******REMOVED***{
+***REMOVED******REMOVED***"role": "system",
+***REMOVED******REMOVED***"content": [
+***REMOVED******REMOVED***{
+***REMOVED******REMOVED***"type": "text",
+***REMOVED******REMOVED***"text": "You are a captioning model that helps uses find descriptive captions."
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***]
+***REMOVED***,
+***REMOVED******REMOVED***{
+***REMOVED******REMOVED***"role": "user",
+***REMOVED******REMOVED***"content": [
+***REMOVED******REMOVED***{
+***REMOVED******REMOVED***"type": "text",
+***REMOVED******REMOVED***"text": "Describe this image as if you were describing it to someone who can't see it. "
+***REMOVED******REMOVED***,
+***REMOVED******REMOVED***{
+***REMOVED******REMOVED***"type": "image_url",
+***REMOVED******REMOVED***"image_url": {
+***REMOVED******REMOVED******REMOVED***"url": f"data:image/{file_ext};base64,{encoded_image}"
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***]
+***REMOVED***
+***REMOVED***],
+***REMOVED***"temperature": 0
+***REMOVED***
+
+***REMOVED***for i in range(RETRY_COUNT):
+***REMOVED***try:
+***REMOVED******REMOVED***response = requests.post(captioning_model_endpoint, headers=headers, json=payload)
+***REMOVED******REMOVED***response.raise_for_status()  # Will raise an HTTPError if the HTTP request returned an unsuccessful status code
+***REMOVED******REMOVED***break
+***REMOVED***except Exception as e:
+***REMOVED******REMOVED***print(f"Error getting caption with error={e}, retrying, current at {i + 1} retry, {RETRY_COUNT - (i + 1)} retries left")
+***REMOVED******REMOVED***time.sleep(15)
+
+***REMOVED***if response.status_code != 200:
+***REMOVED***raise Exception(f"Error getting caption with status_code={response.status_code}")
+***REMOVED***
+***REMOVED***caption = response.json()["choices"][0]["message"]["content"]
+***REMOVED***img_tag = image_content_to_tag(caption)
+***REMOVED***mapping = {img_tag: f"data:image/{file_ext};base64,{encoded_image}"}
+
+***REMOVED***return img_tag, mapping
+
 def chunk_file(
 ***REMOVED***file_path: str,
 ***REMOVED***ignore_errors: bool = True,
@@ -841,7 +997,9 @@ def chunk_file(
 ***REMOVED***use_layout = False,
 ***REMOVED***add_embeddings=False,
 ***REMOVED***azure_credential = None,
-***REMOVED***embedding_endpoint = None
+***REMOVED***embedding_endpoint = None,
+***REMOVED***captioning_model_endpoint = None,
+***REMOVED***captioning_model_key = None
 ) -> ChunkingResult:
 ***REMOVED***"""Chunks the given file.
 ***REMOVED***Args:
@@ -851,6 +1009,7 @@ def chunk_file(
 ***REMOVED***"""
 ***REMOVED***file_name = os.path.basename(file_path)
 ***REMOVED***file_format = _get_file_format(file_name, extensions_to_process)
+***REMOVED***image_mapping = {}
 ***REMOVED***if not file_format:
 ***REMOVED***if ignore_errors:
 ***REMOVED******REMOVED***return ChunkingResult(
@@ -863,8 +1022,13 @@ def chunk_file(
 ***REMOVED***if file_format in ["pdf", "docx", "pptx"]:
 ***REMOVED***if form_recognizer_client is None:
 ***REMOVED******REMOVED***raise UnsupportedFormatError("form_recognizer_client is required for pdf files")
-***REMOVED***content = extract_pdf_content(file_path, form_recognizer_client, use_layout=use_layout)
+***REMOVED***content, image_mapping = extract_pdf_content(file_path, form_recognizer_client, use_layout=use_layout)
 ***REMOVED***cracked_pdf = True
+***REMOVED***elif file_format in ["png", "jpg", "jpeg", "webp"]:
+***REMOVED***# Make call to LLM for a descriptive caption
+***REMOVED***if captioning_model_endpoint is None or captioning_model_key is None:
+***REMOVED******REMOVED***raise Exception("CAPTIONING_MODEL_ENDPOINT and CAPTIONING_MODEL_KEY are required for images")
+***REMOVED***content, image_mapping = get_caption(file_path, captioning_model_endpoint, captioning_model_key)
 ***REMOVED***else:
 ***REMOVED***try:
 ***REMOVED******REMOVED***with open(file_path, "r", encoding="utf8") as f:
@@ -889,7 +1053,8 @@ def chunk_file(
 ***REMOVED***use_layout=use_layout,
 ***REMOVED***add_embeddings=add_embeddings,
 ***REMOVED***azure_credential=azure_credential,
-***REMOVED***embedding_endpoint=embedding_endpoint
+***REMOVED***embedding_endpoint=embedding_endpoint,
+***REMOVED***image_mapping=image_mapping
 ***REMOVED***)
 
 
@@ -906,7 +1071,9 @@ def process_file(
 ***REMOVED***use_layout = False,
 ***REMOVED***add_embeddings = False,
 ***REMOVED***azure_credential = None,
-***REMOVED***embedding_endpoint = None
+***REMOVED***embedding_endpoint = None,
+***REMOVED***captioning_model_endpoint = None,
+***REMOVED***captioning_model_key = None
 ***REMOVED***):
 
 ***REMOVED***if not form_recognizer_client:
@@ -932,11 +1099,14 @@ def process_file(
 ***REMOVED******REMOVED***use_layout=use_layout,
 ***REMOVED******REMOVED***add_embeddings=add_embeddings,
 ***REMOVED******REMOVED***azure_credential=azure_credential,
-***REMOVED******REMOVED***embedding_endpoint=embedding_endpoint
+***REMOVED******REMOVED***embedding_endpoint=embedding_endpoint,
+***REMOVED******REMOVED***captioning_model_endpoint=captioning_model_endpoint,
+***REMOVED******REMOVED***captioning_model_key=captioning_model_key
 ***REMOVED***)
 ***REMOVED***for chunk_idx, chunk_doc in enumerate(result.chunks):
 ***REMOVED******REMOVED***chunk_doc.filepath = rel_file_path
 ***REMOVED******REMOVED***chunk_doc.metadata = json.dumps({"chunk_id": str(chunk_idx)})
+***REMOVED******REMOVED***chunk_doc.image_mapping = json.dumps(chunk_doc.image_mapping) if chunk_doc.image_mapping else None
 ***REMOVED***except Exception as e:
 ***REMOVED***print(e)
 ***REMOVED***if not ignore_errors:
@@ -999,7 +1169,9 @@ def chunk_directory(
 ***REMOVED***njobs=4,
 ***REMOVED***add_embeddings = False,
 ***REMOVED***azure_credential = None,
-***REMOVED***embedding_endpoint = None
+***REMOVED***embedding_endpoint = None,
+***REMOVED***captioning_model_endpoint = None,
+***REMOVED***captioning_model_key = None
 ):
 ***REMOVED***"""
 ***REMOVED***Chunks the given directory recursively
@@ -1041,7 +1213,8 @@ def chunk_directory(
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   token_overlap=token_overlap,
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   extensions_to_process=extensions_to_process,
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   form_recognizer_client=form_recognizer_client, use_layout=use_layout, add_embeddings=add_embeddings,
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   azure_credential=azure_credential, embedding_endpoint=embedding_endpoint)
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   azure_credential=azure_credential, embedding_endpoint=embedding_endpoint,
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   captioning_model_endpoint=captioning_model_endpoint, captioning_model_key=captioning_model_key)
 ***REMOVED******REMOVED***if is_error:
 ***REMOVED******REMOVED***num_files_with_errors += 1
 ***REMOVED******REMOVED***continue
@@ -1057,7 +1230,8 @@ def chunk_directory(
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   token_overlap=token_overlap,
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   extensions_to_process=extensions_to_process,
 ***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   form_recognizer_client=None, use_layout=use_layout, add_embeddings=add_embeddings,
-***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   azure_credential=azure_credential, embedding_endpoint=embedding_endpoint)
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   azure_credential=azure_credential, embedding_endpoint=embedding_endpoint,
+***REMOVED******REMOVED******REMOVED******REMOVED******REMOVED***   captioning_model_endpoint=captioning_model_endpoint, captioning_model_key=captioning_model_key)
 ***REMOVED***with ProcessPoolExecutor(max_workers=njobs) as executor:
 ***REMOVED******REMOVED***futures = list(tqdm(executor.map(process_file_partial, files_to_process), total=len(files_to_process)))
 ***REMOVED******REMOVED***for result, is_error in futures:
@@ -1087,7 +1261,7 @@ class SingletonFormRecognizerClient:
 ***REMOVED******REMOVED***url = os.getenv("FORM_RECOGNIZER_ENDPOINT")
 ***REMOVED******REMOVED***key = os.getenv("FORM_RECOGNIZER_KEY")
 ***REMOVED******REMOVED***if url and key:
-***REMOVED******REMOVED***cls.instance = DocumentAnalysisClient(
+***REMOVED******REMOVED***cls.instance = DocumentIntelligenceClient(
 ***REMOVED******REMOVED******REMOVED***endpoint=url, credential=AzureKeyCredential(key), headers={"x-ms-useragent": "sample-app-aoai-chatgpt/1.0.0"})
 ***REMOVED******REMOVED***else:
 ***REMOVED******REMOVED***print("SingletonFormRecognizerClient: Skipping since credentials not provided. Assuming NO form recognizer extensions(like .pdf) in directory")
@@ -1099,4 +1273,4 @@ class SingletonFormRecognizerClient:
 
 ***REMOVED***def __setstate__(self, state):
 ***REMOVED***url, key = state
-***REMOVED***self.instance = DocumentAnalysisClient(endpoint=url, credential=AzureKeyCredential(key), headers={"x-ms-useragent": "sample-app-aoai-chatgpt/1.0.0"})
+***REMOVED***self.instance = DocumentIntelligenceClient(endpoint=url, credential=AzureKeyCredential(key), headers={"x-ms-useragent": "sample-app-aoai-chatgpt/1.0.0"})
