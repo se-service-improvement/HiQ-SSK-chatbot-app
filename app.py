@@ -4,6 +4,7 @@ import os
 import logging
 import uuid
 import httpx
+import asyncio
 from quart import (
 ***REMOVED***Blueprint,
 ***REMOVED***Quart,
@@ -12,6 +13,7 @@ from quart import (
 ***REMOVED***request,
 ***REMOVED***send_from_directory,
 ***REMOVED***render_template,
+***REMOVED***current_app,
 )
 
 from openai import AsyncAzureOpenAI
@@ -36,11 +38,24 @@ from backend.utils import (
 
 bp = Blueprint("routes", __name__, static_folder="static", template_folder="static")
 
+cosmos_db_ready = asyncio.Event()
+
 
 def create_app():
 ***REMOVED***app = Quart(__name__)
 ***REMOVED***app.register_blueprint(bp)
 ***REMOVED***app.config["TEMPLATES_AUTO_RELOAD"] = True
+***REMOVED***
+***REMOVED***@app.before_serving
+***REMOVED***async def init():
+***REMOVED***try:
+***REMOVED******REMOVED***app.cosmos_conversation_client = await init_cosmosdb_client()
+***REMOVED******REMOVED***cosmos_db_ready.set()
+***REMOVED***except Exception as e:
+***REMOVED******REMOVED***logging.exception("Failed to initialize CosmosDB client")
+***REMOVED******REMOVED***app.cosmos_conversation_client = None
+***REMOVED******REMOVED***raise e
+***REMOVED***
 ***REMOVED***return app
 
 
@@ -96,8 +111,9 @@ MS_DEFENDER_ENABLED = os.environ.get("MS_DEFENDER_ENABLED", "true").lower() == "
 
 
 # Initialize Azure OpenAI Client
-def init_openai_client():
+async def init_openai_client():
 ***REMOVED***azure_openai_client = None
+***REMOVED***
 ***REMOVED***try:
 ***REMOVED***# API version check
 ***REMOVED***if (
@@ -128,8 +144,10 @@ def init_openai_client():
 ***REMOVED***ad_token_provider = None
 ***REMOVED***if not aoai_api_key:
 ***REMOVED******REMOVED***logging.debug("No AZURE_OPENAI_KEY found, using Azure Entra ID auth")
+***REMOVED******REMOVED***async with DefaultAzureCredential() as credential:
 ***REMOVED******REMOVED***ad_token_provider = get_bearer_token_provider(
-***REMOVED******REMOVED***DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
+***REMOVED******REMOVED******REMOVED***credential,
+***REMOVED******REMOVED******REMOVED***"https://cognitiveservices.azure.com/.default"
 ***REMOVED******REMOVED***)
 
 ***REMOVED***# Deployment
@@ -155,7 +173,7 @@ def init_openai_client():
 ***REMOVED***raise e
 
 
-def init_cosmosdb_client():
+async def init_cosmosdb_client():
 ***REMOVED***cosmos_conversation_client = None
 ***REMOVED***if app_settings.chat_history:
 ***REMOVED***try:
@@ -164,7 +182,9 @@ def init_cosmosdb_client():
 ***REMOVED******REMOVED***)
 
 ***REMOVED******REMOVED***if not app_settings.chat_history.account_key:
-***REMOVED******REMOVED***credential = DefaultAzureCredential()
+***REMOVED******REMOVED***async with DefaultAzureCredential() as cred:
+***REMOVED******REMOVED******REMOVED***credential = cred
+***REMOVED******REMOVED******REMOVED***
 ***REMOVED******REMOVED***else:
 ***REMOVED******REMOVED***credential = app_settings.chat_history.account_key
 
@@ -314,7 +334,7 @@ async def send_chat_request(request_body, request_headers):
 ***REMOVED***model_args = prepare_model_args(request_body, request_headers)
 
 ***REMOVED***try:
-***REMOVED***azure_openai_client = init_openai_client()
+***REMOVED***azure_openai_client = await init_openai_client()
 ***REMOVED***raw_response = await azure_openai_client.chat.completions.with_raw_response.create(**model_args)
 ***REMOVED***response = raw_response.parse()
 ***REMOVED***apim_request_id = raw_response.headers.get("apim-request-id") 
@@ -393,6 +413,7 @@ def get_frontend_settings():
 ## Conversation History API ##
 @bp.route("/history/generate", methods=["POST"])
 async def add_conversation():
+***REMOVED***await cosmos_db_ready.wait()
 ***REMOVED***authenticated_user = get_authenticated_user_details(request_headers=request.headers)
 ***REMOVED***user_id = authenticated_user["user_principal_id"]
 
@@ -402,15 +423,14 @@ async def add_conversation():
 
 ***REMOVED***try:
 ***REMOVED***# make sure cosmos is configured
-***REMOVED***cosmos_conversation_client = init_cosmosdb_client()
-***REMOVED***if not cosmos_conversation_client:
+***REMOVED***if not current_app.cosmos_conversation_client:
 ***REMOVED******REMOVED***raise Exception("CosmosDB is not configured or not working")
 
 ***REMOVED***# check for the conversation_id, if the conversation is not set, we will create a new one
 ***REMOVED***history_metadata = {}
 ***REMOVED***if not conversation_id:
 ***REMOVED******REMOVED***title = await generate_title(request_json["messages"])
-***REMOVED******REMOVED***conversation_dict = await cosmos_conversation_client.create_conversation(
+***REMOVED******REMOVED***conversation_dict = await current_app.cosmos_conversation_client.create_conversation(
 ***REMOVED******REMOVED***user_id=user_id, title=title
 ***REMOVED******REMOVED***)
 ***REMOVED******REMOVED***conversation_id = conversation_dict["id"]
@@ -421,7 +441,7 @@ async def add_conversation():
 ***REMOVED***## then write it to the conversation history in cosmos
 ***REMOVED***messages = request_json["messages"]
 ***REMOVED***if len(messages) > 0 and messages[-1]["role"] == "user":
-***REMOVED******REMOVED***createdMessageValue = await cosmos_conversation_client.create_message(
+***REMOVED******REMOVED***createdMessageValue = await current_app.cosmos_conversation_client.create_message(
 ***REMOVED******REMOVED***uuid=str(uuid.uuid4()),
 ***REMOVED******REMOVED***conversation_id=conversation_id,
 ***REMOVED******REMOVED***user_id=user_id,
@@ -436,8 +456,6 @@ async def add_conversation():
 ***REMOVED***else:
 ***REMOVED******REMOVED***raise Exception("No user message found")
 
-***REMOVED***await cosmos_conversation_client.cosmosdb_client.close()
-
 ***REMOVED***# Submit request to Chat Completions for response
 ***REMOVED***request_body = await request.get_json()
 ***REMOVED***history_metadata["conversation_id"] = conversation_id
@@ -451,6 +469,7 @@ async def add_conversation():
 
 @bp.route("/history/update", methods=["POST"])
 async def update_conversation():
+***REMOVED***await cosmos_db_ready.wait()
 ***REMOVED***authenticated_user = get_authenticated_user_details(request_headers=request.headers)
 ***REMOVED***user_id = authenticated_user["user_principal_id"]
 
@@ -460,8 +479,7 @@ async def update_conversation():
 
 ***REMOVED***try:
 ***REMOVED***# make sure cosmos is configured
-***REMOVED***cosmos_conversation_client = init_cosmosdb_client()
-***REMOVED***if not cosmos_conversation_client:
+***REMOVED***if not current_app.cosmos_conversation_client:
 ***REMOVED******REMOVED***raise Exception("CosmosDB is not configured or not working")
 
 ***REMOVED***# check for the conversation_id, if the conversation is not set, we will create a new one
@@ -474,14 +492,14 @@ async def update_conversation():
 ***REMOVED***if len(messages) > 0 and messages[-1]["role"] == "assistant":
 ***REMOVED******REMOVED***if len(messages) > 1 and messages[-2].get("role", None) == "tool":
 ***REMOVED******REMOVED***# write the tool message first
-***REMOVED******REMOVED***await cosmos_conversation_client.create_message(
+***REMOVED******REMOVED***await current_app.cosmos_conversation_client.create_message(
 ***REMOVED******REMOVED******REMOVED***uuid=str(uuid.uuid4()),
 ***REMOVED******REMOVED******REMOVED***conversation_id=conversation_id,
 ***REMOVED******REMOVED******REMOVED***user_id=user_id,
 ***REMOVED******REMOVED******REMOVED***input_message=messages[-2],
 ***REMOVED******REMOVED***)
 ***REMOVED******REMOVED***# write the assistant message
-***REMOVED******REMOVED***await cosmos_conversation_client.create_message(
+***REMOVED******REMOVED***await current_app.cosmos_conversation_client.create_message(
 ***REMOVED******REMOVED***uuid=messages[-1]["id"],
 ***REMOVED******REMOVED***conversation_id=conversation_id,
 ***REMOVED******REMOVED***user_id=user_id,
@@ -491,7 +509,6 @@ async def update_conversation():
 ***REMOVED******REMOVED***raise Exception("No bot messages found")
 
 ***REMOVED***# Submit request to Chat Completions for response
-***REMOVED***await cosmos_conversation_client.cosmosdb_client.close()
 ***REMOVED***response = {"success": True}
 ***REMOVED***return jsonify(response), 200
 
@@ -502,9 +519,9 @@ async def update_conversation():
 
 @bp.route("/history/message_feedback", methods=["POST"])
 async def update_message():
+***REMOVED***await cosmos_db_ready.wait()
 ***REMOVED***authenticated_user = get_authenticated_user_details(request_headers=request.headers)
 ***REMOVED***user_id = authenticated_user["user_principal_id"]
-***REMOVED***cosmos_conversation_client = init_cosmosdb_client()
 
 ***REMOVED***## check request for message_id
 ***REMOVED***request_json = await request.get_json()
@@ -518,7 +535,7 @@ async def update_message():
 ***REMOVED******REMOVED***return jsonify({"error": "message_feedback is required"}), 400
 
 ***REMOVED***## update the message in cosmos
-***REMOVED***updated_message = await cosmos_conversation_client.update_message_feedback(
+***REMOVED***updated_message = await current_app.cosmos_conversation_client.update_message_feedback(
 ***REMOVED******REMOVED***user_id, message_id, message_feedback
 ***REMOVED***)
 ***REMOVED***if updated_message:
@@ -548,6 +565,7 @@ async def update_message():
 
 @bp.route("/history/delete", methods=["DELETE"])
 async def delete_conversation():
+***REMOVED***await cosmos_db_ready.wait()
 ***REMOVED***## get the user id from the request headers
 ***REMOVED***authenticated_user = get_authenticated_user_details(request_headers=request.headers)
 ***REMOVED***user_id = authenticated_user["user_principal_id"]
@@ -561,21 +579,18 @@ async def delete_conversation():
 ***REMOVED******REMOVED***return jsonify({"error": "conversation_id is required"}), 400
 
 ***REMOVED***## make sure cosmos is configured
-***REMOVED***cosmos_conversation_client = init_cosmosdb_client()
-***REMOVED***if not cosmos_conversation_client:
+***REMOVED***if not current_app.cosmos_conversation_client:
 ***REMOVED******REMOVED***raise Exception("CosmosDB is not configured or not working")
 
 ***REMOVED***## delete the conversation messages from cosmos first
-***REMOVED***deleted_messages = await cosmos_conversation_client.delete_messages(
+***REMOVED***deleted_messages = await current_app.cosmos_conversation_client.delete_messages(
 ***REMOVED******REMOVED***conversation_id, user_id
 ***REMOVED***)
 
 ***REMOVED***## Now delete the conversation
-***REMOVED***deleted_conversation = await cosmos_conversation_client.delete_conversation(
+***REMOVED***deleted_conversation = await current_app.cosmos_conversation_client.delete_conversation(
 ***REMOVED******REMOVED***user_id, conversation_id
 ***REMOVED***)
-
-***REMOVED***await cosmos_conversation_client.cosmosdb_client.close()
 
 ***REMOVED***return (
 ***REMOVED******REMOVED***jsonify(
@@ -593,20 +608,19 @@ async def delete_conversation():
 
 @bp.route("/history/list", methods=["GET"])
 async def list_conversations():
+***REMOVED***await cosmos_db_ready.wait()
 ***REMOVED***offset = request.args.get("offset", 0)
 ***REMOVED***authenticated_user = get_authenticated_user_details(request_headers=request.headers)
 ***REMOVED***user_id = authenticated_user["user_principal_id"]
 
 ***REMOVED***## make sure cosmos is configured
-***REMOVED***cosmos_conversation_client = init_cosmosdb_client()
-***REMOVED***if not cosmos_conversation_client:
+***REMOVED***if not current_app.cosmos_conversation_client:
 ***REMOVED***raise Exception("CosmosDB is not configured or not working")
 
 ***REMOVED***## get the conversations from cosmos
-***REMOVED***conversations = await cosmos_conversation_client.get_conversations(
+***REMOVED***conversations = await current_app.cosmos_conversation_client.get_conversations(
 ***REMOVED***user_id, offset=offset, limit=25
 ***REMOVED***)
-***REMOVED***await cosmos_conversation_client.cosmosdb_client.close()
 ***REMOVED***if not isinstance(conversations, list):
 ***REMOVED***return jsonify({"error": f"No conversations for {user_id} were found"}), 404
 
@@ -617,6 +631,7 @@ async def list_conversations():
 
 @bp.route("/history/read", methods=["POST"])
 async def get_conversation():
+***REMOVED***await cosmos_db_ready.wait()
 ***REMOVED***authenticated_user = get_authenticated_user_details(request_headers=request.headers)
 ***REMOVED***user_id = authenticated_user["user_principal_id"]
 
@@ -628,12 +643,11 @@ async def get_conversation():
 ***REMOVED***return jsonify({"error": "conversation_id is required"}), 400
 
 ***REMOVED***## make sure cosmos is configured
-***REMOVED***cosmos_conversation_client = init_cosmosdb_client()
-***REMOVED***if not cosmos_conversation_client:
+***REMOVED***if not current_app.cosmos_conversation_client:
 ***REMOVED***raise Exception("CosmosDB is not configured or not working")
 
 ***REMOVED***## get the conversation object and the related messages from cosmos
-***REMOVED***conversation = await cosmos_conversation_client.get_conversation(
+***REMOVED***conversation = await current_app.cosmos_conversation_client.get_conversation(
 ***REMOVED***user_id, conversation_id
 ***REMOVED***)
 ***REMOVED***## return the conversation id and the messages in the bot frontend format
@@ -648,7 +662,7 @@ async def get_conversation():
 ***REMOVED***)
 
 ***REMOVED***# get the messages for the conversation from cosmos
-***REMOVED***conversation_messages = await cosmos_conversation_client.get_messages(
+***REMOVED***conversation_messages = await current_app.cosmos_conversation_client.get_messages(
 ***REMOVED***user_id, conversation_id
 ***REMOVED***)
 
@@ -664,12 +678,12 @@ async def get_conversation():
 ***REMOVED***for msg in conversation_messages
 ***REMOVED***]
 
-***REMOVED***await cosmos_conversation_client.cosmosdb_client.close()
 ***REMOVED***return jsonify({"conversation_id": conversation_id, "messages": messages}), 200
 
 
 @bp.route("/history/rename", methods=["POST"])
 async def rename_conversation():
+***REMOVED***await cosmos_db_ready.wait()
 ***REMOVED***authenticated_user = get_authenticated_user_details(request_headers=request.headers)
 ***REMOVED***user_id = authenticated_user["user_principal_id"]
 
@@ -681,12 +695,11 @@ async def rename_conversation():
 ***REMOVED***return jsonify({"error": "conversation_id is required"}), 400
 
 ***REMOVED***## make sure cosmos is configured
-***REMOVED***cosmos_conversation_client = init_cosmosdb_client()
-***REMOVED***if not cosmos_conversation_client:
+***REMOVED***if not current_app.cosmos_conversation_client:
 ***REMOVED***raise Exception("CosmosDB is not configured or not working")
 
 ***REMOVED***## get the conversation from cosmos
-***REMOVED***conversation = await cosmos_conversation_client.get_conversation(
+***REMOVED***conversation = await current_app.cosmos_conversation_client.get_conversation(
 ***REMOVED***user_id, conversation_id
 ***REMOVED***)
 ***REMOVED***if not conversation:
@@ -704,16 +717,16 @@ async def rename_conversation():
 ***REMOVED***if not title:
 ***REMOVED***return jsonify({"error": "title is required"}), 400
 ***REMOVED***conversation["title"] = title
-***REMOVED***updated_conversation = await cosmos_conversation_client.upsert_conversation(
+***REMOVED***updated_conversation = await current_app.cosmos_conversation_client.upsert_conversation(
 ***REMOVED***conversation
 ***REMOVED***)
 
-***REMOVED***await cosmos_conversation_client.cosmosdb_client.close()
 ***REMOVED***return jsonify(updated_conversation), 200
 
 
 @bp.route("/history/delete_all", methods=["DELETE"])
 async def delete_all_conversations():
+***REMOVED***await cosmos_db_ready.wait()
 ***REMOVED***## get the user id from the request headers
 ***REMOVED***authenticated_user = get_authenticated_user_details(request_headers=request.headers)
 ***REMOVED***user_id = authenticated_user["user_principal_id"]
@@ -721,11 +734,10 @@ async def delete_all_conversations():
 ***REMOVED***# get conversations for user
 ***REMOVED***try:
 ***REMOVED***## make sure cosmos is configured
-***REMOVED***cosmos_conversation_client = init_cosmosdb_client()
-***REMOVED***if not cosmos_conversation_client:
+***REMOVED***if not current_app.cosmos_conversation_client:
 ***REMOVED******REMOVED***raise Exception("CosmosDB is not configured or not working")
 
-***REMOVED***conversations = await cosmos_conversation_client.get_conversations(
+***REMOVED***conversations = await current_app.cosmos_conversation_client.get_conversations(
 ***REMOVED******REMOVED***user_id, offset=0, limit=None
 ***REMOVED***)
 ***REMOVED***if not conversations:
@@ -734,15 +746,14 @@ async def delete_all_conversations():
 ***REMOVED***# delete each conversation
 ***REMOVED***for conversation in conversations:
 ***REMOVED******REMOVED***## delete the conversation messages from cosmos first
-***REMOVED******REMOVED***deleted_messages = await cosmos_conversation_client.delete_messages(
+***REMOVED******REMOVED***deleted_messages = await current_app.cosmos_conversation_client.delete_messages(
 ***REMOVED******REMOVED***conversation["id"], user_id
 ***REMOVED******REMOVED***)
 
 ***REMOVED******REMOVED***## Now delete the conversation
-***REMOVED******REMOVED***deleted_conversation = await cosmos_conversation_client.delete_conversation(
+***REMOVED******REMOVED***deleted_conversation = await current_app.cosmos_conversation_client.delete_conversation(
 ***REMOVED******REMOVED***user_id, conversation["id"]
 ***REMOVED******REMOVED***)
-***REMOVED***await cosmos_conversation_client.cosmosdb_client.close()
 ***REMOVED***return (
 ***REMOVED******REMOVED***jsonify(
 ***REMOVED******REMOVED***{
@@ -759,6 +770,7 @@ async def delete_all_conversations():
 
 @bp.route("/history/clear", methods=["POST"])
 async def clear_messages():
+***REMOVED***await cosmos_db_ready.wait()
 ***REMOVED***## get the user id from the request headers
 ***REMOVED***authenticated_user = get_authenticated_user_details(request_headers=request.headers)
 ***REMOVED***user_id = authenticated_user["user_principal_id"]
@@ -772,12 +784,11 @@ async def clear_messages():
 ***REMOVED******REMOVED***return jsonify({"error": "conversation_id is required"}), 400
 
 ***REMOVED***## make sure cosmos is configured
-***REMOVED***cosmos_conversation_client = init_cosmosdb_client()
-***REMOVED***if not cosmos_conversation_client:
+***REMOVED***if not current_app.cosmos_conversation_client:
 ***REMOVED******REMOVED***raise Exception("CosmosDB is not configured or not working")
 
 ***REMOVED***## delete the conversation messages from cosmos
-***REMOVED***deleted_messages = await cosmos_conversation_client.delete_messages(
+***REMOVED***deleted_messages = await current_app.cosmos_conversation_client.delete_messages(
 ***REMOVED******REMOVED***conversation_id, user_id
 ***REMOVED***)
 
@@ -797,18 +808,17 @@ async def clear_messages():
 
 @bp.route("/history/ensure", methods=["GET"])
 async def ensure_cosmos():
+***REMOVED***await cosmos_db_ready.wait()
 ***REMOVED***if not app_settings.chat_history:
 ***REMOVED***return jsonify({"error": "CosmosDB is not configured"}), 404
 
 ***REMOVED***try:
-***REMOVED***cosmos_conversation_client = init_cosmosdb_client()
-***REMOVED***success, err = await cosmos_conversation_client.ensure()
-***REMOVED***if not cosmos_conversation_client or not success:
+***REMOVED***success, err = await current_app.cosmos_conversation_client.ensure()
+***REMOVED***if not current_app.cosmos_conversation_client or not success:
 ***REMOVED******REMOVED***if err:
 ***REMOVED******REMOVED***return jsonify({"error": err}), 422
 ***REMOVED******REMOVED***return jsonify({"error": "CosmosDB is not configured or not working"}), 500
 
-***REMOVED***await cosmos_conversation_client.cosmosdb_client.close()
 ***REMOVED***return jsonify({"message": "CosmosDB is configured and working"}), 200
 ***REMOVED***except Exception as e:
 ***REMOVED***logging.exception("Exception in /history/ensure")
@@ -848,7 +858,7 @@ async def generate_title(conversation_messages) -> str:
 ***REMOVED***messages.append({"role": "user", "content": title_prompt})
 
 ***REMOVED***try:
-***REMOVED***azure_openai_client = init_openai_client()
+***REMOVED***azure_openai_client = await init_openai_client()
 ***REMOVED***response = await azure_openai_client.chat.completions.create(
 ***REMOVED******REMOVED***model=app_settings.azure_openai.model, messages=messages, temperature=1, max_tokens=64
 ***REMOVED***)
