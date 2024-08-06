@@ -175,16 +175,24 @@ class _AzureOpenAISettings(BaseSettings):
 ***REMOVED******REMOVED***"type": "deployment_name",
 ***REMOVED******REMOVED***"deployment_name": self.embedding_name
 ***REMOVED***
-***REMOVED***
-***REMOVED***elif self.embedding_endpoint and self.embedding_key:
+***REMOVED***elif self.embedding_endpoint:
+***REMOVED******REMOVED***if self.embedding_key:
 ***REMOVED******REMOVED***return {
-***REMOVED******REMOVED***"type": "endpoint",
-***REMOVED******REMOVED***"endpoint": self.embedding_endpoint,
-***REMOVED******REMOVED***"authentication": {
+***REMOVED******REMOVED******REMOVED***"type": "endpoint",
+***REMOVED******REMOVED******REMOVED***"endpoint": self.embedding_endpoint,
+***REMOVED******REMOVED******REMOVED***"authentication": {
 ***REMOVED******REMOVED******REMOVED***"type": "api_key",
 ***REMOVED******REMOVED******REMOVED***"api_key": self.embedding_key
 ***REMOVED******REMOVED***
-***REMOVED***
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***else:
+***REMOVED******REMOVED***return {
+***REMOVED******REMOVED******REMOVED***"type": "endpoint",
+***REMOVED******REMOVED******REMOVED***"endpoint": self.embedding_endpoint,
+***REMOVED******REMOVED******REMOVED***"authentication": {
+***REMOVED******REMOVED******REMOVED***"type": "system_assigned_managed_identity"
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***
 ***REMOVED***else:   
 ***REMOVED******REMOVED***return None
 ***REMOVED***
