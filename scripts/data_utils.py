@@ -674,11 +674,14 @@ def extract_pdf_content(file_path, form_recognizer_client, use_layout=False):
 ***REMOVED******REMOVED***page_number = bounding_box['pageNumber'] - 1  # Page numbers in PyMuPDF start from 0
 ***REMOVED******REMOVED***x0, y0, x1, y1 = polygon_to_bbox(bounding_box['polygon'])
 
-***REMOVED******REMOVED***# Select the figure and upscale it by 200% for higher resolution
 ***REMOVED******REMOVED***page = document.load_page(page_number)
 ***REMOVED******REMOVED***bbox = fitz.Rect(x0, y0, x1, y1)
 
-***REMOVED******REMOVED***zoom = 2.0 
+***REMOVED******REMOVED***# If either the width or height of the bounding box is less than 3 inches, we upscale by 2x
+***REMOVED******REMOVED***if bbox.width < 72*3 or bbox.height < 72*3:
+***REMOVED******REMOVED***zoom = 2.0
+***REMOVED******REMOVED***else:
+***REMOVED******REMOVED***zoom = 1.0 
 ***REMOVED******REMOVED***mat = fitz.Matrix(zoom, zoom)
 ***REMOVED******REMOVED***image = page.get_pixmap(matrix=mat, clip=bbox)
 
@@ -687,9 +690,15 @@ def extract_pdf_content(file_path, form_recognizer_client, use_layout=False):
 ***REMOVED******REMOVED***image_base64 = base64.b64encode(image_data).decode("utf-8")
 ***REMOVED******REMOVED***image_base64 = f"data:image/jpg;base64,{image_base64}"
 
-***REMOVED******REMOVED***# Add the image tag to the full text
+***REMOVED******REMOVED***# Identify the text that corresponds to the figure
 ***REMOVED******REMOVED***replace_start = figure["spans"][0]["offset"]
 ***REMOVED******REMOVED***replace_end = figure["spans"][0]["offset"] + figure["spans"][0]["length"]
+
+***REMOVED******REMOVED***# Sometimes the figure doesn't correspond to any text, in which case we skip it
+***REMOVED******REMOVED***if replace_start == replace_end:
+***REMOVED******REMOVED***continue
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***# Now we get the image tag
 ***REMOVED******REMOVED***original_text = form_recognizer_results.content[replace_start:replace_end]
 
 ***REMOVED******REMOVED***if original_text not in full_text:
@@ -697,7 +706,8 @@ def extract_pdf_content(file_path, form_recognizer_client, use_layout=False):
 ***REMOVED******REMOVED***
 ***REMOVED******REMOVED***img_tag = image_content_to_tag(original_text)
 ***REMOVED******REMOVED***
-***REMOVED******REMOVED***full_text = full_text.replace(original_text, img_tag)
+***REMOVED******REMOVED***# We replace only the first occurrence of the original text
+***REMOVED******REMOVED***full_text = full_text.replace(original_text, img_tag, 1)
 ***REMOVED******REMOVED***image_mapping[img_tag] = image_base64
 
 ***REMOVED***return full_text, image_mapping
