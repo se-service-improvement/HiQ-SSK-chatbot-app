@@ -182,7 +182,7 @@ class _AzureOpenAISettings(BaseSettings):
 ***REMOVED******REMOVED******REMOVED***"endpoint": self.embedding_endpoint,
 ***REMOVED******REMOVED******REMOVED***"authentication": {
 ***REMOVED******REMOVED******REMOVED***"type": "api_key",
-***REMOVED******REMOVED******REMOVED***"api_key": self.embedding_key
+***REMOVED******REMOVED******REMOVED***"key": self.embedding_key
 ***REMOVED******REMOVED***
 ***REMOVED******REMOVED***
 ***REMOVED******REMOVED***else:

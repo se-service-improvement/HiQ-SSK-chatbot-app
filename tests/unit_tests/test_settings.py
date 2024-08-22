@@ -66,7 +66,7 @@ def test_dotenv_with_elasticsearch_success(app_settings):
 ***REMOVED***assert payload["parameters"] is not None
 ***REMOVED***assert payload["parameters"]["endpoint"] == "dummy"
 ***REMOVED***print(payload)
-***REMOVED***
+
 ***REMOVED***
 ***REMOVED***
 
