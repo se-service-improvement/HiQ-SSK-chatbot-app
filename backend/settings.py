@@ -625,7 +625,8 @@ class _AzureSqlServerSettings(BaseSettings, DatasourcePayloadConstructor):
 ***REMOVED***model_config = SettingsConfigDict(
 ***REMOVED***env_prefix="AZURE_SQL_SERVER_",
 ***REMOVED***env_file=DOTENV_PATH,
-***REMOVED***extra="ignore"
+***REMOVED***extra="ignore",
+***REMOVED***env_ignore_empty=True
 ***REMOVED***)
 ***REMOVED***_type: Literal["azure_sql_server"] = PrivateAttr(default="azure_sql_server")
 ***REMOVED***
@@ -652,6 +653,83 @@ class _AzureSqlServerSettings(BaseSettings, DatasourcePayloadConstructor):
 ***REMOVED***):
 ***REMOVED***parameters = self.model_dump(exclude_none=True, by_alias=True)
 ***REMOVED***#parameters.update(self._settings.search.model_dump(exclude_none=True, by_alias=True))
+***REMOVED***
+***REMOVED***return {
+***REMOVED******REMOVED***"type": self._type,
+***REMOVED******REMOVED***"parameters": parameters
+***REMOVED***
+***REMOVED***
+
+class _MongoDbSettings(BaseSettings, DatasourcePayloadConstructor):
+***REMOVED***model_config = SettingsConfigDict(
+***REMOVED***env_prefix="MONGODB_",
+***REMOVED***env_file=DOTENV_PATH,
+***REMOVED***extra="ignore",
+***REMOVED***env_ignore_empty=True
+***REMOVED***)
+***REMOVED***_type: Literal["mongo_db"] = PrivateAttr(default="mongo_db")
+***REMOVED***
+***REMOVED***endpoint: str
+***REMOVED***username: str = Field(exclude=True)
+***REMOVED***password: str = Field(exclude=True)
+***REMOVED***database_name: str
+***REMOVED***collection_name: str
+***REMOVED***app_name: str
+***REMOVED***index_name: str
+***REMOVED***query_type: Literal["vector"] = "vector"
+***REMOVED***top_k: int = Field(default=5, serialization_alias="top_n_documents")
+***REMOVED***strictness: int = 3
+***REMOVED***enable_in_domain: bool = Field(default=True, serialization_alias="in_scope")
+***REMOVED***content_columns: Optional[List[str]] = Field(default=None, exclude=True)
+***REMOVED***vector_columns: Optional[List[str]] = Field(default=None, exclude=True)
+***REMOVED***title_column: Optional[str] = Field(default=None, exclude=True)
+***REMOVED***url_column: Optional[str] = Field(default=None, exclude=True)
+***REMOVED***filename_column: Optional[str] = Field(default=None, exclude=True)
+***REMOVED***
+***REMOVED***
+***REMOVED***# Constructed fields
+***REMOVED***authentication: Optional[dict] = None
+***REMOVED***embedding_dependency: Optional[dict] = None
+***REMOVED***fields_mapping: Optional[dict] = None
+***REMOVED***
+***REMOVED***@field_validator('content_columns', 'vector_columns', mode="before")
+***REMOVED***@classmethod
+***REMOVED***def split_columns(cls, comma_separated_string: str) -> List[str]:
+***REMOVED***if isinstance(comma_separated_string, str) and len(comma_separated_string) > 0:
+***REMOVED******REMOVED***return parse_multi_columns(comma_separated_string)
+***REMOVED***
+***REMOVED***return None
+***REMOVED***
+***REMOVED***@model_validator(mode="after")
+***REMOVED***def set_fields_mapping(self) -> Self:
+***REMOVED***self.fields_mapping = {
+***REMOVED******REMOVED***"content_fields": self.content_columns,
+***REMOVED******REMOVED***"title_field": self.title_column,
+***REMOVED******REMOVED***"url_field": self.url_column,
+***REMOVED******REMOVED***"filepath_field": self.filename_column,
+***REMOVED******REMOVED***"vector_fields": self.vector_columns
+***REMOVED***
+***REMOVED***return self
+***REMOVED***
+***REMOVED***@model_validator(mode="after")
+***REMOVED***def construct_authentication(self) -> Self:
+***REMOVED***self.authentication = {
+***REMOVED******REMOVED***"type": "username_and_password",
+***REMOVED******REMOVED***"username": self.username,
+***REMOVED******REMOVED***"password": self.password
+***REMOVED***
+***REMOVED***return self
+***REMOVED***
+***REMOVED***def construct_payload_configuration(
+***REMOVED***self,
+***REMOVED****args,
+***REMOVED*****kwargs
+***REMOVED***):
+***REMOVED***self.embedding_dependency = \
+***REMOVED******REMOVED***self._settings.azure_openai.extract_embedding_dependency()
+***REMOVED******REMOVED***
+***REMOVED***parameters = self.model_dump(exclude_none=True, by_alias=True)
+***REMOVED***parameters.update(self._settings.search.model_dump(exclude_none=True, by_alias=True))
 ***REMOVED***
 ***REMOVED***return {
 ***REMOVED******REMOVED***"type": self._type,
@@ -730,14 +808,19 @@ class _AppSettings(BaseModel):
 ***REMOVED******REMOVED***self.datasource = _AzureSqlServerSettings(settings=self, _env_file=DOTENV_PATH)
 ***REMOVED******REMOVED***logging.debug("Using SQL Server")
 ***REMOVED******REMOVED***
+***REMOVED******REMOVED***elif self.base_settings.datasource_type == "MongoDB":
+***REMOVED******REMOVED***self.datasource = _MongoDbSettings(settings=self, _env_file=DOTENV_PATH)
+***REMOVED******REMOVED***logging.debug("Using Mongo DB")
+***REMOVED******REMOVED***
 ***REMOVED******REMOVED***else:
 ***REMOVED******REMOVED***self.datasource = None
 ***REMOVED******REMOVED***logging.warning("No datasource configuration found in the environment -- calls will be made to Azure OpenAI without grounding data.")
 ***REMOVED******REMOVED***
 ***REMOVED******REMOVED***return self
 
-***REMOVED***except ValidationError:
+***REMOVED***except ValidationError as e:
 ***REMOVED******REMOVED***logging.warning("No datasource configuration found in the environment -- calls will be made to Azure OpenAI without grounding data.")
+***REMOVED******REMOVED***logging.warning(e.errors())
 
 
 app_settings = _AppSettings()
