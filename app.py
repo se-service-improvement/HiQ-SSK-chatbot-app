@@ -218,8 +218,18 @@ def prepare_model_args(request_body, request_headers):
 
 ***REMOVED***for message in request_messages:
 ***REMOVED***if message:
+***REMOVED******REMOVED***if message["role"] == "assistant" and "context" in message:
+***REMOVED******REMOVED***context_obj = json.loads(message["context"])
 ***REMOVED******REMOVED***messages.append(
-***REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED***"role": message["role"],
+***REMOVED******REMOVED******REMOVED***"content": message["content"],
+***REMOVED******REMOVED******REMOVED***"context": context_obj
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***)
+***REMOVED******REMOVED***else:
+***REMOVED******REMOVED***messages.append(
+***REMOVED******REMOVED******REMOVED***{
 ***REMOVED******REMOVED******REMOVED***"role": message["role"],
 ***REMOVED******REMOVED******REMOVED***"content": message["content"]
 ***REMOVED******REMOVED***

@@ -74,6 +74,14 @@ export const appStateReducer = (state: AppState, action: Action): AppState => {
 ***REMOVED***  [action.payload.answerId]: action.payload.feedback
 ***REMOVED***
   ***REMOVED***
+***REMOVED***case 'SET_ANSWER_EXEC_RESULT':
+***REMOVED***  return {
+***REMOVED***...state,
+***REMOVED***answerExecResult: {
+***REMOVED***  ...state.answerExecResult,
+***REMOVED***  [action.payload.answerId]: action.payload.exec_result
+***REMOVED***
+  ***REMOVED***
 ***REMOVED***default:
 ***REMOVED***  return state
   }

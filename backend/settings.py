@@ -630,19 +630,27 @@ class _AzureSqlServerSettings(BaseSettings, DatasourcePayloadConstructor):
 ***REMOVED***)
 ***REMOVED***_type: Literal["azure_sql_server"] = PrivateAttr(default="azure_sql_server")
 ***REMOVED***
-***REMOVED***connection_string: str = Field(exclude=True)
-***REMOVED***table_schema: str
+***REMOVED***connection_string: Optional[str] = Field(default=None, exclude=True)
+***REMOVED***table_schema: Optional[str] = None
 ***REMOVED***schema_max_row: Optional[int] = None
 ***REMOVED***top_n_results: Optional[int] = None
+***REMOVED***database_server: Optional[str] = None
+***REMOVED***database_name: Optional[str] = None
+***REMOVED***port: Optional[int] = None
 ***REMOVED***
 ***REMOVED***# Constructed fields
 ***REMOVED***authentication: Optional[dict] = None
 ***REMOVED***
 ***REMOVED***@model_validator(mode="after")
 ***REMOVED***def construct_authentication(self) -> Self:
-***REMOVED***self.authentication = {
+***REMOVED***if self.connection_string:
+***REMOVED******REMOVED***self.authentication = {
 ***REMOVED******REMOVED***"type": "connection_string",
 ***REMOVED******REMOVED***"connection_string": self.connection_string
+***REMOVED***
+***REMOVED***elif self.database_server and self.database_name and self.port:
+***REMOVED******REMOVED***self.authentication = {
+***REMOVED******REMOVED***"type": "system_assigned_managed_identity"
 ***REMOVED***
 ***REMOVED***return self
 ***REMOVED***

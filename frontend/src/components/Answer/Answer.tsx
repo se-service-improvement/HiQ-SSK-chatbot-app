@@ -8,7 +8,6 @@ import { ThumbDislike20Filled, ThumbLike20Filled } from '@fluentui/react-icons'
 import DOMPurify from 'dompurify'
 import remarkGfm from 'remark-gfm'
 import supersub from 'remark-supersub'
-import Plot from 'react-plotly.js'
 import { AskResponse, Citation, Feedback, historyMessageFeedback } from '../../api'
 import { XSSAllowTags, XSSAllowAttributes } from '../../constants/sanatizeAllowables'
 import { AppStateContext } from '../../state/AppProvider'
@@ -20,7 +19,7 @@ import styles from './Answer.module.css'
 interface Props {
   answer: AskResponse
   onCitationClicked: (citedDocument: Citation) => void
-  onExectResultClicked: () => void
+  onExectResultClicked: (answerId: string) => void
 }
 
 export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Props) => {
@@ -291,10 +290,10 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
 ***REMOVED******REMOVED***</Stack.Item>
 ***REMOVED***  </Stack>
 ***REMOVED***</Stack.Item>
-***REMOVED***{parsedAnswer.plotly_data !== null && (
+***REMOVED***{parsedAnswer.generated_chart !== null && (
 ***REMOVED***  <Stack className={styles.answerContainer}>
 ***REMOVED******REMOVED***<Stack.Item grow>
-***REMOVED******REMOVED***  <Plot data={parsedAnswer.plotly_data.data} layout={parsedAnswer.plotly_data.layout} />
+***REMOVED******REMOVED***  <img src={`data:image/png;base64, ${parsedAnswer.generated_chart}`} />
 ***REMOVED******REMOVED***</Stack.Item>
 ***REMOVED***  </Stack>
 ***REMOVED***)}
@@ -333,7 +332,7 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
 ***REMOVED******REMOVED***<Stack horizontal horizontalAlign="start" verticalAlign="center">
 ***REMOVED******REMOVED***  <Text
 ***REMOVED******REMOVED******REMOVED***className={styles.accordionTitle}
-***REMOVED******REMOVED******REMOVED***onClick={() => onExectResultClicked()}
+***REMOVED******REMOVED******REMOVED***onClick={() => onExectResultClicked(answer.message_id ?? '')}
 ***REMOVED******REMOVED******REMOVED***aria-label="Open Intents"
 ***REMOVED******REMOVED******REMOVED***tabIndex={0}
 ***REMOVED******REMOVED******REMOVED***role="button">

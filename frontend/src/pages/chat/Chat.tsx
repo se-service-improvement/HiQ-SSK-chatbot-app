@@ -64,6 +64,7 @@ const Chat = () => {
   const [hideErrorDialog, { toggle: toggleErrorDialog }] = useBoolean(true)
   const [errorMsg, setErrorMsg] = useState<ErrorMessage | null>()
   const [logo, setLogo] = useState('')
+  const [answerId, setAnswerId] = useState<string>('')
 
   const errorDialogContentProps = {
 ***REMOVED***type: DialogType.close,
@@ -132,15 +133,27 @@ const Chat = () => {
   let toolMessage = {} as ChatMessage
   let assistantContent = ''
 
+  useEffect(() => parseExecResults(execResults), [execResults])
+
+  const parseExecResults = (exec_results_: any): void => {
+***REMOVED***if (exec_results_ == undefined) return
+***REMOVED***const exec_results = exec_results_.length === 2 ? exec_results_ : exec_results_.splice(2)
+***REMOVED***appStateContext?.dispatch({ type: 'SET_ANSWER_EXEC_RESULT', payload: { answerId: answerId, exec_result: exec_results } })
+  }
+
   const processResultMessage = (resultMessage: ChatMessage, userMessage: ChatMessage, conversationId?: string) => {
 ***REMOVED***if (resultMessage.content.includes('all_exec_results')) {
 ***REMOVED***  const parsedExecResults = JSON.parse(resultMessage.content) as AzureSqlServerExecResults
 ***REMOVED***  setExecResults(parsedExecResults.all_exec_results)
+***REMOVED***  assistantMessage.context = JSON.stringify({
+***REMOVED***all_exec_results: parsedExecResults.all_exec_results
+  ***REMOVED***)
 ***REMOVED***
 
 ***REMOVED***if (resultMessage.role === ASSISTANT) {
+***REMOVED***  setAnswerId(resultMessage.id)
 ***REMOVED***  assistantContent += resultMessage.content
-***REMOVED***  assistantMessage = resultMessage
+***REMOVED***  assistantMessage = { ...assistantMessage, ...resultMessage }
 ***REMOVED***  assistantMessage.content = assistantContent
 
 ***REMOVED***  if (resultMessage.context) {
@@ -689,7 +702,7 @@ const Chat = () => {
 ***REMOVED***setIsCitationPanelOpen(true)
   }
 
-  const onShowExecResult = () => {
+  const onShowExecResult = (answerId: string) => {
 ***REMOVED***setIsIntentsPanelOpen(true)
   }
 
@@ -716,10 +729,11 @@ const Chat = () => {
 ***REMOVED***  try {
 ***REMOVED***const execResults = JSON.parse(message.content) as AzureSqlServerExecResults;
 ***REMOVED***const codeExecResult = execResults.all_exec_results.at(-1)?.code_exec_result;
+
 ***REMOVED***if (codeExecResult === undefined) {
 ***REMOVED***  return null;
 ***REMOVED***
-***REMOVED***return codeExecResult;
+***REMOVED***return codeExecResult.toString();
   ***REMOVED***
 ***REMOVED***  catch {
 ***REMOVED***return null;
@@ -791,13 +805,13 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED***  answer={{
 ***REMOVED******REMOVED******REMOVED******REMOVED***answer: answer.content,
 ***REMOVED******REMOVED******REMOVED******REMOVED***citations: parseCitationFromMessage(messages[index - 1]),
-***REMOVED******REMOVED******REMOVED******REMOVED***plotly_data: parsePlotFromMessage(messages[index - 1]),
+***REMOVED******REMOVED******REMOVED******REMOVED***generated_chart: parsePlotFromMessage(messages[index - 1]),
 ***REMOVED******REMOVED******REMOVED******REMOVED***message_id: answer.id,
 ***REMOVED******REMOVED******REMOVED******REMOVED***feedback: answer.feedback,
 ***REMOVED******REMOVED******REMOVED******REMOVED***exec_results: execResults
 ***REMOVED******REMOVED***  ***REMOVED***}
 ***REMOVED******REMOVED******REMOVED***  onCitationClicked={c => onShowCitation(c)}
-***REMOVED******REMOVED******REMOVED***  onExectResultClicked={() => onShowExecResult()}
+***REMOVED******REMOVED******REMOVED***  onExectResultClicked={() => onShowExecResult(answerId)}
 ***REMOVED******REMOVED******REMOVED***/>
 ***REMOVED******REMOVED******REMOVED***  </div>
 ***REMOVED******REMOVED******REMOVED***) : answer.role === ERROR ? (
@@ -818,7 +832,7 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED***answer={{
 ***REMOVED******REMOVED******REMOVED***  answer: "Generating answer...",
 ***REMOVED******REMOVED******REMOVED***  citations: [],
-***REMOVED******REMOVED******REMOVED***  plotly_data: null
+***REMOVED******REMOVED******REMOVED***  generated_chart: null
 ***REMOVED******REMOVED******REMOVED***}
 ***REMOVED******REMOVED******REMOVED***onCitationClicked={() => null}
 ***REMOVED******REMOVED******REMOVED***onExectResultClicked={() => null}
@@ -984,33 +998,31 @@ const Chat = () => {
 ***REMOVED******REMOVED***/>
 ***REMOVED******REMOVED***  </Stack>
 ***REMOVED******REMOVED***  <Stack horizontalAlign="space-between">
-***REMOVED******REMOVED***{execResults.map((execResult) => {
-***REMOVED******REMOVED***  return (
-***REMOVED******REMOVED******REMOVED***<Stack className={styles.exectResultList} verticalAlign="space-between">
-***REMOVED******REMOVED******REMOVED***  <><span>Intent:</span> <p>{execResult.intent}</p></>
-***REMOVED******REMOVED******REMOVED***  {execResult.search_query && <><span>Search Query:</span>
-***REMOVED******REMOVED******REMOVED***<SyntaxHighlighter
-***REMOVED******REMOVED******REMOVED***  style={nord}
-***REMOVED******REMOVED******REMOVED***  wrapLines={true}
-***REMOVED******REMOVED******REMOVED***  lineProps={{ style: { wordBreak: 'break-all', whiteSpace: 'pre-wrap' } }}
-***REMOVED******REMOVED******REMOVED***  language="sql"
-***REMOVED******REMOVED******REMOVED***  PreTag="p">
-***REMOVED******REMOVED******REMOVED***  {execResult.search_query}
-***REMOVED******REMOVED******REMOVED***</SyntaxHighlighter></>}
-***REMOVED******REMOVED******REMOVED***  {execResult.search_result && <><span>Search Result:</span> <p>{execResult.search_result}</p></>}
-***REMOVED******REMOVED******REMOVED***  {execResult.code_generated && <><span>Code Generated:</span>
-***REMOVED******REMOVED******REMOVED***<SyntaxHighlighter
-***REMOVED******REMOVED******REMOVED***  style={nord}
-***REMOVED******REMOVED******REMOVED***  wrapLines={true}
-***REMOVED******REMOVED******REMOVED***  lineProps={{ style: { wordBreak: 'break-all', whiteSpace: 'pre-wrap' } }}
-***REMOVED******REMOVED******REMOVED***  language="python"
-***REMOVED******REMOVED******REMOVED***  PreTag="p">
-***REMOVED******REMOVED******REMOVED***  {execResult.code_generated}
-***REMOVED******REMOVED******REMOVED***</SyntaxHighlighter>
-***REMOVED******REMOVED******REMOVED***  </>}
-***REMOVED******REMOVED******REMOVED***</Stack>
-***REMOVED******REMOVED***  )
-***REMOVED******REMOVED***)}
+***REMOVED******REMOVED***{appStateContext?.state?.answerExecResult[answerId]?.map((execResult: ExecResults, index) => (
+***REMOVED******REMOVED***  <Stack className={styles.exectResultList} verticalAlign="space-between">
+***REMOVED******REMOVED******REMOVED***<><span>Intent:</span> <p>{execResult.intent}</p></>
+***REMOVED******REMOVED******REMOVED***{execResult.search_query && <><span>Search Query:</span>
+***REMOVED******REMOVED******REMOVED***  <SyntaxHighlighter
+***REMOVED******REMOVED******REMOVED***style={nord}
+***REMOVED******REMOVED******REMOVED***wrapLines={true}
+***REMOVED******REMOVED******REMOVED***lineProps={{ style: { wordBreak: 'break-all', whiteSpace: 'pre-wrap' } }}
+***REMOVED******REMOVED******REMOVED***language="sql"
+***REMOVED******REMOVED******REMOVED***PreTag="p">
+***REMOVED******REMOVED******REMOVED***{execResult.search_query}
+***REMOVED******REMOVED******REMOVED***  </SyntaxHighlighter></>}
+***REMOVED******REMOVED******REMOVED***{execResult.search_result && <><span>Search Result:</span> <p>{execResult.search_result}</p></>}
+***REMOVED******REMOVED******REMOVED***{execResult.code_generated && <><span>Code Generated:</span>
+***REMOVED******REMOVED******REMOVED***  <SyntaxHighlighter
+***REMOVED******REMOVED******REMOVED***style={nord}
+***REMOVED******REMOVED******REMOVED***wrapLines={true}
+***REMOVED******REMOVED******REMOVED***lineProps={{ style: { wordBreak: 'break-all', whiteSpace: 'pre-wrap' } }}
+***REMOVED******REMOVED******REMOVED***language="python"
+***REMOVED******REMOVED******REMOVED***PreTag="p">
+***REMOVED******REMOVED******REMOVED***{execResult.code_generated}
+***REMOVED******REMOVED******REMOVED***  </SyntaxHighlighter>
+***REMOVED******REMOVED******REMOVED***</>}
+***REMOVED******REMOVED***  </Stack>
+***REMOVED******REMOVED***))}
 ***REMOVED******REMOVED***  </Stack>
 ***REMOVED******REMOVED***</Stack.Item>
 ***REMOVED***  )}
