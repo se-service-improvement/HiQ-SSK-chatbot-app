@@ -142,7 +142,7 @@ const Chat = () => {
   }
 
   const processResultMessage = (resultMessage: ChatMessage, userMessage: ChatMessage, conversationId?: string) => {
-***REMOVED***if (resultMessage.content.includes('all_exec_results')) {
+***REMOVED***if (typeof resultMessage.content === "string" && resultMessage.content.includes('all_exec_results')) {
 ***REMOVED***  const parsedExecResults = JSON.parse(resultMessage.content) as AzureSqlServerExecResults
 ***REMOVED***  setExecResults(parsedExecResults.all_exec_results)
 ***REMOVED***  assistantMessage.context = JSON.stringify({
@@ -179,16 +179,19 @@ const Chat = () => {
 ***REMOVED***
   }
 
-  const makeApiRequestWithoutCosmosDB = async (question: string, conversationId?: string) => {
+  const makeApiRequestWithoutCosmosDB = async (question: ChatMessage["content"], conversationId?: string) => {
 ***REMOVED***setIsLoading(true)
 ***REMOVED***setShowLoadingMessage(true)
 ***REMOVED***const abortController = new AbortController()
 ***REMOVED***abortFuncs.current.unshift(abortController)
 
+***REMOVED***const questionContent = typeof question === 'string' ? question : [{ type: "text", text: question[0].text }, { type: "image_url", image_url: { url: question[1].image_url.url } }]
+***REMOVED***question = typeof question !== 'string' && question[0]?.text?.length > 0 ? question[0].text : question
+
 ***REMOVED***const userMessage: ChatMessage = {
 ***REMOVED***  id: uuid(),
 ***REMOVED***  role: 'user',
-***REMOVED***  content: question,
+***REMOVED***  content: questionContent as string,
 ***REMOVED***  date: new Date().toISOString()
 ***REMOVED***
 
@@ -196,7 +199,7 @@ const Chat = () => {
 ***REMOVED***if (!conversationId) {
 ***REMOVED***  conversation = {
 ***REMOVED***id: conversationId ?? uuid(),
-***REMOVED***title: question,
+***REMOVED***title: question as string,
 ***REMOVED***messages: [userMessage],
 ***REMOVED***date: new Date().toISOString()
   ***REMOVED***
@@ -303,20 +306,21 @@ const Chat = () => {
 ***REMOVED***return abortController.abort()
   }
 
-  const makeApiRequestWithCosmosDB = async (question: string, conversationId?: string) => {
+  const makeApiRequestWithCosmosDB = async (question: ChatMessage["content"], conversationId?: string) => {
 ***REMOVED***setIsLoading(true)
 ***REMOVED***setShowLoadingMessage(true)
 ***REMOVED***const abortController = new AbortController()
 ***REMOVED***abortFuncs.current.unshift(abortController)
+***REMOVED***const questionContent = typeof question === 'string' ? question : [{ type: "text", text: question[0].text }, { type: "image_url", image_url: { url: question[1].image_url.url } }]
+***REMOVED***question = typeof question !== 'string' && question[0]?.text?.length > 0 ? question[0].text : question
 
 ***REMOVED***const userMessage: ChatMessage = {
 ***REMOVED***  id: uuid(),
 ***REMOVED***  role: 'user',
-***REMOVED***  content: question,
+***REMOVED***  content: questionContent as string,
 ***REMOVED***  date: new Date().toISOString()
 ***REMOVED***
 
-***REMOVED***//api call params set here (generate)
 ***REMOVED***let request: ConversationRequest
 ***REMOVED***let conversation
 ***REMOVED***if (conversationId) {
@@ -648,7 +652,7 @@ const Chat = () => {
 ***REMOVED***
 ***REMOVED***const noContentError = appStateContext.state.currentChat.messages.find(m => m.role === ERROR)
 
-***REMOVED***if (!noContentError?.content.includes(NO_CONTENT_ERROR)) {
+***REMOVED***if (typeof noContentError?.content === "string" && !noContentError?.content.includes(NO_CONTENT_ERROR)) {
 ***REMOVED***  saveToDB(appStateContext.state.currentChat.messages, appStateContext.state.currentChat.id)
 ***REMOVED******REMOVED***.then(res => {
 ***REMOVED******REMOVED***  if (!res.ok) {
@@ -713,7 +717,7 @@ const Chat = () => {
   }
 
   const parseCitationFromMessage = (message: ChatMessage) => {
-***REMOVED***if (message?.role && message?.role === 'tool') {
+***REMOVED***if (message?.role && message?.role === 'tool' && typeof message?.content === "string") {
 ***REMOVED***  try {
 ***REMOVED***const toolMessage = JSON.parse(message.content) as ToolMessageContent
 ***REMOVED***return toolMessage.citations
@@ -725,7 +729,7 @@ const Chat = () => {
   }
 
   const parsePlotFromMessage = (message: ChatMessage) => {
-***REMOVED***if (message?.role && message?.role === "tool") {
+***REMOVED***if (message?.role && message?.role === "tool" && typeof message?.content === "string") {
 ***REMOVED***  try {
 ***REMOVED***const execResults = JSON.parse(message.content) as AzureSqlServerExecResults;
 ***REMOVED***const codeExecResult = execResults.all_exec_results.at(-1)?.code_exec_result;
@@ -797,11 +801,13 @@ const Chat = () => {
 ***REMOVED******REMOVED***  <>
 ***REMOVED******REMOVED******REMOVED***{answer.role === 'user' ? (
 ***REMOVED******REMOVED******REMOVED***  <div className={styles.chatMessageUser} tabIndex={0}>
-***REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageUserMessage}>{answer.content}</div>
+***REMOVED******REMOVED******REMOVED***<div className={styles.chatMessageUserMessage}>
+***REMOVED******REMOVED******REMOVED***  {typeof answer.content === "string" && answer.content ? answer.content : Array.isArray(answer.content) ? <>{answer.content[0].text} <img className={styles.uploadedImageChat} src={answer.content[1].image_url.url} alt="Uploaded Preview" /></> : null}
+***REMOVED******REMOVED******REMOVED***</div>
 ***REMOVED******REMOVED******REMOVED***  </div>
 ***REMOVED******REMOVED******REMOVED***) : answer.role === 'assistant' ? (
 ***REMOVED******REMOVED******REMOVED***  <div className={styles.chatMessageGpt}>
-***REMOVED******REMOVED******REMOVED***<Answer
+***REMOVED******REMOVED******REMOVED***{typeof answer.content === "string" && <Answer
 ***REMOVED******REMOVED******REMOVED***  answer={{
 ***REMOVED******REMOVED******REMOVED******REMOVED***answer: answer.content,
 ***REMOVED******REMOVED******REMOVED******REMOVED***citations: parseCitationFromMessage(messages[index - 1]),
@@ -812,7 +818,7 @@ const Chat = () => {
 ***REMOVED******REMOVED***  ***REMOVED***}
 ***REMOVED******REMOVED******REMOVED***  onCitationClicked={c => onShowCitation(c)}
 ***REMOVED******REMOVED******REMOVED***  onExectResultClicked={() => onShowExecResult(answerId)}
-***REMOVED******REMOVED******REMOVED***/>
+***REMOVED******REMOVED******REMOVED***/>}
 ***REMOVED******REMOVED******REMOVED***  </div>
 ***REMOVED******REMOVED******REMOVED***) : answer.role === ERROR ? (
 ***REMOVED******REMOVED******REMOVED***  <div className={styles.chatMessageError}>
@@ -820,7 +826,7 @@ const Chat = () => {
 ***REMOVED******REMOVED******REMOVED***  <ErrorCircleRegular className={styles.errorIcon} style={{ color: 'rgba(182, 52, 67, 1)' }} />
 ***REMOVED******REMOVED******REMOVED***  <span>Error</span>
 ***REMOVED******REMOVED******REMOVED***</Stack>
-***REMOVED******REMOVED******REMOVED***<span className={styles.chatMessageErrorContent}>{answer.content}</span>
+***REMOVED******REMOVED******REMOVED***<span className={styles.chatMessageErrorContent}>{typeof answer.content === "string" && answer.content}</span>
 ***REMOVED******REMOVED******REMOVED***  </div>
 ***REMOVED******REMOVED******REMOVED***) : null}
 ***REMOVED******REMOVED***  </>

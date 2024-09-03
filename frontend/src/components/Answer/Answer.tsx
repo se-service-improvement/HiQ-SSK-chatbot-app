@@ -247,17 +247,17 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
 ***REMOVED***<Stack.Item>
 ***REMOVED***  <Stack horizontal grow>
 ***REMOVED******REMOVED***<Stack.Item grow>
-***REMOVED******REMOVED***  <ReactMarkdown
+***REMOVED******REMOVED***  {parsedAnswer && <ReactMarkdown
 ***REMOVED******REMOVED***linkTarget="_blank"
 ***REMOVED******REMOVED***remarkPlugins={[remarkGfm, supersub]}
 ***REMOVED******REMOVED***children={
 ***REMOVED******REMOVED***  SANITIZE_ANSWER
-***REMOVED******REMOVED******REMOVED***? DOMPurify.sanitize(parsedAnswer.markdownFormatText, { ALLOWED_TAGS: XSSAllowTags, ALLOWED_ATTR: XSSAllowAttributes })
-***REMOVED******REMOVED******REMOVED***: parsedAnswer.markdownFormatText
+***REMOVED******REMOVED******REMOVED***? DOMPurify.sanitize(parsedAnswer?.markdownFormatText, { ALLOWED_TAGS: XSSAllowTags, ALLOWED_ATTR: XSSAllowAttributes })
+***REMOVED******REMOVED******REMOVED***: parsedAnswer?.markdownFormatText
 ***REMOVED******REMOVED***
 ***REMOVED******REMOVED***className={styles.answerText}
 ***REMOVED******REMOVED***components={components}
-***REMOVED******REMOVED***  />
+***REMOVED******REMOVED***  />}
 ***REMOVED******REMOVED***</Stack.Item>
 ***REMOVED******REMOVED***<Stack.Item className={styles.answerHeader}>
 ***REMOVED******REMOVED***  {FEEDBACK_ENABLED && answer.message_id !== undefined && (
@@ -290,15 +290,15 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
 ***REMOVED******REMOVED***</Stack.Item>
 ***REMOVED***  </Stack>
 ***REMOVED***</Stack.Item>
-***REMOVED***{parsedAnswer.generated_chart !== null && (
+***REMOVED***{parsedAnswer?.generated_chart !== null && (
 ***REMOVED***  <Stack className={styles.answerContainer}>
 ***REMOVED******REMOVED***<Stack.Item grow>
-***REMOVED******REMOVED***  <img src={`data:image/png;base64, ${parsedAnswer.generated_chart}`} />
+***REMOVED******REMOVED***  <img src={`data:image/png;base64, ${parsedAnswer?.generated_chart}`} />
 ***REMOVED******REMOVED***</Stack.Item>
 ***REMOVED***  </Stack>
 ***REMOVED***)}
 ***REMOVED***<Stack horizontal className={styles.answerFooter}>
-***REMOVED***  {!!parsedAnswer.citations.length && (
+***REMOVED***  {!!parsedAnswer?.citations.length && (
 ***REMOVED******REMOVED***<Stack.Item onKeyDown={e => (e.key === 'Enter' || e.key === ' ' ? toggleIsRefAccordionOpen() : null)}>
 ***REMOVED******REMOVED***  <Stack style={{ width: '100%' }}>
 ***REMOVED******REMOVED***<Stack horizontal horizontalAlign="start" verticalAlign="center">
@@ -352,7 +352,7 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
 ***REMOVED***</Stack>
 ***REMOVED***{chevronIsExpanded && (
 ***REMOVED***  <div className={styles.citationWrapper}>
-***REMOVED******REMOVED***{parsedAnswer.citations.map((citation, idx) => {
+***REMOVED******REMOVED***{parsedAnswer?.citations.map((citation, idx) => {
 ***REMOVED******REMOVED***  return (
 ***REMOVED******REMOVED***<span
 ***REMOVED******REMOVED***  title={createCitationFilepath(citation, ++idx)}

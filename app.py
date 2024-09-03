@@ -103,6 +103,7 @@ frontend_settings = {
 ***REMOVED***"show_chat_history_button": app_settings.ui.show_chat_history_button,
 ***REMOVED***,
 ***REMOVED***"sanitize_answer": app_settings.base_settings.sanitize_answer,
+***REMOVED***"oyd_enabled": app_settings.base_settings.datasource_type,
 }
 
 
