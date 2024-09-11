@@ -166,10 +166,12 @@ def format_pf_non_streaming_response(
 ***REMOVED******REMOVED***"content": chatCompletion[response_field_name] 
 ***REMOVED***)
 ***REMOVED***if citations_field_name in chatCompletion:
+***REMOVED******REMOVED***citation_content= {"citations": chatCompletion[citations_field_name]}
 ***REMOVED******REMOVED***messages.append({ 
 ***REMOVED******REMOVED***"role": "tool",
-***REMOVED******REMOVED***"content": chatCompletion[citations_field_name]
+***REMOVED******REMOVED***"content": json.dumps(citation_content)
 ***REMOVED***)
+
 ***REMOVED***response_obj = {
 ***REMOVED******REMOVED***"id": chatCompletion["id"],
 ***REMOVED******REMOVED***"model": "",
