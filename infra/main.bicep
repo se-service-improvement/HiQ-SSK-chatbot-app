@@ -200,7 +200,7 @@ module cosmos 'db.bicep' = {
   scope: resourceGroup
   params: {
 ***REMOVED***accountName: !empty(cosmosAccountName) ? cosmosAccountName : '${abbrs.documentDBDatabaseAccounts}${resourceToken}'
-***REMOVED***location: 'eastus'
+***REMOVED***location: resourceGroup.location
 ***REMOVED***tags: tags
 ***REMOVED***principalIds: [principalId, backend.outputs.identityPrincipalId]
   }
