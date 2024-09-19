@@ -753,7 +753,7 @@ class _BaseSettings(BaseSettings):
 ***REMOVED***env_ignore_empty=True
 ***REMOVED***)
 ***REMOVED***datasource_type: Optional[str] = None
-***REMOVED***auth_enabled: bool = False
+***REMOVED***auth_enabled: bool = True
 ***REMOVED***sanitize_answer: bool = False
 ***REMOVED***use_promptflow: bool = False
 
