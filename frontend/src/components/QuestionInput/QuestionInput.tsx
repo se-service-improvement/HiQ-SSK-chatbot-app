@@ -7,6 +7,7 @@ import Send from '../../assets/Send.svg'
 import styles from './QuestionInput.module.css'
 import { ChatMessage } from '../../api'
 import { AppStateContext } from '../../state/AppProvider'
+import { resizeImage } from '../../utils/resizeImage'
 
 interface Props {
   onSend: (question: ChatMessage['content'], id?: string) => void
@@ -32,17 +33,12 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
   };
 
   const convertToBase64 = async (file: Blob) => {
-***REMOVED***const reader = new FileReader();
-
-***REMOVED***reader.readAsDataURL(file);
-
-***REMOVED***reader.onloadend = () => {
-***REMOVED***  setBase64Image(reader.result as string);
-***REMOVED***;
-
-***REMOVED***reader.onerror = (error) => {
-***REMOVED***  console.error('Error: ', error);
-***REMOVED***;
+***REMOVED***try {
+***REMOVED***  const resizedBase64 = await resizeImage(file, 800, 800);
+***REMOVED***  setBase64Image(resizedBase64);
+***REMOVED*** catch (error) {
+***REMOVED***  console.error('Error:', error);
+***REMOVED***
   };
 
   const sendQuestion = () => {

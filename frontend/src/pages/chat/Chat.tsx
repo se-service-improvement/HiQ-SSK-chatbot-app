@@ -652,7 +652,7 @@ const Chat = () => {
 ***REMOVED***
 ***REMOVED***const noContentError = appStateContext.state.currentChat.messages.find(m => m.role === ERROR)
 
-***REMOVED***if (typeof noContentError?.content === "string" && !noContentError?.content.includes(NO_CONTENT_ERROR)) {
+***REMOVED***if (!noContentError) {
 ***REMOVED***  saveToDB(appStateContext.state.currentChat.messages, appStateContext.state.currentChat.id)
 ***REMOVED******REMOVED***.then(res => {
 ***REMOVED******REMOVED***  if (!res.ok) {
