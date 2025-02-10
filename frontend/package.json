@@ -15,7 +15,7 @@
 ***REMOVED***"format": "npm run prettier:fix && npm run lint:fix"
   },
   "dependencies": {
-***REMOVED***"@fluentui/react": "^8.105.3",
+***REMOVED***"@fluentui/react": "^8.109.0",
 ***REMOVED***"@fluentui/react-hooks": "^8.6.29",
 ***REMOVED***"@fluentui/react-icons": "^2.0.195",
 ***REMOVED***"dompurify": "^3.0.8",
