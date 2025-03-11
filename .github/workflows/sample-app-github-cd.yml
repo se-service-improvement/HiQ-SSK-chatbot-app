@@ -36,7 +36,7 @@ jobs:
 ***REMOVED***run: zip release.zip ./* -r
 
 ***REMOVED***  - name: Upload artifact for deployment jobs
-***REMOVED***uses: actions/upload-artifact@v3
+***REMOVED***uses: actions/upload-artifact@v4
 ***REMOVED***with:
 ***REMOVED***  name: python-app
 ***REMOVED***  path: |
@@ -54,7 +54,7 @@ jobs:
 
 ***REMOVED***steps:
 ***REMOVED***  - name: Download artifact from build job
-***REMOVED***uses: actions/download-artifact@v3
+***REMOVED***uses: actions/download-artifact@v4
 ***REMOVED***with:
 ***REMOVED***  name: python-app
 
