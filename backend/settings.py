@@ -123,6 +123,11 @@ class _AzureOpenAISettings(BaseSettings):
 ***REMOVED***embedding_endpoint: Optional[str] = None
 ***REMOVED***embedding_key: Optional[str] = None
 ***REMOVED***embedding_name: Optional[str] = None
+***REMOVED***function_call_azure_functions_enabled: Optional[bool] = False
+***REMOVED***function_call_azure_functions_tools_key: Optional[str] = None
+***REMOVED***function_call_azure_functions_tools_base_url: Optional[str] = None
+***REMOVED***function_call_azure_functions_tool_key: Optional[str] = None
+***REMOVED***function_call_azure_functions_tool_base_url: Optional[str] = None
 ***REMOVED***
 ***REMOVED***@field_validator('tools', mode='before')
 ***REMOVED***@classmethod

@@ -131,6 +131,22 @@ def format_stream_response(chatCompletionChunk, history_metadata, apim_request_i
 ***REMOVED******REMOVED***
 ***REMOVED******REMOVED***response_obj["choices"][0]["messages"].append(messageObj)
 ***REMOVED******REMOVED***return response_obj
+***REMOVED******REMOVED***if delta.tool_calls:
+***REMOVED******REMOVED***messageObj = {
+***REMOVED******REMOVED******REMOVED***"role": "tool",
+***REMOVED******REMOVED******REMOVED***"tool_calls": {
+***REMOVED******REMOVED******REMOVED***"id": delta.tool_calls[0].id,
+***REMOVED******REMOVED******REMOVED***"function": {
+***REMOVED******REMOVED******REMOVED******REMOVED***"name" : delta.tool_calls[0].function.name,
+***REMOVED******REMOVED******REMOVED******REMOVED***"arguments": delta.tool_calls[0].function.arguments
+***REMOVED******REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***"type": delta.tool_calls[0].type
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***if hasattr(delta, "context"):
+***REMOVED******REMOVED******REMOVED***messageObj["context"] = json.dumps(delta.context)
+***REMOVED******REMOVED***response_obj["choices"][0]["messages"].append(messageObj)
+***REMOVED******REMOVED***return response_obj
 ***REMOVED******REMOVED***else:
 ***REMOVED******REMOVED***if delta.content:
 ***REMOVED******REMOVED******REMOVED***messageObj = {

@@ -111,6 +111,9 @@ frontend_settings = {
 MS_DEFENDER_ENABLED = os.environ.get("MS_DEFENDER_ENABLED", "true").lower() == "true"
 
 
+azure_openai_tools = []
+azure_openai_available_tools = []
+
 # Initialize Azure OpenAI Client
 async def init_openai_client():
 ***REMOVED***azure_openai_client = None
@@ -159,6 +162,20 @@ async def init_openai_client():
 ***REMOVED***# Default Headers
 ***REMOVED***default_headers = {"x-ms-useragent": USER_AGENT}
 
+***REMOVED***# Remote function calls
+***REMOVED***if app_settings.azure_openai.function_call_azure_functions_enabled:
+***REMOVED******REMOVED***azure_functions_tools_url = f"{app_settings.azure_openai.function_call_azure_functions_tools_base_url}?code={app_settings.azure_openai.function_call_azure_functions_tools_key}"
+***REMOVED******REMOVED***async with httpx.AsyncClient() as client:
+***REMOVED******REMOVED***response = await client.get(azure_functions_tools_url)
+***REMOVED******REMOVED***response_status_code = response.status_code
+***REMOVED******REMOVED***if response_status_code == httpx.codes.OK:
+***REMOVED******REMOVED***azure_openai_tools.extend(json.loads(response.text))
+***REMOVED******REMOVED***for tool in azure_openai_tools:
+***REMOVED******REMOVED******REMOVED***azure_openai_available_tools.append(tool["function"]["name"])
+***REMOVED******REMOVED***else:
+***REMOVED******REMOVED***logging.error(f"An error occurred while getting OpenAI Function Call tools metadata: {response.status_code}")
+
+***REMOVED***
 ***REMOVED***azure_openai_client = AsyncAzureOpenAI(
 ***REMOVED******REMOVED***api_version=app_settings.azure_openai.preview_api_version,
 ***REMOVED******REMOVED***api_key=aoai_api_key,
@@ -173,6 +190,21 @@ async def init_openai_client():
 ***REMOVED***azure_openai_client = None
 ***REMOVED***raise e
 
+async def openai_remote_azure_function_call(function_name, function_args):
+***REMOVED***if app_settings.azure_openai.function_call_azure_functions_enabled is not True:
+***REMOVED***return
+
+***REMOVED***azure_functions_tool_url = f"{app_settings.azure_openai.function_call_azure_functions_tool_base_url}?code={app_settings.azure_openai.function_call_azure_functions_tool_key}"
+***REMOVED***headers = {'content-type': 'application/json'}
+***REMOVED***body = {
+***REMOVED***"tool_name": function_name,
+***REMOVED***"tool_arguments": json.loads(function_args)
+***REMOVED***
+***REMOVED***async with httpx.AsyncClient() as client:
+***REMOVED***response = await client.post(azure_functions_tool_url, data=json.dumps(body), headers=headers)
+***REMOVED***response.raise_for_status()
+
+***REMOVED***return response.text
 
 async def init_cosmosdb_client():
 ***REMOVED***cosmos_conversation_client = None
@@ -219,22 +251,28 @@ def prepare_model_args(request_body, request_headers):
 
 ***REMOVED***for message in request_messages:
 ***REMOVED***if message:
-***REMOVED******REMOVED***if message["role"] == "assistant" and "context" in message:
-***REMOVED******REMOVED***context_obj = json.loads(message["context"])
-***REMOVED******REMOVED***messages.append(
+***REMOVED******REMOVED***match message["role"]:
+***REMOVED******REMOVED***case "user":
+***REMOVED******REMOVED******REMOVED***messages.append(
 ***REMOVED******REMOVED******REMOVED***{
-***REMOVED******REMOVED******REMOVED***"role": message["role"],
-***REMOVED******REMOVED******REMOVED***"content": message["content"],
-***REMOVED******REMOVED******REMOVED***"context": context_obj
-***REMOVED******REMOVED***
-***REMOVED******REMOVED***)
-***REMOVED******REMOVED***else:
-***REMOVED******REMOVED***messages.append(
-***REMOVED******REMOVED******REMOVED***{
-***REMOVED******REMOVED******REMOVED***"role": message["role"],
-***REMOVED******REMOVED******REMOVED***"content": message["content"]
-***REMOVED******REMOVED***
-***REMOVED******REMOVED***)
+***REMOVED******REMOVED******REMOVED******REMOVED***"role": message["role"],
+***REMOVED******REMOVED******REMOVED******REMOVED***"content": message["content"]
+***REMOVED******REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED***)
+***REMOVED******REMOVED***case "assistant" | "function" | "tool":
+***REMOVED******REMOVED******REMOVED***messages_helper = {}
+***REMOVED******REMOVED******REMOVED***messages_helper["role"] = message["role"]
+***REMOVED******REMOVED******REMOVED***if "name" in message:
+***REMOVED******REMOVED******REMOVED***messages_helper["name"] = message["name"]
+***REMOVED******REMOVED******REMOVED***if "function_call" in message:
+***REMOVED******REMOVED******REMOVED***messages_helper["function_call"] = message["function_call"]
+***REMOVED******REMOVED******REMOVED***messages_helper["content"] = message["content"]
+***REMOVED******REMOVED******REMOVED***if "context" in message:
+***REMOVED******REMOVED******REMOVED***context_obj = json.loads(message["context"])
+***REMOVED******REMOVED******REMOVED***messages_helper["context"] = context_obj
+***REMOVED******REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED***messages.append(messages_helper)
+
 
 ***REMOVED***user_json = None
 ***REMOVED***if (MS_DEFENDER_ENABLED):
@@ -254,14 +292,19 @@ def prepare_model_args(request_body, request_headers):
 ***REMOVED***"user": user_json
 ***REMOVED***
 
-***REMOVED***if app_settings.datasource:
-***REMOVED***model_args["extra_body"] = {
-***REMOVED******REMOVED***"data_sources": [
-***REMOVED******REMOVED***app_settings.datasource.construct_payload_configuration(
-***REMOVED******REMOVED******REMOVED***request=request
-***REMOVED******REMOVED***)
-***REMOVED******REMOVED***]
-***REMOVED***
+***REMOVED***if len(messages) > 0:
+***REMOVED***if messages[-1]["role"] == "user":
+***REMOVED******REMOVED***if app_settings.azure_openai.function_call_azure_functions_enabled and len(azure_openai_tools) > 0:
+***REMOVED******REMOVED***model_args["tools"] = azure_openai_tools
+
+***REMOVED******REMOVED***if app_settings.datasource:
+***REMOVED******REMOVED***model_args["extra_body"] = {
+***REMOVED******REMOVED******REMOVED***"data_sources": [
+***REMOVED******REMOVED******REMOVED***app_settings.datasource.construct_payload_configuration(
+***REMOVED******REMOVED******REMOVED******REMOVED***request=request
+***REMOVED******REMOVED******REMOVED***)
+***REMOVED******REMOVED******REMOVED***]
+***REMOVED******REMOVED***
 
 ***REMOVED***model_args_clean = copy.deepcopy(model_args)
 ***REMOVED***if model_args_clean.get("extra_body"):
@@ -335,6 +378,43 @@ async def promptflow_request(request):
 ***REMOVED***logging.error(f"An error occurred while making promptflow_request: {e}")
 
 
+async def process_function_call(response):
+***REMOVED***response_message = response.choices[0].message
+***REMOVED***messages = []
+
+***REMOVED***if response_message.tool_calls:
+***REMOVED***for tool_call in response_message.tool_calls:
+***REMOVED******REMOVED***# Check if function exists
+***REMOVED******REMOVED***if tool_call.function.name not in azure_openai_available_tools:
+***REMOVED******REMOVED***continue
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***function_response = await openai_remote_azure_function_call(tool_call.function.name, tool_call.function.arguments)
+
+***REMOVED******REMOVED***# adding assistant response to messages
+***REMOVED******REMOVED***messages.append(
+***REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED***"role": response_message.role,
+***REMOVED******REMOVED******REMOVED***"function_call": {
+***REMOVED******REMOVED******REMOVED***"name": tool_call.function.name,
+***REMOVED******REMOVED******REMOVED***"arguments": tool_call.function.arguments,
+***REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***"content": None,
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***)
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***# adding function response to messages
+***REMOVED******REMOVED***messages.append(
+***REMOVED******REMOVED***{
+***REMOVED******REMOVED******REMOVED***"role": "function",
+***REMOVED******REMOVED******REMOVED***"name": tool_call.function.name,
+***REMOVED******REMOVED******REMOVED***"content": function_response,
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***)  # extend conversation with function response
+***REMOVED***
+***REMOVED***return messages
+***REMOVED***
+***REMOVED***return None
+
 async def send_chat_request(request_body, request_headers):
 ***REMOVED***filtered_messages = []
 ***REMOVED***messages = request_body.get("messages", [])
@@ -370,18 +450,113 @@ async def complete_chat_request(request_body, request_headers):
 ***REMOVED***else:
 ***REMOVED***response, apim_request_id = await send_chat_request(request_body, request_headers)
 ***REMOVED***history_metadata = request_body.get("history_metadata", {})
-***REMOVED***return format_non_streaming_response(response, history_metadata, apim_request_id)
+***REMOVED***non_streaming_response = format_non_streaming_response(response, history_metadata, apim_request_id)
+
+***REMOVED***if app_settings.azure_openai.function_call_azure_functions_enabled:
+***REMOVED******REMOVED***function_response = await process_function_call(response)  # Add await here
+
+***REMOVED******REMOVED***if function_response:
+***REMOVED******REMOVED***request_body["messages"].extend(function_response)
+
+***REMOVED******REMOVED***response, apim_request_id = await send_chat_request(request_body, request_headers)
+***REMOVED******REMOVED***history_metadata = request_body.get("history_metadata", {})
+***REMOVED******REMOVED***non_streaming_response = format_non_streaming_response(response, history_metadata, apim_request_id)
+
+***REMOVED***return non_streaming_response
+
+class AzureOpenaiFunctionCallStreamState():
+***REMOVED***def __init__(self):
+***REMOVED***self.tool_calls = []***REMOVED******REMOVED***# All tool calls detected in the stream
+***REMOVED***self.tool_name = ""***REMOVED******REMOVED*** # Tool name being streamed
+***REMOVED***self.tool_arguments_stream = ""***REMOVED*** # Tool arguments being streamed
+***REMOVED***self.current_tool_call = None***REMOVED***   # JSON with the tool name and arguments currently being streamed
+***REMOVED***self.function_messages = []***REMOVED*** # All function messages to be appended to the chat history
+***REMOVED***self.streaming_state = "INITIAL"***REMOVED***# Streaming state (INITIAL, STREAMING, COMPLETED)
+
+
+async def process_function_call_stream(completionChunk, function_call_stream_state, request_body, request_headers, history_metadata, apim_request_id):
+***REMOVED***if hasattr(completionChunk, "choices") and len(completionChunk.choices) > 0:
+***REMOVED***response_message = completionChunk.choices[0].delta
+***REMOVED***
+***REMOVED***# Function calling stream processing
+***REMOVED***if response_message.tool_calls and function_call_stream_state.streaming_state in ["INITIAL", "STREAMING"]:
+***REMOVED******REMOVED***function_call_stream_state.streaming_state = "STREAMING"
+***REMOVED******REMOVED***for tool_call_chunk in response_message.tool_calls:
+***REMOVED******REMOVED***# New tool call
+***REMOVED******REMOVED***if tool_call_chunk.id:
+***REMOVED******REMOVED******REMOVED***if function_call_stream_state.current_tool_call:
+***REMOVED******REMOVED******REMOVED***function_call_stream_state.tool_arguments_stream += tool_call_chunk.function.arguments if tool_call_chunk.function.arguments else ""
+***REMOVED******REMOVED******REMOVED***function_call_stream_state.current_tool_call["tool_arguments"] = function_call_stream_state.tool_arguments_stream
+***REMOVED******REMOVED******REMOVED***function_call_stream_state.tool_arguments_stream = ""
+***REMOVED******REMOVED******REMOVED***function_call_stream_state.tool_name = ""
+***REMOVED******REMOVED******REMOVED***function_call_stream_state.tool_calls.append(function_call_stream_state.current_tool_call)
+
+***REMOVED******REMOVED******REMOVED***function_call_stream_state.current_tool_call = {
+***REMOVED******REMOVED******REMOVED***"tool_id": tool_call_chunk.id,
+***REMOVED******REMOVED******REMOVED***"tool_name": tool_call_chunk.function.name if function_call_stream_state.tool_name == "" else function_call_stream_state.tool_name
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***else:
+***REMOVED******REMOVED******REMOVED***function_call_stream_state.tool_arguments_stream += tool_call_chunk.function.arguments if tool_call_chunk.function.arguments else ""
+***REMOVED******REMOVED***
+***REMOVED***# Function call - Streaming completed
+***REMOVED***elif response_message.tool_calls is None and function_call_stream_state.streaming_state == "STREAMING":
+***REMOVED******REMOVED***function_call_stream_state.current_tool_call["tool_arguments"] = function_call_stream_state.tool_arguments_stream
+***REMOVED******REMOVED***function_call_stream_state.tool_calls.append(function_call_stream_state.current_tool_call)
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***for tool_call in function_call_stream_state.tool_calls:
+***REMOVED******REMOVED***tool_response = await openai_remote_azure_function_call(tool_call["tool_name"], tool_call["tool_arguments"])
+
+***REMOVED******REMOVED***function_call_stream_state.function_messages.append({
+***REMOVED******REMOVED******REMOVED***"role": "assistant",
+***REMOVED******REMOVED******REMOVED***"function_call": {
+***REMOVED******REMOVED******REMOVED***"name" : tool_call["tool_name"],
+***REMOVED******REMOVED******REMOVED***"arguments": tool_call["tool_arguments"]
+***REMOVED******REMOVED***,
+***REMOVED******REMOVED******REMOVED***"content": None
+***REMOVED******REMOVED***)
+***REMOVED******REMOVED***function_call_stream_state.function_messages.append({
+***REMOVED******REMOVED******REMOVED***"tool_call_id": tool_call["tool_id"],
+***REMOVED******REMOVED******REMOVED***"role": "function",
+***REMOVED******REMOVED******REMOVED***"name": tool_call["tool_name"],
+***REMOVED******REMOVED******REMOVED***"content": tool_response,
+***REMOVED******REMOVED***)
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***function_call_stream_state.streaming_state = "COMPLETED"
+***REMOVED******REMOVED***return function_call_stream_state.streaming_state
+***REMOVED***
+***REMOVED***else:
+***REMOVED******REMOVED***return function_call_stream_state.streaming_state
 
 
 async def stream_chat_request(request_body, request_headers):
 ***REMOVED***response, apim_request_id = await send_chat_request(request_body, request_headers)
 ***REMOVED***history_metadata = request_body.get("history_metadata", {})
 ***REMOVED***
-***REMOVED***async def generate():
-***REMOVED***async for completionChunk in response:
+***REMOVED***async def generate(apim_request_id, history_metadata):
+***REMOVED***if app_settings.azure_openai.function_call_azure_functions_enabled:
+***REMOVED******REMOVED***# Maintain state during function call streaming
+***REMOVED******REMOVED***function_call_stream_state = AzureOpenaiFunctionCallStreamState()
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***async for completionChunk in response:
+***REMOVED******REMOVED***stream_state = await process_function_call_stream(completionChunk, function_call_stream_state, request_body, request_headers, history_metadata, apim_request_id)
+***REMOVED******REMOVED***
+***REMOVED******REMOVED***# No function call, asistant response
+***REMOVED******REMOVED***if stream_state == "INITIAL":
+***REMOVED******REMOVED******REMOVED***yield format_stream_response(completionChunk, history_metadata, apim_request_id)
+
+***REMOVED******REMOVED***# Function call stream completed, functions were executed.
+***REMOVED******REMOVED***# Append function calls and results to history and send to OpenAI, to stream the final answer.
+***REMOVED******REMOVED***if stream_state == "COMPLETED":
+***REMOVED******REMOVED******REMOVED***request_body["messages"].extend(function_call_stream_state.function_messages)
+***REMOVED******REMOVED******REMOVED***function_response, apim_request_id = await send_chat_request(request_body, request_headers)
+***REMOVED******REMOVED******REMOVED***async for functionCompletionChunk in function_response:
+***REMOVED******REMOVED******REMOVED***yield format_stream_response(functionCompletionChunk, history_metadata, apim_request_id)
+***REMOVED******REMOVED***
+***REMOVED***else:
+***REMOVED******REMOVED***async for completionChunk in response:
 ***REMOVED******REMOVED***yield format_stream_response(completionChunk, history_metadata, apim_request_id)
 
-***REMOVED***return generate()
+***REMOVED***return generate(apim_request_id=apim_request_id, history_metadata=history_metadata)
 
 
 async def conversation_internal(request_body, request_headers):
