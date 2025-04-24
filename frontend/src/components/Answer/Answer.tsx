@@ -324,7 +324,7 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
 ***REMOVED******REMOVED***</Stack.Item>
 ***REMOVED***  )}
 ***REMOVED***  <Stack.Item className={styles.answerDisclaimerContainer}>
-***REMOVED******REMOVED***<span className={styles.answerDisclaimer}>AI-generated content may be incorrect</span>
+***REMOVED******REMOVED***<span className={styles.answerDisclaimer}>Content generate by AI may be incorrect</span>
 ***REMOVED***  </Stack.Item>
 ***REMOVED***  {!!answer.exec_results?.length && (
 ***REMOVED******REMOVED***<Stack.Item onKeyDown={e => (e.key === 'Enter' || e.key === ' ' ? toggleIsRefAccordionOpen() : null)}>
