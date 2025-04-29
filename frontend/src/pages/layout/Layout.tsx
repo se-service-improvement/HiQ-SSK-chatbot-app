@@ -80,7 +80,7 @@ const Layout = () => {
 ***REMOVED***  <Stack horizontal verticalAlign="center">
 ***REMOVED******REMOVED***<img src={logo} className={styles.headerIcon} aria-hidden="true" alt="" />
 ***REMOVED******REMOVED***<Link to="/" className={styles.headerTitleContainer}>
-***REMOVED******REMOVED***  <h1 className={styles.headerTitle}>Self-service Kiosk</h1>
+***REMOVED******REMOVED***  <h1 className={styles.headerTitle}>{ui?.title}</h1>
 ***REMOVED******REMOVED***</Link>
 ***REMOVED***  </Stack>
 ***REMOVED***  <Stack horizontal tokens={{ childrenGap: 4 }} className={styles.shareButtonContainer}>
