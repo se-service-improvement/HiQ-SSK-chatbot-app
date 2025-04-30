@@ -28,13 +28,16 @@
   line-height: 28px;
   display: flex;
   align-items: flex-end;
-  color: #242424;
+  /* color: #242424; */
+  color: #ffffff;
 }
 
 .headerIcon {
-  height: 32px;
+  height: 75px;
   width: auto;
   margin-left: 36px;
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 
 .shareButtonContainer {
