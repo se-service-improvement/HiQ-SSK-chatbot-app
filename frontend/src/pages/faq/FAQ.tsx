@@ -47,15 +47,23 @@ const enum messageStatus {
   Done = 'Done'
 }
 
+
+
 const FAQ = () => {
   const { faq_id } = useParams();
 
   useEffect(() => {
-    console.log("useEffect Works");
-    console.log(faq_id);
-    if (faq_id == "1") {
-      console.log("faq_id Works");
-      makeApiRequestWithCosmosDB("bike parking", );
+    // console.log("useEffect Works");
+    // console.log(faq_id);
+    switch (faq_id) {
+      case "1":
+        makeApiRequestWithCosmosDB("I have forgotten my ID card, can I still attend my exam?", );
+        break;
+      case "2":
+        makeApiRequestWithCosmosDB("How do I request an extension to my assignment?", );
+        break;
+      default:
+        break;
     }
   }, [])
 
@@ -770,6 +778,7 @@ const FAQ = () => {
     )
   }
 
+
   return (
     <div className={styles.container} role="main">
       {showAuthMessage ? (
@@ -1049,6 +1058,63 @@ const FAQ = () => {
             appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && <ChatHistoryPanel />}
         </Stack>
       )}
+
+            {/* <div id={styles.top_content} className={styles.top_content}>
+              <div id={styles.header} className={styles.section_wrapper}></div>
+              <div id={styles.content} className={styles.section_wrapper}>
+                  <div id={styles.content_main} className={styles.content_wrapper}>
+                    <div id={styles.intro} className={styles.info_box}>
+                      <p><strong>Welcome to the HiQ Self-Service Kiosk</strong></p>
+                      <p>No time to wait in line? Access quick support here. 😎✨</p>
+                      <p>Find answers to your questions about assessments, fees, enrolment, library resources, wellbeing support, and more.</p>
+                      <p>To get started, click the <strong>Ask a question</strong> button. Make sure your question is detailed, specific, and written in complete sentences. You can clear your chats anytime using the broom icon.</p>
+                    </div>
+                  </div>
+
+
+
+                  <div id={styles.content_instructions} className={styles.content_wrapper}>
+                      <div id={styles.instructions} className={styles.info_box}>
+                          <p><strong>How to use the HiQ Self-Service Kiosk:</strong></p>
+                          <ul>
+                            <li><i className={styles.material_icons}>chat</i> Click on the <strong>blue chat button</strong> at the bottom right to .</li>
+                            <li><i className={styles.material_icons}>question_answer</i> Type your question and press enter to receive an instant response.</li>            
+                            <li><i className={styles.material_icons}>link</i> If there is a link in the response, click on it to learn more (opens in a new tab).</li>
+                            <li><i className={styles.material_icons}>add</i> Use the <strong>plus button</strong> to add new chat sessions.</li>
+                            <li><i className={styles.material_icons}>cleaning_services</i> Click the <strong>broom icon</strong> to clear the chat and start fresh.</li>            
+                          <li><i className={styles.material_icons}>history</i> Click on <strong>Show chat history</strong> to view your recent chats with HiKA-AI.</li>                    
+                          <li><i className={styles.material_icons}>close</i> Click the "X" in the top right corner to close the chat and reset for the next user.</li>
+                          </ul>
+                          <p><strong>Note:</strong> Each new chat resets the conversation, so feel free to explore different questions!</p>
+                          <br />
+                          <p><strong>Tip for Better Questions:</strong> For the best responses, ask detailed, specific questions. Provide context (e.g., topic or department) and use complete sentences. This helps HiKA-AI give you accurate answers more quickly.</p>
+                      </div> */}
+                      {/* <button className={styles.floating}chat-btn" onClick={openChatInNewTab()}>Ask a question</button>
+                      <button className={styles.feedback}btn" onClick={openFeedbackForm()}>Leave Feedback</button> */}
+                  {/* </div>
+              </div>
+              <div id={styles.footer} className={styles.section_wrapper}></div>
+
+
+
+              <div id={styles.fixed_disclaimer} className={styles.section_wrapper}>
+                  <div id={styles.content_fixed_disclaimer} className={styles.content_wrapper}>
+                      <div id={styles.disclaimer} className={styles.info_box}>
+                          <div id={styles.disclaimer_content}>
+                              <strong><em>Disclaimer:</em></strong>
+                              <br />
+                              <em>The HiQ Self-Service Kiosk utilises artificial intelligence. While it aims to provide accurate and relevant information, the responses may not always be complete, current, or entirely accurate. 
+                              <br />
+                                  Please independently verify information via the provided links, the HiQ website, or by contacting HiQ directly. Use of this kiosk is at your own risk.</em>
+                          </div>
+                          <i id={styles.disclaimer_close} className={styles.material_icons}>close</i>
+                      </div>
+                  </div>
+              </div>
+          </div> */}
+
+
+
     </div>
   )
 }
