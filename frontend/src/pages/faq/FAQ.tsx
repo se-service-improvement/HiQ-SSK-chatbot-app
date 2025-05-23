@@ -47,15 +47,23 @@ const enum messageStatus {
   Done = 'Done'
 }
 
+
+
 const FAQ = () => {
   const { faq_id } = useParams();
 
   useEffect(() => {
-***REMOVED***console.log("useEffect Works");
-***REMOVED***console.log(faq_id);
-***REMOVED***if (faq_id == "1") {
-***REMOVED***  console.log("faq_id Works");
-***REMOVED***  makeApiRequestWithCosmosDB("bike parking", );
+***REMOVED***// console.log("useEffect Works");
+***REMOVED***// console.log(faq_id);
+***REMOVED***switch (faq_id) {
+***REMOVED***  case "1":
+***REMOVED***makeApiRequestWithCosmosDB("I have forgotten my ID card, can I still attend my exam?", );
+***REMOVED***break;
+***REMOVED***  case "2":
+***REMOVED***makeApiRequestWithCosmosDB("How do I request an extension to my assignment?", );
+***REMOVED***break;
+***REMOVED***  default:
+***REMOVED***break;
 ***REMOVED***
   }, [])
 
@@ -770,6 +778,7 @@ const FAQ = () => {
 ***REMOVED***)
   }
 
+
   return (
 ***REMOVED***<div className={styles.container} role="main">
 ***REMOVED***  {showAuthMessage ? (
@@ -1049,6 +1058,63 @@ const FAQ = () => {
 ***REMOVED******REMOVED***appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && <ChatHistoryPanel />}
 ***REMOVED***</Stack>
 ***REMOVED***  )}
+
+***REMOVED******REMOVED***{/* <div id={styles.top_content} className={styles.top_content}>
+***REMOVED******REMOVED***  <div id={styles.header} className={styles.section_wrapper}></div>
+***REMOVED******REMOVED***  <div id={styles.content} className={styles.section_wrapper}>
+***REMOVED******REMOVED***  <div id={styles.content_main} className={styles.content_wrapper}>
+***REMOVED******REMOVED******REMOVED***<div id={styles.intro} className={styles.info_box}>
+***REMOVED******REMOVED******REMOVED***  <p><strong>Welcome to the HiQ Self-Service Kiosk</strong></p>
+***REMOVED******REMOVED******REMOVED***  <p>No time to wait in line? Access quick support here. 😎✨</p>
+***REMOVED******REMOVED******REMOVED***  <p>Find answers to your questions about assessments, fees, enrolment, library resources, wellbeing support, and more.</p>
+***REMOVED******REMOVED******REMOVED***  <p>To get started, click the <strong>Ask a question</strong> button. Make sure your question is detailed, specific, and written in complete sentences. You can clear your chats anytime using the broom icon.</p>
+***REMOVED******REMOVED******REMOVED***</div>
+***REMOVED******REMOVED***  </div>
+
+
+
+***REMOVED******REMOVED***  <div id={styles.content_instructions} className={styles.content_wrapper}>
+***REMOVED******REMOVED******REMOVED***  <div id={styles.instructions} className={styles.info_box}>
+***REMOVED******REMOVED******REMOVED***  <p><strong>How to use the HiQ Self-Service Kiosk:</strong></p>
+***REMOVED******REMOVED******REMOVED***  <ul>
+***REMOVED******REMOVED******REMOVED******REMOVED***<li><i className={styles.material_icons}>chat</i> Click on the <strong>blue chat button</strong> at the bottom right to .</li>
+***REMOVED******REMOVED******REMOVED******REMOVED***<li><i className={styles.material_icons}>question_answer</i> Type your question and press enter to receive an instant response.</li>***REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED******REMOVED***<li><i className={styles.material_icons}>link</i> If there is a link in the response, click on it to learn more (opens in a new tab).</li>
+***REMOVED******REMOVED******REMOVED******REMOVED***<li><i className={styles.material_icons}>add</i> Use the <strong>plus button</strong> to add new chat sessions.</li>
+***REMOVED******REMOVED******REMOVED******REMOVED***<li><i className={styles.material_icons}>cleaning_services</i> Click the <strong>broom icon</strong> to clear the chat and start fresh.</li>***REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED***  <li><i className={styles.material_icons}>history</i> Click on <strong>Show chat history</strong> to view your recent chats with HiKA-AI.</li>***REMOVED******REMOVED******REMOVED***
+***REMOVED******REMOVED******REMOVED***  <li><i className={styles.material_icons}>close</i> Click the "X" in the top right corner to close the chat and reset for the next user.</li>
+***REMOVED******REMOVED******REMOVED***  </ul>
+***REMOVED******REMOVED******REMOVED***  <p><strong>Note:</strong> Each new chat resets the conversation, so feel free to explore different questions!</p>
+***REMOVED******REMOVED******REMOVED***  <br />
+***REMOVED******REMOVED******REMOVED***  <p><strong>Tip for Better Questions:</strong> For the best responses, ask detailed, specific questions. Provide context (e.g., topic or department) and use complete sentences. This helps HiKA-AI give you accurate answers more quickly.</p>
+***REMOVED******REMOVED******REMOVED***  </div> */}
+***REMOVED******REMOVED******REMOVED***  {/* <button className={styles.floating}chat-btn" onClick={openChatInNewTab()}>Ask a question</button>
+***REMOVED******REMOVED******REMOVED***  <button className={styles.feedback}btn" onClick={openFeedbackForm()}>Leave Feedback</button> */}
+***REMOVED******REMOVED***  {/* </div>
+***REMOVED******REMOVED***  </div>
+***REMOVED******REMOVED***  <div id={styles.footer} className={styles.section_wrapper}></div>
+
+
+
+***REMOVED******REMOVED***  <div id={styles.fixed_disclaimer} className={styles.section_wrapper}>
+***REMOVED******REMOVED***  <div id={styles.content_fixed_disclaimer} className={styles.content_wrapper}>
+***REMOVED******REMOVED******REMOVED***  <div id={styles.disclaimer} className={styles.info_box}>
+***REMOVED******REMOVED******REMOVED***  <div id={styles.disclaimer_content}>
+***REMOVED******REMOVED******REMOVED******REMOVED***  <strong><em>Disclaimer:</em></strong>
+***REMOVED******REMOVED******REMOVED******REMOVED***  <br />
+***REMOVED******REMOVED******REMOVED******REMOVED***  <em>The HiQ Self-Service Kiosk utilises artificial intelligence. While it aims to provide accurate and relevant information, the responses may not always be complete, current, or entirely accurate. 
+***REMOVED******REMOVED******REMOVED******REMOVED***  <br />
+***REMOVED******REMOVED******REMOVED******REMOVED***  Please independently verify information via the provided links, the HiQ website, or by contacting HiQ directly. Use of this kiosk is at your own risk.</em>
+***REMOVED******REMOVED******REMOVED***  </div>
+***REMOVED******REMOVED******REMOVED***  <i id={styles.disclaimer_close} className={styles.material_icons}>close</i>
+***REMOVED******REMOVED******REMOVED***  </div>
+***REMOVED******REMOVED***  </div>
+***REMOVED******REMOVED***  </div>
+***REMOVED***  </div> */}
+
+
+
 ***REMOVED***</div>
   )
 }

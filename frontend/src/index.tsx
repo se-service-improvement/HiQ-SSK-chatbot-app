@@ -34,3 +34,8 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 ***REMOVED***<App />
   </React.StrictMode>
 )
+
+const stylesheetLink: HTMLLinkElement = document.createElement('link');
+stylesheetLink.rel = 'stylesheet';
+stylesheetLink.href = 'https://fonts.googleapis.com/icon?family=Material+Icons';
+document.head.append(stylesheetLink);
