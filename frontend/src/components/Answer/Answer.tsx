@@ -157,24 +157,24 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
 ***REMOVED***<div>Why wasn't this response helpful?</div>
 ***REMOVED***<Stack tokens={{ childrenGap: 4 }}>
 ***REMOVED***  <Checkbox
-***REMOVED******REMOVED***label="Citations are missing"
-***REMOVED******REMOVED***id={Feedback.MissingCitation}
-***REMOVED******REMOVED***defaultChecked={negativeFeedbackList.includes(Feedback.MissingCitation)}
+***REMOVED******REMOVED***label="Links are missing"
+***REMOVED******REMOVED***id={Feedback.MissingLink}
+***REMOVED******REMOVED***defaultChecked={negativeFeedbackList.includes(Feedback.MissingLink)}
 ***REMOVED******REMOVED***onChange={updateFeedbackList}></Checkbox>
 ***REMOVED***  <Checkbox
-***REMOVED******REMOVED***label="Citations are wrong"
-***REMOVED******REMOVED***id={Feedback.WrongCitation}
-***REMOVED******REMOVED***defaultChecked={negativeFeedbackList.includes(Feedback.WrongCitation)}
+***REMOVED******REMOVED***label="Links are wrong"
+***REMOVED******REMOVED***id={Feedback.WrongLink}
+***REMOVED******REMOVED***defaultChecked={negativeFeedbackList.includes(Feedback.WrongLink)}
 ***REMOVED******REMOVED***onChange={updateFeedbackList}></Checkbox>
 ***REMOVED***  <Checkbox
-***REMOVED******REMOVED***label="The response is not from my data"
-***REMOVED******REMOVED***id={Feedback.OutOfScope}
-***REMOVED******REMOVED***defaultChecked={negativeFeedbackList.includes(Feedback.OutOfScope)}
+***REMOVED******REMOVED***label="The response is not answering my specific question"
+***REMOVED******REMOVED***id={Feedback.NonSpecific}
+***REMOVED******REMOVED***defaultChecked={negativeFeedbackList.includes(Feedback.NonSpecific)}
 ***REMOVED******REMOVED***onChange={updateFeedbackList}></Checkbox>
 ***REMOVED***  <Checkbox
-***REMOVED******REMOVED***label="Inaccurate or irrelevant"
-***REMOVED******REMOVED***id={Feedback.InaccurateOrIrrelevant}
-***REMOVED******REMOVED***defaultChecked={negativeFeedbackList.includes(Feedback.InaccurateOrIrrelevant)}
+***REMOVED******REMOVED***label="The information is irrelevant to my question"
+***REMOVED******REMOVED***id={Feedback.Irrelevant}
+***REMOVED******REMOVED***defaultChecked={negativeFeedbackList.includes(Feedback.Irrelevant)}
 ***REMOVED******REMOVED***onChange={updateFeedbackList}></Checkbox>
 ***REMOVED***  <Checkbox
 ***REMOVED******REMOVED***label="Other"
@@ -182,9 +182,9 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
 ***REMOVED******REMOVED***defaultChecked={negativeFeedbackList.includes(Feedback.OtherUnhelpful)}
 ***REMOVED******REMOVED***onChange={updateFeedbackList}></Checkbox>
 ***REMOVED***</Stack>
-***REMOVED***<div onClick={() => setShowReportInappropriateFeedback(true)} style={{ color: '#115EA3', cursor: 'pointer' }}>
+***REMOVED***{/* <div onClick={() => setShowReportInappropriateFeedback(true)} style={{ color: '#115EA3', cursor: 'pointer' }}>
 ***REMOVED***  Report inappropriate content
-***REMOVED***</div>
+***REMOVED***</div> */}
 ***REMOVED***  </>
 ***REMOVED***)
   }
@@ -245,7 +245,7 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
 ***REMOVED***<>
 ***REMOVED***  <Stack className={styles.answerContainer} tabIndex={0}>
 ***REMOVED***<Stack.Item>
-***REMOVED***  <Stack horizontal grow>
+***REMOVED***  <Stack horizontal grow className={styles.answerContainer_Column}>
 ***REMOVED******REMOVED***<Stack.Item grow>
 ***REMOVED******REMOVED***  {parsedAnswer && <ReactMarkdown
 ***REMOVED******REMOVED***linkTarget="_blank"
@@ -262,6 +262,7 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
 ***REMOVED******REMOVED***<Stack.Item className={styles.answerHeader}>
 ***REMOVED******REMOVED***  {FEEDBACK_ENABLED && answer.message_id !== undefined && (
 ***REMOVED******REMOVED***<Stack horizontal horizontalAlign="space-between">
+***REMOVED******REMOVED***  Did you find this response helpful?
 ***REMOVED******REMOVED***  <ThumbLike20Filled
 ***REMOVED******REMOVED******REMOVED***aria-hidden="false"
 ***REMOVED******REMOVED******REMOVED***aria-label="Like this response"
