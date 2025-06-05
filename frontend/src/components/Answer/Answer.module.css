@@ -11,6 +11,11 @@
   border-radius: 5.419px;
 }
 
+.answerContainer_Column{
+  display: flex;
+  flex-direction: column;
+}
+
 .answerText {
   font-style: normal;
   font-weight: 400;
@@ -30,6 +35,8 @@
 
 .answerHeader {
   position: relative;
+  display: flex;
+  justify-content: end;
 }
 
 .answerFooter {

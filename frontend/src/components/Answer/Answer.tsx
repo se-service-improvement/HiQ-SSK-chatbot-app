@@ -157,24 +157,24 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
         <div>Why wasn't this response helpful?</div>
         <Stack tokens={{ childrenGap: 4 }}>
           <Checkbox
-            label="Citations are missing"
-            id={Feedback.MissingCitation}
-            defaultChecked={negativeFeedbackList.includes(Feedback.MissingCitation)}
+            label="Links are missing"
+            id={Feedback.MissingLink}
+            defaultChecked={negativeFeedbackList.includes(Feedback.MissingLink)}
             onChange={updateFeedbackList}></Checkbox>
           <Checkbox
-            label="Citations are wrong"
-            id={Feedback.WrongCitation}
-            defaultChecked={negativeFeedbackList.includes(Feedback.WrongCitation)}
+            label="Links are wrong"
+            id={Feedback.WrongLink}
+            defaultChecked={negativeFeedbackList.includes(Feedback.WrongLink)}
             onChange={updateFeedbackList}></Checkbox>
           <Checkbox
-            label="The response is not from my data"
-            id={Feedback.OutOfScope}
-            defaultChecked={negativeFeedbackList.includes(Feedback.OutOfScope)}
+            label="The response is not answering my specific question"
+            id={Feedback.NonSpecific}
+            defaultChecked={negativeFeedbackList.includes(Feedback.NonSpecific)}
             onChange={updateFeedbackList}></Checkbox>
           <Checkbox
-            label="Inaccurate or irrelevant"
-            id={Feedback.InaccurateOrIrrelevant}
-            defaultChecked={negativeFeedbackList.includes(Feedback.InaccurateOrIrrelevant)}
+            label="The information is irrelevant to my question"
+            id={Feedback.Irrelevant}
+            defaultChecked={negativeFeedbackList.includes(Feedback.Irrelevant)}
             onChange={updateFeedbackList}></Checkbox>
           <Checkbox
             label="Other"
@@ -182,9 +182,9 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
             defaultChecked={negativeFeedbackList.includes(Feedback.OtherUnhelpful)}
             onChange={updateFeedbackList}></Checkbox>
         </Stack>
-        <div onClick={() => setShowReportInappropriateFeedback(true)} style={{ color: '#115EA3', cursor: 'pointer' }}>
+        {/* <div onClick={() => setShowReportInappropriateFeedback(true)} style={{ color: '#115EA3', cursor: 'pointer' }}>
           Report inappropriate content
-        </div>
+        </div> */}
       </>
     )
   }
@@ -245,7 +245,7 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
     <>
       <Stack className={styles.answerContainer} tabIndex={0}>
         <Stack.Item>
-          <Stack horizontal grow>
+          <Stack horizontal grow className={styles.answerContainer_Column}>
             <Stack.Item grow>
               {parsedAnswer && <ReactMarkdown
                 linkTarget="_blank"
@@ -262,6 +262,7 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
             <Stack.Item className={styles.answerHeader}>
               {FEEDBACK_ENABLED && answer.message_id !== undefined && (
                 <Stack horizontal horizontalAlign="space-between">
+                  Did you find this response helpful?
                   <ThumbLike20Filled
                     aria-hidden="false"
                     aria-label="Like this response"
