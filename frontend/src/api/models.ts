@@ -154,5 +154,9 @@ export enum Feedback {
   Violent = 'violent',
   Sexual = 'sexual',
   Manipulative = 'manipulative',
-  OtherHarmful = 'other_harmlful'
+  OtherHarmful = 'other_harmlful',
+  MissingLink = "missing_link",
+  WrongLink = "wrong_link",
+  NonSpecific = "non_specific",
+  Irrelevant = "irrelevant"
 }
