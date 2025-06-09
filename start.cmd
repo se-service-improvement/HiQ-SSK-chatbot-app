@@ -32,8 +32,8 @@ echo.***REMOVED***
 echo Starting backend***REMOVED***
 echo.***REMOVED***
 cd ..  
-start http://127.0.0.1:50505
-call py -m uvicorn app:app  --port 50505 --reload
+start http://127.0.0.1:10505
+call py -m uvicorn app:app  --port 10505 --reload
 if "%errorlevel%" neq "0" (***REMOVED***
 ***REMOVED***echo Failed to start backend***REMOVED***
 ***REMOVED***exit /B %errorlevel%***REMOVED***
