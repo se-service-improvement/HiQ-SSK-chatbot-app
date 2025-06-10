@@ -157,16 +157,6 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
 ***REMOVED***<div>Why wasn't this response helpful?</div>
 ***REMOVED***<Stack tokens={{ childrenGap: 4 }}>
 ***REMOVED***  <Checkbox
-***REMOVED******REMOVED***label="Links are missing"
-***REMOVED******REMOVED***id={Feedback.MissingLink}
-***REMOVED******REMOVED***defaultChecked={negativeFeedbackList.includes(Feedback.MissingLink)}
-***REMOVED******REMOVED***onChange={updateFeedbackList}></Checkbox>
-***REMOVED***  <Checkbox
-***REMOVED******REMOVED***label="Links are wrong"
-***REMOVED******REMOVED***id={Feedback.WrongLink}
-***REMOVED******REMOVED***defaultChecked={negativeFeedbackList.includes(Feedback.WrongLink)}
-***REMOVED******REMOVED***onChange={updateFeedbackList}></Checkbox>
-***REMOVED***  <Checkbox
 ***REMOVED******REMOVED***label="The response is not answering my specific question"
 ***REMOVED******REMOVED***id={Feedback.NonSpecific}
 ***REMOVED******REMOVED***defaultChecked={negativeFeedbackList.includes(Feedback.NonSpecific)}
@@ -175,6 +165,16 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
 ***REMOVED******REMOVED***label="The information is irrelevant to my question"
 ***REMOVED******REMOVED***id={Feedback.Irrelevant}
 ***REMOVED******REMOVED***defaultChecked={negativeFeedbackList.includes(Feedback.Irrelevant)}
+***REMOVED******REMOVED***onChange={updateFeedbackList}></Checkbox>
+***REMOVED***  <Checkbox
+***REMOVED******REMOVED***label="Links are wrong"
+***REMOVED******REMOVED***id={Feedback.WrongLink}
+***REMOVED******REMOVED***defaultChecked={negativeFeedbackList.includes(Feedback.WrongLink)}
+***REMOVED******REMOVED***onChange={updateFeedbackList}></Checkbox>
+***REMOVED***  <Checkbox
+***REMOVED******REMOVED***label="Links are missing"
+***REMOVED******REMOVED***id={Feedback.MissingLink}
+***REMOVED******REMOVED***defaultChecked={negativeFeedbackList.includes(Feedback.MissingLink)}
 ***REMOVED******REMOVED***onChange={updateFeedbackList}></Checkbox>
 ***REMOVED***  <Checkbox
 ***REMOVED******REMOVED***label="Other"
