@@ -157,16 +157,6 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
         <div>Why wasn't this response helpful?</div>
         <Stack tokens={{ childrenGap: 4 }}>
           <Checkbox
-            label="Links are missing"
-            id={Feedback.MissingLink}
-            defaultChecked={negativeFeedbackList.includes(Feedback.MissingLink)}
-            onChange={updateFeedbackList}></Checkbox>
-          <Checkbox
-            label="Links are wrong"
-            id={Feedback.WrongLink}
-            defaultChecked={negativeFeedbackList.includes(Feedback.WrongLink)}
-            onChange={updateFeedbackList}></Checkbox>
-          <Checkbox
             label="The response is not answering my specific question"
             id={Feedback.NonSpecific}
             defaultChecked={negativeFeedbackList.includes(Feedback.NonSpecific)}
@@ -175,6 +165,16 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
             label="The information is irrelevant to my question"
             id={Feedback.Irrelevant}
             defaultChecked={negativeFeedbackList.includes(Feedback.Irrelevant)}
+            onChange={updateFeedbackList}></Checkbox>
+          <Checkbox
+            label="Links are wrong"
+            id={Feedback.WrongLink}
+            defaultChecked={negativeFeedbackList.includes(Feedback.WrongLink)}
+            onChange={updateFeedbackList}></Checkbox>
+          <Checkbox
+            label="Links are missing"
+            id={Feedback.MissingLink}
+            defaultChecked={negativeFeedbackList.includes(Feedback.MissingLink)}
             onChange={updateFeedbackList}></Checkbox>
           <Checkbox
             label="Other"
