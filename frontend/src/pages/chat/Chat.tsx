@@ -1,5 +1,5 @@
-import { useRef, useState, useEffect, useContext, useLayoutEffect } from 'react'
-import { CommandBarButton, IconButton, Dialog, DialogType, Stack } from '@fluentui/react'
+import { FormEvent, useRef, useState, useEffect, useContext, useLayoutEffect } from 'react'
+import { CommandBarButton, IconButton, Dialog, DialogType, Stack, DefaultButton, TextField } from '@fluentui/react'
 import { SquareRegular, ShieldLockRegular, ErrorCircleRegular } from '@fluentui/react-icons'
 
 import ReactMarkdown from 'react-markdown'
@@ -35,7 +35,7 @@ import {
 } from "../../api";
 import { Answer } from "../../components/Answer";
 import { QuestionInput } from "../../components/QuestionInput";
-import { ChatHistoryPanel } from "../../components/ChatHistory/ChatHistoryPanel";
+// import { ChatHistoryPanel } from "../../components/ChatHistory/ChatHistoryPanel";
 import { AppStateContext } from "../../state/AppProvider";
 import { useBoolean } from "@fluentui/react-hooks";
 
@@ -65,6 +65,10 @@ const Chat = () => {
   const [errorMsg, setErrorMsg] = useState<ErrorMessage | null>()
   const [logo, setLogo] = useState('')
   const [answerId, setAnswerId] = useState<string>('')
+
+  
+  const [exportEmail, setExportEmail] = useState('')
+  const [isExportChatDialogOpen, setExportChatDialogOpen] = useState(false)
 
   const errorDialogContentProps = {
     type: DialogType.close,
@@ -624,6 +628,48 @@ const Chat = () => {
     setProcessMessages(messageStatus.Done)
   }
 
+
+
+
+
+
+  const exportChat = () => {
+    setExportChatDialogOpen(true)
+  }
+
+  const resetFeedbackDialog = () => {
+    setExportChatDialogOpen(false)
+  }
+
+  const onExportChatHistory = () => {
+    const invalidEmailMessage = document.getElementById("invalidEmail");
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (emailRegex.test(exportEmail)) {
+      console.log(exportEmail);
+      setExportEmail('');
+      setExportChatDialogOpen(false)
+
+      if (invalidEmailMessage) {
+        invalidEmailMessage.style.display = 'none';
+      }
+    } else {
+      if (invalidEmailMessage) {
+        invalidEmailMessage.style.display = 'initial';
+      }
+    }
+  }
+
+  const updateEmail = (ev?: FormEvent<HTMLElement | HTMLInputElement>) => {
+    setExportEmail((ev?.target as HTMLInputElement)?.value)
+  }
+
+
+
+
+
+
+
   const stopGenerating = () => {
     abortFuncs.current.forEach(a => a.abort())
     setShowLoadingMessage(false)
@@ -875,7 +921,7 @@ const Chat = () => {
                         color: '#FFFFFF'
                       },
                       iconDisabled: {
-                        color: '#BDBDBD !important'
+                        color: '#FFFFFF !important'
                       },
                       root: {
                         color: '#FFFFFF',
@@ -883,7 +929,7 @@ const Chat = () => {
                           'radial-gradient(109.81% 107.82% at 100.1% 90.19%, #0F6CBD 33.63%, #2D87C3 70.31%, #8DDDD8 100%)'
                       },
                       rootDisabled: {
-                        background: '#F0F0F0'
+                        background: '#606060'
                       }
                     }}
                     className={styles.newChatIcon}
@@ -891,16 +937,16 @@ const Chat = () => {
                     onClick={newChat}
                     disabled={disabledButton()}
                     aria-label="start a new chat button"
-                  />
+                  ><span className={styles.newChatText}>New Chat</span></CommandBarButton>
                 )}
-                <CommandBarButton
+                {/* <CommandBarButton
                   role="button"
                   styles={{
                     icon: {
                       color: '#FFFFFF'
                     },
                     iconDisabled: {
-                      color: '#BDBDBD !important'
+                      color: '#FFFFFF !important'
                     },
                     root: {
                       color: '#FFFFFF',
@@ -908,23 +954,15 @@ const Chat = () => {
                         'radial-gradient(109.81% 107.82% at 100.1% 90.19%, #0F6CBD 33.63%, #2D87C3 70.31%, #8DDDD8 100%)'
                     },
                     rootDisabled: {
-                      background: '#F0F0F0'
+                      background: '#606060'
                     }
                   }}
-                  className={
-                    appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured
-                      ? styles.clearChatBroom
-                      : styles.clearChatBroomNoCosmos
-                  }
-                  iconProps={{ iconName: 'Broom' }}
-                  onClick={
-                    appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured
-                      ? clearChat
-                      : newChat
-                  }
+                  className={styles.exportChatIcon}
+                  iconProps={{ iconName: 'MailForward' }}
+                  onClick={exportChat}
                   disabled={disabledButton()}
-                  aria-label="clear chat button"
-                />
+                  aria-label="export chat button"
+                ><span className={styles.exportChatText}>Email Chat</span></CommandBarButton> */}
                 <Dialog
                   hidden={hideErrorDialog}
                   onDismiss={handleErrorDialogClose}
@@ -945,6 +983,45 @@ const Chat = () => {
                 }
               />
             </Stack>
+            {/* <Dialog
+              onDismiss={() => {
+                resetFeedbackDialog()
+              }}
+              hidden={!isExportChatDialogOpen}
+              styles={{
+                main: [
+                  {
+                    selectors: {
+                      ['@media (min-width: 480px)']: {
+                        maxWidth: '600px',
+                        background: '#FFFFFF',
+                        boxShadow: '0px 14px 28.8px rgba(0, 0, 0, 0.24), 0px 0px 8px rgba(0, 0, 0, 0.2)',
+                        borderRadius: '8px',
+                        maxHeight: '600px',
+                        minHeight: '100px'
+                      }
+                    }
+                  }
+                ]
+              }}
+              dialogContentProps={{
+                title: 'Email Chat History',
+                showCloseButton: true
+              }}>
+              <Stack tokens={{ childrenGap: 4 }}>
+                <div>Enter your email address below and click submit to receive an email with the chat history of this conversation.</div>
+      
+                <label><strong>Email Address:</strong></label>
+                <input
+                  type="email"
+                  onChange={updateEmail}></input>
+                <label className={styles.invalidEmail} id='invalidEmail'>Invalid email format</label>
+
+                <DefaultButton onClick={onExportChatHistory}>
+                  Send Email
+                </DefaultButton>
+              </Stack>
+            </Dialog> */}
           </div>
           {/* Citation Panel */}
           {messages && messages.length > 0 && isCitationPanelOpen && activeCitation && (
@@ -1032,8 +1109,8 @@ const Chat = () => {
               </Stack>
             </Stack.Item>
           )}
-          {appStateContext?.state.isChatHistoryOpen &&
-            appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && <ChatHistoryPanel />}
+          {/* {appStateContext?.state.isChatHistoryOpen &&
+            appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && <ChatHistoryPanel />} */}
         </Stack>
       )}
     </div>

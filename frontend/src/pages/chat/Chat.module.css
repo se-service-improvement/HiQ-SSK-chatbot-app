@@ -189,13 +189,43 @@
   justify-content: center;
   align-items: center;
   position: absolute;
-  width: 40px;
+  width: 125px;
   height: 40px;
   left: 7px;
   top: 66px;
   color: #ffffff;
   border-radius: 4px;
   z-index: 1;
+}
+
+.newChatText {
+  /* color: #2e2e2e; */
+  padding: 0px 5px;
+}
+
+.exportChatIcon {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  width: 125px;
+  height: 40px;
+  left: 7px;
+  top: 13px;
+  color: #ffffff;
+  border-radius: 4px;
+  z-index: 1;
+}
+
+.exportChatText {
+  /* color: #2e2e2e; */
+  padding: 0px 5px;
+}
+
+.invalidEmail {
+  display: none;
 }
 
 .stopGeneratingContainer {
@@ -376,8 +406,13 @@ a {
     max-width: 90%;
   }
 
-  .newChatIcon {
+  .newChatIcon, .exportChatIcon {
     left: 0px;
+    width: 40px;
+  }
+
+  .newChatText, .exportChatText {
+    display: none;
   }
 
   .clearChatBroom {
