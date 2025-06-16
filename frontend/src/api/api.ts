@@ -76,6 +76,8 @@ export const historyList = async (offset = 0): Promise<Conversation[] | null> =>
 }
 
 export const historyRead = async (convId: string): Promise<ChatMessage[]> => {
+  return [];
+
   const response = await fetch('/history/read', {
     method: 'POST',
     body: JSON.stringify({
