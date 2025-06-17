@@ -11,9 +11,11 @@ import DOMPurify from 'dompurify'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { nord } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
-import styles from './Chat.module.css'
+import styles from './Review.module.css'
 import Contoso from '../../assets/Contoso.svg'
 import { XSSAllowTags } from '../../constants/sanatizeAllowables'
+
+
 
 import {
   ChatMessage,
@@ -38,6 +40,7 @@ import { QuestionInput } from "../../components/QuestionInput";
 // import { ChatHistoryPanel } from "../../components/ChatHistory/ChatHistoryPanel";
 import { AppStateContext } from "../../state/AppProvider";
 import { useBoolean } from "@fluentui/react-hooks";
+import { useParams } from 'react-router-dom'
 
 const enum messageStatus {
   NotRunning = 'Not Running',
@@ -830,6 +833,29 @@ const Chat = () => {
       appStateContext?.state.chatHistoryLoadingState === ChatHistoryLoadingState.Loading
     )
   }
+
+
+
+
+
+
+
+  const { conversation_id } = useParams();
+  const item = { id: conversation_id } as Conversation;
+  useEffect(() => appStateContext?.dispatch({ type: 'UPDATE_CURRENT_CHAT', payload: item }), [])
+  
+
+
+
+
+
+
+  
+
+
+
+
+
 
   return (
     <div className={styles.container} role="main">

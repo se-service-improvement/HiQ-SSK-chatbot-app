@@ -2,7 +2,7 @@ import { FormEvent, useContext, useEffect, useMemo, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { nord } from 'react-syntax-highlighter/dist/esm/styles/prism'
-import { Checkbox, DefaultButton, Dialog, FontIcon, Stack, Text } from '@fluentui/react'
+import { Checkbox, DefaultButton, Dialog, FontIcon, Stack, Text, TextField } from '@fluentui/react'
 import { useBoolean } from '@fluentui/react-hooks'
 import { ThumbDislike20Filled, ThumbLike20Filled } from '@fluentui/react-icons'
 import DOMPurify from 'dompurify'
@@ -44,6 +44,11 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
   const FEEDBACK_ENABLED =
     appStateContext?.state.frontendSettings?.feedback_enabled && appStateContext?.state.isCosmosDBAvailable?.cosmosDB
   const SANITIZE_ANSWER = appStateContext?.state.frontendSettings?.sanitize_answer
+
+
+
+  const [isOtherOptionSelected, setIsOtherOptionSelected] = useState(false)
+
 
   const handleChevronClick = () => {
     setChevronIsExpanded(!chevronIsExpanded)
@@ -137,11 +142,34 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
     }
 
     setNegativeFeedbackList(feedbackList)
+
+    if ((ev?.target as HTMLInputElement)?.id == Feedback.OtherUnhelpful){
+      if (checked) {
+        setIsOtherOptionSelected(true)
+      } else {
+        setIsOtherOptionSelected(false)
+      }
+    }
   }
+
+
 
   const onSubmitNegativeFeedback = async () => {
     if (answer.message_id == undefined) return
-    await historyMessageFeedback(answer.message_id, negativeFeedbackList.join(','))
+
+    let updated = negativeFeedbackList.join(',');
+
+    const other_selected = document.getElementById("other_unhelpful") as HTMLInputElement;
+    const additional_details_box = document.getElementById("additional_details_box") as HTMLInputElement;
+    if (other_selected && additional_details_box) {
+      if (other_selected.checked) {
+        let box_input = additional_details_box.value;
+        box_input.replace("'", "");
+        updated += ",'" + box_input + "'"
+      }
+    }
+
+    await historyMessageFeedback(answer.message_id, updated)
     resetFeedbackDialog()
   }
 
@@ -181,6 +209,11 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
             id={Feedback.OtherUnhelpful}
             defaultChecked={negativeFeedbackList.includes(Feedback.OtherUnhelpful)}
             onChange={updateFeedbackList}></Checkbox>
+          <div hidden={!isOtherOptionSelected}>
+            <TextField
+              label="Additional details:"
+              id="additional_details_box"></TextField>
+          </div>
         </Stack>
         {/* <div onClick={() => setShowReportInappropriateFeedback(true)} style={{ color: '#115EA3', cursor: 'pointer' }}>
           Report inappropriate content
