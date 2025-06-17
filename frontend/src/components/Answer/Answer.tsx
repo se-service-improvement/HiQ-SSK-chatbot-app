@@ -2,7 +2,7 @@ import { FormEvent, useContext, useEffect, useMemo, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { nord } from 'react-syntax-highlighter/dist/esm/styles/prism'
-import { Checkbox, DefaultButton, Dialog, FontIcon, Stack, Text } from '@fluentui/react'
+import { Checkbox, DefaultButton, Dialog, FontIcon, Stack, Text, TextField } from '@fluentui/react'
 import { useBoolean } from '@fluentui/react-hooks'
 import { ThumbDislike20Filled, ThumbLike20Filled } from '@fluentui/react-icons'
 import DOMPurify from 'dompurify'
@@ -44,6 +44,11 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
   const FEEDBACK_ENABLED =
 ***REMOVED***appStateContext?.state.frontendSettings?.feedback_enabled && appStateContext?.state.isCosmosDBAvailable?.cosmosDB
   const SANITIZE_ANSWER = appStateContext?.state.frontendSettings?.sanitize_answer
+
+
+
+  const [isOtherOptionSelected, setIsOtherOptionSelected] = useState(false)
+
 
   const handleChevronClick = () => {
 ***REMOVED***setChevronIsExpanded(!chevronIsExpanded)
@@ -137,11 +142,34 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
 ***REMOVED***
 
 ***REMOVED***setNegativeFeedbackList(feedbackList)
+
+***REMOVED***if ((ev?.target as HTMLInputElement)?.id == Feedback.OtherUnhelpful){
+***REMOVED***  if (checked) {
+***REMOVED***setIsOtherOptionSelected(true)
+  ***REMOVED***
+***REMOVED***setIsOtherOptionSelected(false)
+  ***REMOVED***
+***REMOVED***
   }
+
+
 
   const onSubmitNegativeFeedback = async () => {
 ***REMOVED***if (answer.message_id == undefined) return
-***REMOVED***await historyMessageFeedback(answer.message_id, negativeFeedbackList.join(','))
+
+***REMOVED***let updated = negativeFeedbackList.join(',');
+
+***REMOVED***const other_selected = document.getElementById("other_unhelpful") as HTMLInputElement;
+***REMOVED***const additional_details_box = document.getElementById("additional_details_box") as HTMLInputElement;
+***REMOVED***if (other_selected && additional_details_box) {
+***REMOVED***  if (other_selected.checked) {
+***REMOVED***let box_input = additional_details_box.value;
+***REMOVED***box_input.replace("'", "");
+***REMOVED***updated += ",'" + box_input + "'"
+  ***REMOVED***
+***REMOVED***
+
+***REMOVED***await historyMessageFeedback(answer.message_id, updated)
 ***REMOVED***resetFeedbackDialog()
   }
 
@@ -181,6 +209,11 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
 ***REMOVED******REMOVED***id={Feedback.OtherUnhelpful}
 ***REMOVED******REMOVED***defaultChecked={negativeFeedbackList.includes(Feedback.OtherUnhelpful)}
 ***REMOVED******REMOVED***onChange={updateFeedbackList}></Checkbox>
+***REMOVED***  <div hidden={!isOtherOptionSelected}>
+***REMOVED******REMOVED***<TextField
+***REMOVED******REMOVED***  label="Additional details:"
+***REMOVED******REMOVED***  id="additional_details_box"></TextField>
+***REMOVED***  </div>
 ***REMOVED***</Stack>
 ***REMOVED***{/* <div onClick={() => setShowReportInappropriateFeedback(true)} style={{ color: '#115EA3', cursor: 'pointer' }}>
 ***REMOVED***  Report inappropriate content

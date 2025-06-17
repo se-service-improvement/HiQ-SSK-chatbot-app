@@ -114,6 +114,11 @@ export const historyRead = async (convId: string): Promise<ChatMessage[]> => {
   return response
 }
 
+
+
+
+
+
 export const historyGenerate = async (
   options: ConversationRequest,
   abortSignal: AbortSignal,
