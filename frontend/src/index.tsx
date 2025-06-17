@@ -5,6 +5,7 @@ import { initializeIcons } from '@fluentui/react'
 
 import Chat from './pages/chat/Chat'
 import FAQ from './pages/faq/FAQ'
+import Review from './pages/review/Review'
 import Layout from './pages/layout/Layout'
 import NoPage from './pages/NoPage'
 import { AppStateProvider } from './state/AppProvider'
@@ -21,6 +22,7 @@ export default function App() {
           <Route path="/" element={<Layout />}>
             <Route index element={<Chat />} />
             <Route path="faq/:faq_id" element={<FAQ />} />
+            {/* <Route path=":conversation_id" element={<Review />} /> */}
             <Route path="*" element={<NoPage />} />
           </Route>
         </Routes>
